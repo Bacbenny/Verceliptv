@@ -108,4 +108,61 @@ router.get("/tieulam-relay", async (req, res) => {
   }
 });
 
+/**
+ * /api/tieulam-relay-public — không cần auth
+ * Vercel dùng endpoint này làm fallback khi TIEULAM_RELAY_URL chưa được set
+ */
+router.get("/tieulam-relay-public", async (req, res) => {
+  // Reuse the same handler logic inline (no auth check)
+  const MATCH_MAX_DURATION_LOCAL = parseInt(process.env.MATCH_MAX_DURATION ?? "7200", 10);
+  const TIEULAM_FRONTEND_LOCAL = process.env.TIEULAM_FRONTEND ?? "https://sv1.tieulam1.live";
+  const TIEULAM_API_LOCAL = process.env.TIEULAM_API ?? "https://api.tlap12062026.xyz";
+
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - MATCH_MAX_DURATION_LOCAL * 1000)
+    .toISOString().slice(0, 19);
+  const cutoffEnd = new Date(now.getTime() + 24 * 3600 * 1000)
+    .toISOString().slice(0, 19);
+  const apiUrl = `${TIEULAM_API_LOCAL.replace(/\/$/, "")}/matches/graph`;
+  const headers: Record<string, string> = {
+    "Accept": "application/json, text/plain, */*",
+    "Content-Type": "application/json",
+    "Referer": `${TIEULAM_FRONTEND_LOCAL}/`,
+    "Origin": TIEULAM_FRONTEND_LOCAL,
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+  };
+  const payload = (page: number) => ({
+    queries: [
+      { field: "start_date", type: "gte", value: cutoff },
+      { field: "start_date", type: "lte", value: cutoffEnd },
+    ],
+    query_and: true, limit: 100, page, order_asc: "start_date",
+  });
+  const blvPayload = {
+    queries: [{ field: "blv", type: "is_not_null", value: "" }],
+    query_and: true, limit: 50, page: 1,
+  };
+  try {
+    const [r1, r2, rBlv] = await Promise.all([
+      fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(payload(1)) }),
+      fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(payload(2)) }),
+      fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(blvPayload) }),
+    ]);
+    if (!r1.ok) { res.status(502).json({ error: `Upstream ${r1.status}`, data: [] }); return; }
+    const j1 = (await r1.json()) as { data?: unknown[] };
+    const j2 = r2.ok ? ((await r2.json()) as { data?: unknown[] }) : { data: [] };
+    const jBlv = rBlv.ok ? ((await rBlv.json()) as { data?: unknown[] }) : { data: [] };
+    const seen = new Set<string>();
+    const combined: unknown[] = [];
+    for (const m of [...(jBlv.data ?? []), ...(j1.data ?? []), ...(j2.data ?? [])]) {
+      const key = String((m as Record<string, unknown>).id ?? (m as Record<string, unknown>).stream_key ?? JSON.stringify(m));
+      if (!seen.has(key)) { seen.add(key); combined.push(m); }
+    }
+    combined.sort((a, b) => String((a as Record<string, unknown>).start_date ?? "").localeCompare(String((b as Record<string, unknown>).start_date ?? "")));
+    res.json({ data: combined });
+  } catch (err) {
+    res.status(502).json({ error: String(err), data: [] });
+  }
+});
+
 export default router;
