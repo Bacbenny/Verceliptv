@@ -389,6 +389,10 @@ def _build_tieulam_lines(matches: list) -> list:
                 if dt_start.tzinfo is None:
                     dt_start = dt_start.replace(tzinfo=timezone.utc)
                 elapsed = time.time() - dt_start.timestamp()
+                # Bỏ trận chưa bắt đầu (stream_key có sẵn nhưng nguồn chưa live)
+                if elapsed < 0:
+                    continue
+                # Bỏ trận đã kết thúc quá 2h
                 if elapsed > MATCH_MAX_AGE_SECONDS:
                     continue
             except Exception:
