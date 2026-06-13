@@ -232,21 +232,24 @@ _TIEULAM_HTTPX_HEADERS = {
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _discover_tieulam_api_base(scraper) -> str:
-    try:
-        r = scraper.get(TIEULAM_FRONTEND_URL, timeout=10)
-        js_files = re.findall(r'src="(/assets/[^"]+\.js)"', r.text)
-        for js_path in js_files[:3]:
-            js = scraper.get(
-                TIEULAM_FRONTEND_URL.rstrip("/") + js_path, timeout=20
-            ).text
-            hits = re.findall(r'create\(\{baseURL:"(https://[^"]+)"\}', js)
-            if hits:
-                return hits[0].rstrip("/")
-            hits = re.findall(r'baseURL:"(https://[^"]{10,60})"', js)
-            if hits:
-                return hits[0].rstrip("/")
-    except Exception:
-        pass
+    """Try multiple TieuLam frontends to find the current API base URL."""
+    frontends = [
+        TIEULAM_FRONTEND_URL,
+        "https://sv2.tieulam1.live",
+        "https://sv1.tieulam2.live",
+        "https://sv2.tieulam2.live",
+    ]
+    for fe in frontends:
+        try:
+            r = scraper.get(fe, timeout=10)
+            js_files = re.findall(r'src="(/assets/[^"]+\.js)"', r.text)
+            for js_path in js_files[:3]:
+                js = scraper.get(fe.rstrip("/") + js_path, timeout=20).text
+                hits = re.findall(r'baseURL:"(https://[^"]{10,60})"', js)
+                if hits:
+                    return hits[0].rstrip("/")
+        except Exception:
+            continue
     return TIEULAM_KNOWN_API_BASE
 
 
@@ -357,11 +360,24 @@ def _tieulam_sport_label(match: dict) -> str:
 
 
 def _parse_iso_to_ts(s: str) -> float:
-    """Parse ISO-8601 string to UTC timestamp float; returns inf on failure."""
+    """Parse ISO-8601 string to UTC timestamp float; returns inf on failure.
+    Naive datetimes (no tz suffix) are treated as UTC."""
     try:
         dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=timezone.utc)
+        return dt.timestamp()
+    except Exception:
+        return float("inf")
+
+
+def _parse_tieulam_ts(s: str) -> float:
+    """Parse TieuLam start_date → UTC timestamp.
+    TieuLam stores all dates in Vietnam time (UTC+7) without timezone marker."""
+    try:
+        dt = datetime.fromisoformat(s)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=VN_TZ)   # treat naive as VN time, not UTC
         return dt.timestamp()
     except Exception:
         return float("inf")
@@ -399,7 +415,7 @@ def _build_tieulam_entries(matches: list) -> list[tuple[float, str, str]]:
             continue
 
         start_str = match.get("start_date", "")
-        sort_ts   = _parse_iso_to_ts(start_str) if start_str else float("inf")
+        sort_ts   = _parse_tieulam_ts(start_str) if start_str else float("inf")
 
         if start_str and not is_live:
             elapsed = time.time() - sort_ts
