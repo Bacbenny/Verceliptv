@@ -39,6 +39,7 @@ router.get("/tieulam-relay", async (req, res) => {
       "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
   };
 
+  // Query A: trận đang/vừa live trong khung giờ (có source_live)
   const timeWindowPayload = (page: number) => ({
     queries: [
       { field: "start_date", type: "gte", value: cutoff },
@@ -50,12 +51,15 @@ router.get("/tieulam-relay", async (req, res) => {
     order_asc: "start_date",
   });
 
-  const blvEnd = now.getTime() + 48 * 3600 * 1000;
+  // Query B: trận có BLV — KHÔNG thêm time filter (kết hợp time+blv phá filter API)
+  // Time filtering sẽ được thực hiện ở relay code bên dưới
+  const blvEnd = now.getTime() + 48 * 3600 * 1000; // 48h window (ms) cho BLV
   const blvPayload = {
     queries: [{ field: "blv", type: "is_not_null", value: "" }],
     query_and: true,
     limit: 50,
     page: 1,
+    // No order_asc, no time filter — both break the blv filter in TieuLam API
   };
 
   try {
@@ -75,33 +79,27 @@ router.get("/tieulam-relay", async (req, res) => {
     const j2    = r2.ok   ? ((await r2.json())   as { data?: unknown[] }) : { data: [] };
     const jBlv  = rBlv.ok ? ((await rBlv.json()) as { data?: unknown[] }) : { data: [] };
 
-    const cutoffMs = now.getTime() - MATCH_MAX_DURATION * 1000;
+    // Filter BLV matches by time window in relay (API-side time filter breaks blv filter)
+    const cutoffMs  = now.getTime() - MATCH_MAX_DURATION * 1000;
+    const blvEndMs  = blvEnd;
     const blvMatches = (jBlv.data ?? []).filter(m => {
       const match = m as Record<string, unknown>;
-      if (!match.blv) return false;
+      if (!match.blv) return false; // only keep truly non-null blv
       const startDate = String(match.start_date ?? "");
       if (!startDate) return true;
       const t = new Date(startDate.includes("Z") ? startDate : startDate + "Z").getTime();
-      return t >= cutoffMs && t <= blvEnd;
+      return t >= cutoffMs && t <= blvEndMs;
     });
 
     const seen = new Set<string>();
     const combined: unknown[] = [];
 
+    // BLV matches first — ensures blv field is preserved when deduplicating
     for (const m of [...blvMatches, ...(j1.data ?? []), ...(j2.data ?? [])]) {
       const match = m as Record<string, unknown>;
       const key = String(match.id ?? match.stream_key ?? JSON.stringify(m));
       if (!seen.has(key)) { seen.add(key); combined.push(m); }
     }
-
-    // Sort combined by start_date ascending so relay output is already ordered
-    combined.sort((a, b) => {
-      const ma = a as Record<string, unknown>;
-      const mb = b as Record<string, unknown>;
-      const ta = String(ma.start_date ?? "");
-      const tb = String(mb.start_date ?? "");
-      return ta.localeCompare(tb);
-    });
 
     res.json({ data: combined });
   } catch (err) {
