@@ -12,10 +12,10 @@ import requests
 from flask import Flask, Response, request
 
 try:
-    import httpx
-    _HTTPX_H2 = True
+    from curl_cffi import requests as curl_requests
+    _CURL_CFFI = True
 except ImportError:
-    _HTTPX_H2 = False
+    _CURL_CFFI = False
 
 app = Flask(__name__)
 
@@ -37,12 +37,6 @@ HOIQUAN_KNOWN_API_BASE= os.environ.get("HOIQUAN_API",      "https://sv.hoiquantv
 # ─── Khán Đài A config ───────────────────────────────────────────────────────
 KHANDAIA_FRONTEND_URL   = os.environ.get("KHANDAIA_FRONTEND", "https://tructiep.khandaia.link")
 KHANDAIA_KNOWN_API_BASE = os.environ.get("KHANDAIA_API",      "https://sv.khandai-a.xyz/api/v1/external")
-
-# ─── IPTV (GitHub-hosted static list) ────────────────────────────────────────
-DEKIKI_M3U_URL = os.environ.get(
-    "DEKIKI_M3U_URL",
-    "https://raw.githubusercontent.com/blvbatman/iptv/refs/heads/main/iptv.m3u",
-)
 
 # ─── EPG — override via env var, otherwise auto-built from /epg.xml endpoint ─
 EPG_URL_OVERRIDE = os.environ.get("EPG_URL", "")
@@ -83,11 +77,10 @@ _playlist_cache = {
     "tieulam":  _empty_entry(),
     "hoiquan":  _empty_entry(),
     "khandaia": _empty_entry(),
-    "dekiki":   _empty_entry(),
 }
 
 _last_counts = {
-    "tieulam": 0, "hoiquan": 0, "khandaia": 0, "dekiki": 0,
+    "tieulam": 0, "hoiquan": 0, "khandaia": 0,
     "refreshed_at": 0, "last_error": "",
 }
 
@@ -245,12 +238,13 @@ _TIEULAM_HTTPX_HEADERS = {
 #  TieuLam TV — POST /matches/graph API
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _discover_tieulam_api_base_httpx(client) -> str:
+def _discover_tieulam_api_base(scraper) -> str:
+    """Quét JS bundle của frontend để tìm API base URL hiện tại (dùng cloudscraper)."""
     try:
-        r = client.get(TIEULAM_FRONTEND_URL, timeout=10)
+        r = scraper.get(TIEULAM_FRONTEND_URL, timeout=10)
         js_files = re.findall(r'src="(/assets/[^"]+\.js)"', r.text)
         for js_path in js_files[:3]:
-            js = client.get(
+            js = scraper.get(
                 TIEULAM_FRONTEND_URL.rstrip("/") + js_path, timeout=20
             ).text
             hits = re.findall(r'create\(\{baseURL:"(https://[^"]+)"\}', js)
@@ -264,34 +258,11 @@ def _discover_tieulam_api_base_httpx(client) -> str:
     return TIEULAM_KNOWN_API_BASE
 
 
-def _discover_tieulam_api_base_requests() -> str:
-    """Fallback discovery using requests (HTTP/1.1) when httpx unavailable."""
-    try:
-        r = requests.get(TIEULAM_FRONTEND_URL, timeout=10, headers=_HQ_HEADERS)
-        js_files = re.findall(r'src="(/assets/[^"]+\.js)"', r.text)
-        for js_path in js_files[:3]:
-            js = requests.get(
-                TIEULAM_FRONTEND_URL.rstrip("/") + js_path,
-                timeout=20, headers=_HQ_HEADERS
-            ).text
-            hits = re.findall(r'create\(\{baseURL:"(https://[^"]+)"\}', js)
-            if hits:
-                return hits[0].rstrip("/")
-            hits = re.findall(r'baseURL:"(https://[^"]{10,60})"', js)
-            if hits:
-                return hits[0].rstrip("/")
-    except Exception:
-        pass
-    return TIEULAM_KNOWN_API_BASE
-
-
-def _get_tieulam_api_url(client=None) -> str:
+def _get_tieulam_api_url(scraper=None) -> str:
     now = time.time()
     if now - _tieulam_api_cache["discovered_at"] > API_DISCOVERY_TTL:
-        if client is not None:
-            discovered = _discover_tieulam_api_base_httpx(client)
-        else:
-            discovered = _discover_tieulam_api_base_requests()
+        sc = scraper or cloudscraper.create_scraper()
+        discovered = _discover_tieulam_api_base(sc)
         _tieulam_api_cache["url"] = discovered + "/matches/graph"
         _tieulam_api_cache["discovered_at"] = now
     return _tieulam_api_cache["url"]
@@ -308,7 +279,7 @@ def _fetch_tieulam_via_relay() -> list:
 
 
 def _fetch_tieulam_matches() -> list:
-    """Fetch TieuLam matches — dùng relay nếu TIEULAM_RELAY_URL được set."""
+    """Fetch TieuLam matches — dùng cloudscraper để bypass Cloudflare."""
     if TIEULAM_RELAY_URL:
         try:
             return _fetch_tieulam_via_relay()
@@ -317,7 +288,7 @@ def _fetch_tieulam_matches() -> list:
             print(f"⚠️ Relay failed: {e}", file=sys.stderr)
 
     cutoff     = (datetime.now(timezone.utc) - timedelta(seconds=MATCH_MAX_AGE_SECONDS)).strftime("%Y-%m-%dT%H:%M:%S")
-    cutoff_end = (datetime.now(timezone.utc) + timedelta(hours=36)).strftime("%Y-%m-%dT%H:%M:%S")
+    cutoff_end = (datetime.now(timezone.utc) + timedelta(hours=72)).strftime("%Y-%m-%dT%H:%M:%S")
 
     payload = {
         "queries": [
@@ -330,52 +301,91 @@ def _fetch_tieulam_matches() -> list:
         "order_asc": "start_date",
     }
 
-    if _HTTPX_H2:
-        # Dùng httpx với HTTP/2 nếu có
+    # Ưu tiên curl_cffi — giả lập TLS fingerprint Chrome, bypass Cloudflare IP-block
+    if _CURL_CFFI:
         try:
-            with httpx.Client(http2=True, timeout=15) as client:
-                api_url = _get_tieulam_api_url(client)
-                try:
-                    resp = client.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS)
-                    resp.raise_for_status()
-                except Exception:
-                    _tieulam_api_cache["discovered_at"] = 0
-                    api_url = _get_tieulam_api_url(client)
-                    resp = client.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS)
-                    resp.raise_for_status()
-                return resp.json().get("data", [])
+            api_url = _get_tieulam_api_url()
+            resp = curl_requests.post(
+                api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS,
+                timeout=15, impersonate="chrome110",
+            )
+            resp.raise_for_status()
+            return resp.json().get("data", [])
         except Exception:
-            pass
+            # Thử lại với URL discovery mới
+            _tieulam_api_cache["discovered_at"] = 0
+            try:
+                api_url = _get_tieulam_api_url()
+                resp = curl_requests.post(
+                    api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS,
+                    timeout=15, impersonate="chrome110",
+                )
+                resp.raise_for_status()
+                return resp.json().get("data", [])
+            except Exception:
+                pass  # fallback sang cloudscraper
 
-    # Fallback: dùng requests (HTTP/1.1)
-    api_url = _get_tieulam_api_url()
+    # Fallback: cloudscraper (bypass JS challenge nhưng không bypass IP block)
+    scraper = cloudscraper.create_scraper()
+    api_url = _get_tieulam_api_url(scraper)
     try:
-        resp = requests.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS, timeout=15)
+        resp = scraper.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS, timeout=15)
         resp.raise_for_status()
     except Exception:
         _tieulam_api_cache["discovered_at"] = 0
-        api_url = _get_tieulam_api_url()
-        resp = requests.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS, timeout=15)
+        api_url = _get_tieulam_api_url(scraper)
+        resp = scraper.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS, timeout=15)
         resp.raise_for_status()
+
     return resp.json().get("data", [])
 
 
+_TIEULAM_SPORT_VI = {
+    "FOOTBALL":    ("⚽ Bóng đá",   SPORT_LOGOS["football"]),
+    "VOLLEYBALL":  ("🏐 Bóng chuyền", SPORT_LOGOS["volleyball"]),
+    "BASKETBALL":  ("🏀 Bóng rổ",   SPORT_LOGOS["basketball"]),
+    "TENNIS":      ("🎾 Quần vợt",  SPORT_LOGOS["tennis"]),
+    "BADMINTON":   ("🏸 Cầu lông",  SPORT_LOGOS["badminton"]),
+    "BILLIARD":    ("🎱 Bi-a",      SPORT_LOGOS["billiards"]),
+    "SNOOKER":     ("🎱 Snooker",   SPORT_LOGOS["billiards"]),
+}
+
+
 def _tieulam_logo(match: dict) -> str:
-    logo = match.get("team_1_logo") or match.get("team_2_logo") or ""
-    if logo:
-        return logo
-    return _logo_from_text(match.get("desc", "") + " " + match.get("league", ""))
+    # Dùng icon môn thể thao (giống HQ/KDA) thay vì logo đội — nhất quán hơn
+    desc = (match.get("desc") or "").upper()
+    sport_info = _TIEULAM_SPORT_VI.get(desc)
+    if sport_info:
+        return sport_info[1]
+    return _logo_from_text(desc + " " + match.get("league", ""))
+
+
+def _tieulam_sport_label(match: dict) -> str:
+    """Trả về nhãn môn thể thao tiếng Việt từ field desc."""
+    desc = (match.get("desc") or "").upper()
+    sport_info = _TIEULAM_SPORT_VI.get(desc)
+    if sport_info:
+        return sport_info[0]
+    if desc:
+        return desc.capitalize()
+    return ""
 
 
 def _build_tieulam_lines(matches: list) -> list:
     lines = []
     for match in matches:
-        stream_url = (match.get("source_live") or "").strip()
-        if not stream_url:
-            stream_key = (match.get("stream_key") or "").strip()
-            if not stream_key:
-                continue
+        source_live = (match.get("source_live") or "").strip()
+        blv         = (match.get("blv") or "").strip()
+        stream_key  = (match.get("stream_key") or "").strip()
+
+        if source_live:
+            # Trận đang live — có URL CDN xác nhận
+            stream_url = source_live
+        elif blv and stream_key:
+            # Trận có BLV được assign — dùng stream_key (BLV đã nhận kèo, sắp phát)
             stream_url = f"{TIEULAM_STREAM_CDN}/live/{stream_key}/playlist.m3u8"
+        else:
+            continue
 
         start_str = match.get("start_date", "")
         is_live = bool(match.get("is_live"))
@@ -385,16 +395,25 @@ def _build_tieulam_lines(matches: list) -> list:
                 if dt_start.tzinfo is None:
                     dt_start = dt_start.replace(tzinfo=timezone.utc)
                 elapsed = time.time() - dt_start.timestamp()
+                if blv:
+                    # Trận BLV: cho phép tối đa 12h trước giờ đấu (hiện lịch World Cup ngày mai)
+                    if elapsed < -43200:
+                        continue
+                else:
+                    # Trận ẩn danh: phải đã bắt đầu mới có stream
+                    if elapsed < 0:
+                        continue
                 if elapsed > MATCH_MAX_AGE_SECONDS:
                     continue
             except Exception:
                 pass
 
-        logo = _tieulam_logo(match)
+        logo  = _tieulam_logo(match)
         team1  = match.get("team_1", "Home").strip()
         team2  = match.get("team_2", "Away").strip()
         league = match.get("league", "").strip()
         blv    = (match.get("blv") or "").strip()
+        sport  = _tieulam_sport_label(match)
 
         try:
             dt_start = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
@@ -407,8 +426,10 @@ def _build_tieulam_lines(matches: list) -> list:
             time_str = "--:--"
             date_str = "--/--"
 
-        if blv:
-            display = f"{time_str} - {date_str} | {team1} VS {team2} ({league}) | {blv}"
+        # Ưu tiên BLV nếu có, fallback hiển thị môn thể thao như HQ
+        suffix = blv if blv else sport
+        if suffix:
+            display = f"{time_str} - {date_str} | {team1} VS {team2} ({league}) | {suffix}"
         else:
             display = f"{time_str} - {date_str} | {team1} VS {team2} ({league})"
 
@@ -524,22 +545,6 @@ def _fetch_khandaia_fixtures() -> list:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  IPTV static list
-# ══════════════════════════════════════════════════════════════════════════════
-
-def _fetch_dekiki_lines() -> list:
-    resp = requests.get(DEKIKI_M3U_URL, timeout=20)
-    resp.raise_for_status()
-    lines = []
-    for line in resp.text.splitlines():
-        stripped = line.rstrip()
-        if not stripped or stripped.startswith("#EXTM3U"):
-            continue
-        lines.append(stripped)
-    return lines
-
-
-# ══════════════════════════════════════════════════════════════════════════════
 #  Shared fixture helpers
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -646,15 +651,11 @@ def _refresh_all_playlists():
     def fetch_kda():
         return _build_fixture_lines(_fetch_khandaia_fixtures(), "Khán Đài A")
 
-    def fetch_dekiki():
-        return _fetch_dekiki_lines()
-
-    with ThreadPoolExecutor(max_workers=4) as ex:
+    with ThreadPoolExecutor(max_workers=3) as ex:
         futures = {
             ex.submit(fetch_tieulam): "tieulam",
             ex.submit(fetch_hq):      "hoiquan",
             ex.submit(fetch_kda):     "khandaia",
-            ex.submit(fetch_dekiki):  "dekiki",
         }
         results = {}
         for fut in as_completed(futures):
@@ -668,7 +669,6 @@ def _refresh_all_playlists():
     tieulam_lines = results.get("tieulam",  [])
     hq_lines      = results.get("hoiquan",  [])
     kda_lines     = results.get("khandaia", [])
-    dekiki_lines  = results.get("dekiki",   [])
 
     err_str = "; ".join(errors)
 
@@ -681,9 +681,8 @@ def _refresh_all_playlists():
     _store("tieulam",  epg_header + "\n" + "\n".join(tieulam_lines))
     _store("hoiquan",  epg_header + "\n" + "\n".join(hq_lines))
     _store("khandaia", epg_header + "\n" + "\n".join(kda_lines))
-    _store("dekiki",   epg_header + "\n" + "\n".join(dekiki_lines))
 
-    all_lines = tieulam_lines + hq_lines + kda_lines + dekiki_lines
+    all_lines = tieulam_lines + hq_lines + kda_lines
     combined_text = epg_header + "\n" + "\n".join(all_lines)
     if err_str:
         combined_text += f"\n# Errors: {err_str}"
@@ -693,7 +692,6 @@ def _refresh_all_playlists():
         "tieulam":      count(tieulam_lines),
         "hoiquan":      count(hq_lines),
         "khandaia":     count(kda_lines),
-        "dekiki":       count(dekiki_lines),
         "refreshed_at": time.time(),
         "last_error":   err_str,
     })
@@ -768,11 +766,6 @@ def khandaia_m3u():
     return _m3u_response("khandaia", "khandaia.m3u")
 
 
-@app.route("/dekiki.m3u")
-def dekiki_m3u():
-    return _m3u_response("dekiki", "dekiki.m3u")
-
-
 @app.route("/epg.xml")
 def epg_xml():
     entry = _get_or_build_epg()
@@ -831,8 +824,7 @@ def index():
     tieulam_count = _last_counts.get("tieulam", 0)
     hq_count      = _last_counts.get("hoiquan", 0)
     kda_count     = _last_counts.get("khandaia", 0)
-    dekiki_count  = _last_counts.get("dekiki", 0)
-    total         = tieulam_count + hq_count + kda_count + dekiki_count
+    total         = tieulam_count + hq_count + kda_count
 
     epg_link = _epg_url()
     return (
@@ -842,16 +834,13 @@ def index():
         "<li><a href='/tieulam.m3u'>/tieulam.m3u</a> — TieuLam TV only</li>"
         "<li><a href='/hoiquan.m3u'>/hoiquan.m3u</a> — Hội Quán TV only</li>"
         "<li><a href='/khandaia.m3u'>/khandaia.m3u</a> — Khán Đài A only</li>"
-        "<li><a href='/dekiki.m3u'>/dekiki.m3u</a> — Kênh TV Việt (IPTV)</li>"
         "</ul>"
         "<h3>📡 EPG</h3><ul>"
         f"<li><a href='/epg.xml'>/epg.xml</a> — XMLTV tự sinh từ danh sách kênh (cache 1h)</li>"
         f"<li>URL đầy đủ: <code>{epg_link}</code></li>"
         "</ul>"
         "<h3>📊 Trạng thái</h3>"
-        f"<p>📺 Tổng kênh: <strong>{total}</strong>"
-        f" &nbsp;(🏆 Live: {tieulam_count + hq_count + kda_count}"
-        f" | 📡 TV: {dekiki_count})</p>"
+        f"<p>📺 Tổng kênh live: <strong>{total}</strong></p>"
         f"<p>🕐 Cập nhật lần cuối: <strong>{dt_str}</strong></p>"
         f"<p>⏳ Cập nhật tiếp theo: <strong>{next_str}</strong></p>"
         f"<p>🟢 TieuLam TV: <strong>{tieulam_count} kênh</strong>"
@@ -860,7 +849,6 @@ def index():
         f"&nbsp;|&nbsp; <code>{_hoiquan_api_cache['url']}</code></p>"
         f"<p>🟢 Khán Đài A: <strong>{kda_count} kênh</strong>"
         f"&nbsp;|&nbsp; <code>{_khandaia_api_cache['url']}</code></p>"
-        f"<p>📡 Kênh TV (IPTV): <strong>{dekiki_count} kênh</strong></p>"
         f"{err_html}"
         "<h3>⚙️ Tối ưu băng thông</h3>"
         "<ul>"
