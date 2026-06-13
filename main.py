@@ -12,10 +12,10 @@ import requests
 from flask import Flask, Response, request
 
 try:
-    import httpx
-    _HTTPX_H2 = True
+    from curl_cffi import requests as curl_requests
+    _CURL_CFFI = True
 except ImportError:
-    _HTTPX_H2 = False
+    _CURL_CFFI = False
 
 app = Flask(__name__)
 
@@ -41,7 +41,7 @@ KHANDAIA_KNOWN_API_BASE = os.environ.get("KHANDAIA_API",      "https://sv.khanda
 # ─── IPTV (GitHub-hosted static list) ────────────────────────────────────────
 DEKIKI_M3U_URL = os.environ.get(
     "DEKIKI_M3U_URL",
-    "https://raw.githubusercontent.com/blvbatman/iptv/main/iptv.m3u",
+    "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/vn.m3u",
 )
 
 # ─── EPG — override via env var, otherwise auto-built from /epg.xml endpoint ─
@@ -308,13 +308,37 @@ def _fetch_tieulam_matches() -> list:
         "order_asc": "start_date",
     }
 
+    # Ưu tiên curl_cffi — giả lập TLS fingerprint Chrome, bypass Cloudflare IP-block
+    if _CURL_CFFI:
+        try:
+            api_url = _get_tieulam_api_url()
+            resp = curl_requests.post(
+                api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS,
+                timeout=15, impersonate="chrome110",
+            )
+            resp.raise_for_status()
+            return resp.json().get("data", [])
+        except Exception:
+            # Thử lại với URL discovery mới
+            _tieulam_api_cache["discovered_at"] = 0
+            try:
+                api_url = _get_tieulam_api_url()
+                resp = curl_requests.post(
+                    api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS,
+                    timeout=15, impersonate="chrome110",
+                )
+                resp.raise_for_status()
+                return resp.json().get("data", [])
+            except Exception:
+                pass  # fallback sang cloudscraper
+
+    # Fallback: cloudscraper (bypass JS challenge nhưng không bypass IP block)
     scraper = cloudscraper.create_scraper()
     api_url = _get_tieulam_api_url(scraper)
     try:
         resp = scraper.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS, timeout=15)
         resp.raise_for_status()
     except Exception:
-        # Reset cache và thử lại với URL mới
         _tieulam_api_cache["discovered_at"] = 0
         api_url = _get_tieulam_api_url(scraper)
         resp = scraper.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS, timeout=15)
