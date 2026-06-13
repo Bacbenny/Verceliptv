@@ -396,8 +396,8 @@ def _build_tieulam_lines(matches: list) -> list:
                     dt_start = dt_start.replace(tzinfo=timezone.utc)
                 elapsed = time.time() - dt_start.timestamp()
                 if blv:
-                    # Trận BLV: cho phép tối đa 3h trước giờ đấu (BLV đã chuẩn bị)
-                    if elapsed < -10800:
+                    # Trận BLV: cho phép tối đa 12h trước giờ đấu (hiện lịch World Cup ngày mai)
+                    if elapsed < -43200:
                         continue
                 else:
                     # Trận ẩn danh: phải đã bắt đầu mới có stream
