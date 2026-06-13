@@ -22,13 +22,9 @@ app = Flask(__name__)
 # ─── TieuLam TV config ────────────────────────────────────────────────────────
 TIEULAM_FRONTEND_URL  = os.environ.get("TIEULAM_FRONTEND", "https://sv1.tieulam1.live")
 TIEULAM_KNOWN_API_BASE= os.environ.get("TIEULAM_API",      "https://api.tlap12062026.xyz")
-# CDN phát stream — khi source_live=None, build từ stream_key
 TIEULAM_STREAM_CDN    = os.environ.get("TIEULAM_CDN",      "https://live.secufun.xyz")
-# Nếu IP bị chặn (Render/Vercel), dùng relay endpoint trên Replit để lấy data TieuLam
-# Set TIEULAM_RELAY_URL=https://<replit-app>.replit.app/api/tieulam-relay
-# Set RELAY_SECRET=<shared-secret> (tuỳ chọn, để bảo vệ endpoint)
-TIEULAM_RELAY_URL    = os.environ.get("TIEULAM_RELAY_URL", "")
-TIEULAM_RELAY_SECRET = os.environ.get("RELAY_SECRET", "")
+TIEULAM_RELAY_URL     = os.environ.get("TIEULAM_RELAY_URL", "")
+TIEULAM_RELAY_SECRET  = os.environ.get("RELAY_SECRET", "")
 
 # ─── Hội Quán TV config ───────────────────────────────────────────────────────
 HOIQUAN_FRONTEND_URL  = os.environ.get("HOIQUAN_FRONTEND", "https://sv2.hoiquan4.live")
@@ -38,19 +34,19 @@ HOIQUAN_KNOWN_API_BASE= os.environ.get("HOIQUAN_API",      "https://sv.hoiquantv
 KHANDAIA_FRONTEND_URL   = os.environ.get("KHANDAIA_FRONTEND", "https://tructiep.khandaia.link")
 KHANDAIA_KNOWN_API_BASE = os.environ.get("KHANDAIA_API",      "https://sv.khandai-a.xyz/api/v1/external")
 
-# ─── EPG — override via env var, otherwise auto-built from /epg.xml endpoint ─
+# ─── EPG ─────────────────────────────────────────────────────────────────────
 EPG_URL_OVERRIDE = os.environ.get("EPG_URL", "")
 
 # ─── Shared config ────────────────────────────────────────────────────────────
 VN_TZ                = timezone(timedelta(hours=7))
-SELF_PING_INTERVAL   = 240   # seconds
-PREFETCH_INTERVAL    = 300   # seconds — refresh cache every 5 minutes
-API_DISCOVERY_TTL    = 3600  # seconds — re-discover API URL every 1 hour
+SELF_PING_INTERVAL   = 240
+PREFETCH_INTERVAL    = 300
+API_DISCOVERY_TTL    = 3600
 
 FINISHED_STATUS_STRINGS = {"finished", "end", "ended", "complete", "completed"}
-MATCH_MAX_AGE_SECONDS   = int(os.environ.get("MATCH_MAX_DURATION", 7200))  # 2 h
+MATCH_MAX_AGE_SECONDS   = int(os.environ.get("MATCH_MAX_DURATION", 7200))
 
-# ─── Sport logos (Twemoji via jsDelivr) ───────────────────────────────────────
+# ─── Sport logos ──────────────────────────────────────────────────────────────
 _CDN = "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72"
 SPORT_LOGOS = {
     "football":   f"{_CDN}/26bd.png",
@@ -87,7 +83,7 @@ _last_counts = {
 # ─── EPG XML cache ────────────────────────────────────────────────────────────
 _epg_cache: dict = {"content": None, "gz": None, "etag": None, "built_at": 0}
 _epg_lock  = threading.Lock()
-EPG_CACHE_TTL = 3600  # rebuild every 1 hour
+EPG_CACHE_TTL = 3600
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -95,20 +91,15 @@ EPG_CACHE_TTL = 3600  # rebuild every 1 hour
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _get_public_url() -> str:
-    """Return the server's public base URL (no trailing slash)."""
-    # Vercel
     vercel_url = os.environ.get("VERCEL_URL", "")
     if vercel_url:
         return f"https://{vercel_url}"
-    # Replit
     domains = os.environ.get("REPLIT_DOMAINS", "")
     if domains:
         return f"https://{domains.split(',')[0].strip()}"
-    # Render
     render = os.environ.get("RENDER_EXTERNAL_URL", "")
     if render:
         return render.rstrip("/")
-    # Manual override
     app_url = os.environ.get("APP_URL", "")
     if app_url:
         return app_url.rstrip("/")
@@ -235,11 +226,10 @@ _TIEULAM_HTTPX_HEADERS = {
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  TieuLam TV — POST /matches/graph API
+#  TieuLam TV
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _discover_tieulam_api_base(scraper) -> str:
-    """Quét JS bundle của frontend để tìm API base URL hiện tại (dùng cloudscraper)."""
     try:
         r = scraper.get(TIEULAM_FRONTEND_URL, timeout=10)
         js_files = re.findall(r'src="(/assets/[^"]+\.js)"', r.text)
@@ -269,7 +259,6 @@ def _get_tieulam_api_url(scraper=None) -> str:
 
 
 def _fetch_tieulam_via_relay() -> list:
-    """Gọi relay endpoint (bỏ qua IP block trên Render/Vercel)."""
     headers: dict = {}
     if TIEULAM_RELAY_SECRET:
         headers["X-Relay-Token"] = TIEULAM_RELAY_SECRET
@@ -279,13 +268,12 @@ def _fetch_tieulam_via_relay() -> list:
 
 
 def _fetch_tieulam_matches() -> list:
-    """Fetch TieuLam matches — dùng cloudscraper để bypass Cloudflare."""
     if TIEULAM_RELAY_URL:
         try:
             return _fetch_tieulam_via_relay()
         except Exception as e:
             import sys
-            print(f"⚠️ Relay failed: {e}", file=sys.stderr)
+            print(f"Relay failed: {e}", file=sys.stderr)
 
     cutoff     = (datetime.now(timezone.utc) - timedelta(seconds=MATCH_MAX_AGE_SECONDS)).strftime("%Y-%m-%dT%H:%M:%S")
     cutoff_end = (datetime.now(timezone.utc) + timedelta(hours=72)).strftime("%Y-%m-%dT%H:%M:%S")
@@ -301,7 +289,6 @@ def _fetch_tieulam_matches() -> list:
         "order_asc": "start_date",
     }
 
-    # Ưu tiên curl_cffi — giả lập TLS fingerprint Chrome, bypass Cloudflare IP-block
     if _CURL_CFFI:
         try:
             api_url = _get_tieulam_api_url()
@@ -312,7 +299,6 @@ def _fetch_tieulam_matches() -> list:
             resp.raise_for_status()
             return resp.json().get("data", [])
         except Exception:
-            # Thử lại với URL discovery mới
             _tieulam_api_cache["discovered_at"] = 0
             try:
                 api_url = _get_tieulam_api_url()
@@ -323,9 +309,8 @@ def _fetch_tieulam_matches() -> list:
                 resp.raise_for_status()
                 return resp.json().get("data", [])
             except Exception:
-                pass  # fallback sang cloudscraper
+                pass
 
-    # Fallback: cloudscraper (bypass JS challenge nhưng không bypass IP block)
     scraper = cloudscraper.create_scraper()
     api_url = _get_tieulam_api_url(scraper)
     try:
@@ -341,18 +326,17 @@ def _fetch_tieulam_matches() -> list:
 
 
 _TIEULAM_SPORT_VI = {
-    "FOOTBALL":    ("⚽ Bóng đá",   SPORT_LOGOS["football"]),
-    "VOLLEYBALL":  ("🏐 Bóng chuyền", SPORT_LOGOS["volleyball"]),
-    "BASKETBALL":  ("🏀 Bóng rổ",   SPORT_LOGOS["basketball"]),
-    "TENNIS":      ("🎾 Quần vợt",  SPORT_LOGOS["tennis"]),
-    "BADMINTON":   ("🏸 Cầu lông",  SPORT_LOGOS["badminton"]),
-    "BILLIARD":    ("🎱 Bi-a",      SPORT_LOGOS["billiards"]),
-    "SNOOKER":     ("🎱 Snooker",   SPORT_LOGOS["billiards"]),
+    "FOOTBALL":    ("Bong da",   SPORT_LOGOS["football"]),
+    "VOLLEYBALL":  ("Bong chuyen", SPORT_LOGOS["volleyball"]),
+    "BASKETBALL":  ("Bong ro",   SPORT_LOGOS["basketball"]),
+    "TENNIS":      ("Quan vot",  SPORT_LOGOS["tennis"]),
+    "BADMINTON":   ("Cau long",  SPORT_LOGOS["badminton"]),
+    "BILLIARD":    ("Bi-a",      SPORT_LOGOS["billiards"]),
+    "SNOOKER":     ("Snooker",   SPORT_LOGOS["billiards"]),
 }
 
 
 def _tieulam_logo(match: dict) -> str:
-    # Dùng icon môn thể thao (giống HQ/KDA) thay vì logo đội — nhất quán hơn
     desc = (match.get("desc") or "").upper()
     sport_info = _TIEULAM_SPORT_VI.get(desc)
     if sport_info:
@@ -361,7 +345,6 @@ def _tieulam_logo(match: dict) -> str:
 
 
 def _tieulam_sport_label(match: dict) -> str:
-    """Trả về nhãn môn thể thao tiếng Việt từ field desc."""
     desc = (match.get("desc") or "").upper()
     sport_info = _TIEULAM_SPORT_VI.get(desc)
     if sport_info:
@@ -371,70 +354,135 @@ def _tieulam_sport_label(match: dict) -> str:
     return ""
 
 
-def _build_tieulam_lines(matches: list) -> list:
-    lines = []
+def _parse_iso_to_ts(s: str) -> float:
+    """Parse ISO-8601 string to UTC timestamp float; returns inf on failure."""
+    try:
+        dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.timestamp()
+    except Exception:
+        return float("inf")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  Entry builders — return (sort_ts, extinf_line, url_line) tuples
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _build_tieulam_entries(matches: list) -> list[tuple[float, str, str]]:
+    """
+    Returns list of (utc_timestamp, extinf_line, url_line).
+    Sorted by start_date so that single-source playlists are also ordered.
+    """
+    # Sort by start_date ascending before processing
+    try:
+        matches = sorted(matches, key=lambda m: m.get("start_date") or "")
+    except Exception:
+        pass
+
+    entries: list[tuple[float, str, str]] = []
     for match in matches:
         source_live = (match.get("source_live") or "").strip()
         blv         = (match.get("blv") or "").strip()
         stream_key  = (match.get("stream_key") or "").strip()
 
         if source_live:
-            # Trận đang live — có URL CDN xác nhận
             stream_url = source_live
         elif blv and stream_key:
-            # Trận có BLV được assign — dùng stream_key (BLV đã nhận kèo, sắp phát)
             stream_url = f"{TIEULAM_STREAM_CDN}/live/{stream_key}/playlist.m3u8"
         else:
             continue
 
         start_str = match.get("start_date", "")
-        is_live = bool(match.get("is_live"))
-        if start_str and not is_live:
-            try:
-                dt_start = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
-                if dt_start.tzinfo is None:
-                    dt_start = dt_start.replace(tzinfo=timezone.utc)
-                elapsed = time.time() - dt_start.timestamp()
-                if blv:
-                    # Trận BLV: cho phép tối đa 12h trước giờ đấu (hiện lịch World Cup ngày mai)
-                    if elapsed < -43200:
-                        continue
-                else:
-                    # Trận ẩn danh: phải đã bắt đầu mới có stream
-                    if elapsed < 0:
-                        continue
-                if elapsed > MATCH_MAX_AGE_SECONDS:
-                    continue
-            except Exception:
-                pass
+        is_live   = bool(match.get("is_live"))
+        sort_ts   = _parse_iso_to_ts(start_str) if start_str else float("inf")
 
-        logo  = _tieulam_logo(match)
+        if start_str and not is_live:
+            elapsed = time.time() - sort_ts
+            if blv:
+                if elapsed < -43200:
+                    continue
+            else:
+                if elapsed < 0:
+                    continue
+            if elapsed > MATCH_MAX_AGE_SECONDS:
+                continue
+
+        logo   = _tieulam_logo(match)
         team1  = match.get("team_1", "Home").strip()
         team2  = match.get("team_2", "Away").strip()
         league = match.get("league", "").strip()
-        blv    = (match.get("blv") or "").strip()
         sport  = _tieulam_sport_label(match)
 
         try:
-            dt_start = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
-            if dt_start.tzinfo is None:
-                dt_start = dt_start.replace(tzinfo=timezone.utc)
-            dt_vn    = dt_start.astimezone(VN_TZ)
+            dt_vn    = datetime.fromtimestamp(sort_ts, tz=VN_TZ)
             time_str = dt_vn.strftime("%H:%M")
             date_str = dt_vn.strftime("%d/%m")
         except Exception:
             time_str = "--:--"
             date_str = "--/--"
 
-        # Ưu tiên BLV nếu có, fallback hiển thị môn thể thao như HQ
         suffix = blv if blv else sport
         if suffix:
             display = f"{time_str} - {date_str} | {team1} VS {team2} ({league}) | {suffix}"
         else:
             display = f"{time_str} - {date_str} | {team1} VS {team2} ({league})"
 
-        lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="TieuLam TV",{display}')
-        lines.append(stream_url)
+        extinf = f'#EXTINF:-1 tvg-logo="{logo}" group-title="TieuLam TV",{display}'
+        entries.append((sort_ts, extinf, stream_url))
+
+    return entries
+
+
+def _build_fixture_entries(fixtures: list, group_title: str) -> list[tuple[float, str, str]]:
+    """
+    Returns list of (utc_timestamp, extinf_line, url_line).
+    Sorted by startTime so that single-source playlists are also ordered.
+    """
+    try:
+        fixtures = sorted(fixtures, key=lambda f: f.get("startTime") or "")
+    except Exception:
+        pass
+
+    entries: list[tuple[float, str, str]] = []
+    for fixture in fixtures:
+        if not _fixture_is_active(fixture):
+            continue
+
+        logo      = _hq_kda_logo(fixture)
+        start_str = fixture.get("startTime", "")
+        home      = fixture.get("homeTeam", {}).get("name", "Home").strip()
+        away      = fixture.get("awayTeam", {}).get("name", "Away").strip()
+        league    = fixture.get("league", {}).get("name", "")
+
+        sort_ts = _parse_iso_to_ts(start_str) if start_str else float("inf")
+
+        try:
+            dt_vn    = datetime.fromtimestamp(sort_ts, tz=VN_TZ)
+            time_str = dt_vn.strftime("%H:%M")
+            date_str = dt_vn.strftime("%d/%m")
+        except Exception:
+            time_str = "--:--"
+            date_str = "--/--"
+
+        for entry in fixture.get("fixtureCommentators", []):
+            commentator_obj = entry.get("commentator", {})
+            name = (commentator_obj.get("nickname") or commentator_obj.get("name") or "").strip()
+            stream_url = _pick_best_stream(commentator_obj.get("streams", []))
+            if not stream_url:
+                continue
+            display = f"{time_str} - {date_str} | {home} VS {away} ({league}) | {name}"
+            extinf  = f'#EXTINF:-1 tvg-logo="{logo}" group-title="{group_title}",{display}'
+            entries.append((sort_ts, extinf, stream_url))
+
+    return entries
+
+
+def _entries_to_lines(entries: list[tuple[float, str, str]]) -> list[str]:
+    lines: list[str] = []
+    for _, extinf, url in entries:
+        lines.append(extinf)
+        lines.append(url)
     return lines
 
 
@@ -471,17 +519,17 @@ def _get_hoiquan_api_base(scraper) -> str:
 
 
 def _fetch_hoiquan_fixtures() -> list:
-    scraper = cloudscraper.create_scraper()
+    scraper  = cloudscraper.create_scraper()
     api_base = _get_hoiquan_api_base(scraper)
-    url = api_base.rstrip("/") + "/fixtures/unfinished"
-    headers = {**_HQ_HEADERS, "Referer": HOIQUAN_FRONTEND_URL + "/"}
+    url      = api_base.rstrip("/") + "/fixtures/unfinished"
+    headers  = {**_HQ_HEADERS, "Referer": HOIQUAN_FRONTEND_URL + "/"}
     try:
         resp = scraper.get(url, headers=headers, timeout=15)
         resp.raise_for_status()
     except Exception:
         _hoiquan_api_cache["discovered_at"] = 0
         api_base = _get_hoiquan_api_base(scraper)
-        url = api_base.rstrip("/") + "/fixtures/unfinished"
+        url  = api_base.rstrip("/") + "/fixtures/unfinished"
         resp = scraper.get(url, headers=headers, timeout=15)
         resp.raise_for_status()
     data = resp.json()
@@ -505,7 +553,7 @@ def _discover_khandaia_api(scraper) -> str:
             chunk_paths = re.findall(r'assets/queries[^"\']+\.js', js)
             for cp in chunk_paths[:2]:
                 chunk = scraper.get(KHANDAIA_FRONTEND_URL.rstrip("/") + "/" + cp, timeout=15).text
-                hits = re.findall(r'https://sv\.[a-z0-9\-\.]+/api/v1/external', chunk)
+                hits  = re.findall(r'https://sv\.[a-z0-9\-\.]+/api/v1/external', chunk)
                 if hits:
                     return hits[0]
             hits = re.findall(r'https://sv\.[a-z0-9\-\.]+/api/v1/external', js)
@@ -525,17 +573,17 @@ def _get_khandaia_api_base(scraper) -> str:
 
 
 def _fetch_khandaia_fixtures() -> list:
-    scraper = cloudscraper.create_scraper()
+    scraper  = cloudscraper.create_scraper()
     api_base = _get_khandaia_api_base(scraper)
-    url = api_base.rstrip("/") + "/fixtures/unfinished"
-    headers = {**_HQ_HEADERS, "Referer": KHANDAIA_FRONTEND_URL + "/"}
+    url      = api_base.rstrip("/") + "/fixtures/unfinished"
+    headers  = {**_HQ_HEADERS, "Referer": KHANDAIA_FRONTEND_URL + "/"}
     try:
         resp = scraper.get(url, headers=headers, timeout=15)
         resp.raise_for_status()
     except Exception:
         _khandaia_api_cache["discovered_at"] = 0
         api_base = _get_khandaia_api_base(scraper)
-        url = api_base.rstrip("/") + "/fixtures/unfinished"
+        url  = api_base.rstrip("/") + "/fixtures/unfinished"
         resp = scraper.get(url, headers=headers, timeout=15)
         resp.raise_for_status()
     data = resp.json()
@@ -583,40 +631,6 @@ def _pick_best_stream(streams: list) -> str:
     return ""
 
 
-def _build_fixture_lines(fixtures: list, group_title: str) -> list:
-    try:
-        fixtures = sorted(fixtures, key=lambda f: f.get("startTime") or "")
-    except Exception:
-        pass
-    lines = []
-    for fixture in fixtures:
-        if not _fixture_is_active(fixture):
-            continue
-        logo      = _hq_kda_logo(fixture)
-        start_str = fixture.get("startTime", "")
-        home      = fixture.get("homeTeam", {}).get("name", "Home").strip()
-        away      = fixture.get("awayTeam", {}).get("name", "Away").strip()
-        league    = fixture.get("league", {}).get("name", "")
-        try:
-            dt      = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
-            dt_vn   = dt.astimezone(VN_TZ)
-            time_str = dt_vn.strftime("%H:%M")
-            date_str = dt_vn.strftime("%d/%m")
-        except Exception:
-            time_str = "--:--"
-            date_str = "--/--"
-        for entry in fixture.get("fixtureCommentators", []):
-            commentator_obj = entry.get("commentator", {})
-            name = (commentator_obj.get("nickname") or commentator_obj.get("name") or "").strip()
-            stream_url = _pick_best_stream(commentator_obj.get("streams", []))
-            if not stream_url:
-                continue
-            display = f"{time_str} - {date_str} | {home} VS {away} ({league}) | {name}"
-            lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="{group_title}",{display}')
-            lines.append(stream_url)
-    return lines
-
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  Cache helpers
 # ══════════════════════════════════════════════════════════════════════════════
@@ -643,13 +657,13 @@ def _refresh_all_playlists():
     errors = []
 
     def fetch_tieulam():
-        return _build_tieulam_lines(_fetch_tieulam_matches())
+        return _build_tieulam_entries(_fetch_tieulam_matches())
 
     def fetch_hq():
-        return _build_fixture_lines(_fetch_hoiquan_fixtures(), "Hội Quán TV")
+        return _build_fixture_entries(_fetch_hoiquan_fixtures(), "Hoi Quan TV")
 
     def fetch_kda():
-        return _build_fixture_lines(_fetch_khandaia_fixtures(), "Khán Đài A")
+        return _build_fixture_entries(_fetch_khandaia_fixtures(), "Khan Dai A")
 
     with ThreadPoolExecutor(max_workers=3) as ex:
         futures = {
@@ -666,32 +680,36 @@ def _refresh_all_playlists():
                 results[key] = []
                 errors.append(f"{key}: {e}")
 
-    tieulam_lines = results.get("tieulam",  [])
-    hq_lines      = results.get("hoiquan",  [])
-    kda_lines     = results.get("khandaia", [])
+    tieulam_entries = results.get("tieulam",  [])
+    hq_entries      = results.get("hoiquan",  [])
+    kda_entries     = results.get("khandaia", [])
 
     err_str = "; ".join(errors)
 
-    def count(lines):
-        return sum(1 for l in lines if l.startswith("#EXTINF"))
-
     current_epg = _epg_url()
-    epg_header = f'#EXTM3U url-tvg="{current_epg}" x-tvg-url="{current_epg}"'
+    epg_header  = f'#EXTM3U url-tvg="{current_epg}" x-tvg-url="{current_epg}"'
 
-    _store("tieulam",  epg_header + "\n" + "\n".join(tieulam_lines))
-    _store("hoiquan",  epg_header + "\n" + "\n".join(hq_lines))
-    _store("khandaia", epg_header + "\n" + "\n".join(kda_lines))
+    _store("tieulam",  epg_header + "\n" + "\n".join(_entries_to_lines(tieulam_entries)))
+    _store("hoiquan",  epg_header + "\n" + "\n".join(_entries_to_lines(hq_entries)))
+    _store("khandaia", epg_header + "\n" + "\n".join(_entries_to_lines(kda_entries)))
 
-    all_lines = tieulam_lines + hq_lines + kda_lines
+    # Merge all entries and sort by start time — ensures combined playlist is chronological
+    all_entries = tieulam_entries + hq_entries + kda_entries
+    all_entries.sort(key=lambda e: e[0])  # sort by UTC timestamp
+
+    all_lines    = _entries_to_lines(all_entries)
     combined_text = epg_header + "\n" + "\n".join(all_lines)
     if err_str:
         combined_text += f"\n# Errors: {err_str}"
     _store("combined", combined_text)
 
+    def count(entries):
+        return len(entries)
+
     _last_counts.update({
-        "tieulam":      count(tieulam_lines),
-        "hoiquan":      count(hq_lines),
-        "khandaia":     count(kda_lines),
+        "tieulam":      count(tieulam_entries),
+        "hoiquan":      count(hq_entries),
+        "khandaia":     count(kda_entries),
         "refreshed_at": time.time(),
         "last_error":   err_str,
     })
@@ -794,7 +812,6 @@ def ping():
 
 @app.route("/api/tieulam-relay")
 def tieulam_relay():
-    """Relay endpoint — nhận request từ Render/Vercel instance khác bị block IP."""
     secret = os.environ.get("RELAY_SECRET", "")
     if secret:
         token = request.headers.get("X-Relay-Token", "")
@@ -815,11 +832,11 @@ def index():
         next_s   = max(int(PREFETCH_INTERVAL - (time.time() - ra)), 0)
         next_str = f"{next_s}s"
     else:
-        dt_str   = "chưa có dữ liệu"
-        next_str = "đang khởi động..."
+        dt_str   = "chua co du lieu"
+        next_str = "dang khoi dong..."
 
     err      = _last_counts.get("last_error", "")
-    err_html = f'<p style="color:red">⚠️ {err}</p>' if err else ""
+    err_html = f'<p style="color:red">Loi: {err}</p>' if err else ""
 
     tieulam_count = _last_counts.get("tieulam", 0)
     hq_count      = _last_counts.get("hoiquan", 0)
@@ -828,73 +845,45 @@ def index():
 
     epg_link = _epg_url()
     return (
-        "<h2>🎬 IPTV M3U Server</h2>"
-        "<h3>📋 Playlist</h3><ul>"
-        "<li><a href='/live.m3u'>/live.m3u</a> — Tất cả nguồn gộp lại</li>"
+        "<h2>IPTV M3U Server</h2>"
+        "<h3>Playlist</h3><ul>"
+        "<li><a href='/live.m3u'>/live.m3u</a> — Tat ca nguon gop lai (sap xep theo gio)</li>"
         "<li><a href='/tieulam.m3u'>/tieulam.m3u</a> — TieuLam TV only</li>"
-        "<li><a href='/hoiquan.m3u'>/hoiquan.m3u</a> — Hội Quán TV only</li>"
-        "<li><a href='/khandaia.m3u'>/khandaia.m3u</a> — Khán Đài A only</li>"
+        "<li><a href='/hoiquan.m3u'>/hoiquan.m3u</a> — Hoi Quan TV only</li>"
+        "<li><a href='/khandaia.m3u'>/khandaia.m3u</a> — Khan Dai A only</li>"
         "</ul>"
-        "<h3>📡 EPG</h3><ul>"
-        f"<li><a href='/epg.xml'>/epg.xml</a> — XMLTV tự sinh từ danh sách kênh (cache 1h)</li>"
-        f"<li>URL đầy đủ: <code>{epg_link}</code></li>"
+        "<h3>EPG</h3><ul>"
+        f"<li><a href='/epg.xml'>/epg.xml</a></li>"
+        f"<li>URL: <code>{epg_link}</code></li>"
         "</ul>"
-        "<h3>📊 Trạng thái</h3>"
-        f"<p>📺 Tổng kênh live: <strong>{total}</strong></p>"
-        f"<p>🕐 Cập nhật lần cuối: <strong>{dt_str}</strong></p>"
-        f"<p>⏳ Cập nhật tiếp theo: <strong>{next_str}</strong></p>"
-        f"<p>🟢 TieuLam TV: <strong>{tieulam_count} kênh</strong>"
-        f"&nbsp;|&nbsp; <code>{_tieulam_api_cache['url']}</code></p>"
-        f"<p>🟢 Hội Quán TV: <strong>{hq_count} kênh</strong>"
-        f"&nbsp;|&nbsp; <code>{_hoiquan_api_cache['url']}</code></p>"
-        f"<p>🟢 Khán Đài A: <strong>{kda_count} kênh</strong>"
-        f"&nbsp;|&nbsp; <code>{_khandaia_api_cache['url']}</code></p>"
-        f"{err_html}"
-        "<h3>⚙️ Tối ưu băng thông</h3>"
-        "<ul>"
-        "<li>Gzip nén tự động (giảm ~70% dữ liệu truyền)</li>"
-        "<li>ETag + HTTP 304 — client có sẵn cache không cần tải lại</li>"
-        f"<li>Cache-Control: public, max-age={PREFETCH_INTERVAL}s</li>"
-        "<li>Fetch 4 nguồn song song (ThreadPoolExecutor)</li>"
-        f"<li>Làm mới cache mỗi <strong>{PREFETCH_INTERVAL // 60} phút</strong></li>"
-        "</ul>"
+        "<h3>Trang thai</h3>"
+        f"<p>Tong kenh live: <strong>{total}</strong> "
+        f"(TieuLam: {tieulam_count}, HoiQuan: {hq_count}, KhanDaiA: {kda_count})</p>"
+        f"<p>Cap nhat lan cuoi: <strong>{dt_str}</strong> (lam moi sau: {next_str})</p>"
+        + err_html +
+        "<h3>Relay</h3>"
+        f"<p><a href='/api/tieulam-relay'>/api/tieulam-relay</a></p>"
     )
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  Keep-alive self-ping (chỉ dùng khi chạy server thường, không dùng trên Vercel)
+#  Background threads
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _get_ping_url() -> str:
-    domains = os.environ.get("REPLIT_DOMAINS", "")
-    if domains:
-        return f"https://{domains.split(',')[0].strip()}/"
-    render_url = os.environ.get("RENDER_EXTERNAL_URL", "")
-    if render_url:
-        return render_url.rstrip("/") + "/"
-    app_url = os.environ.get("APP_URL", "")
-    if app_url:
-        return app_url.rstrip("/") + "/"
-    return f"http://localhost:{os.environ.get('PORT', 5000)}/"
-
-
-def _self_ping():
-    url = _get_ping_url()
+def _self_ping_loop():
+    time.sleep(30)
+    pub = _get_public_url()
     while True:
-        time.sleep(SELF_PING_INTERVAL)
         try:
-            requests.get(url, timeout=15)
+            requests.get(f"{pub}/ping", timeout=10)
         except Exception:
             pass
+        time.sleep(SELF_PING_INTERVAL)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  Startup — chỉ khi chạy trực tiếp (không phải Vercel serverless)
-# ══════════════════════════════════════════════════════════════════════════════
+threading.Thread(target=_prefetch_loop, daemon=True).start()
+threading.Thread(target=_self_ping_loop, daemon=True).start()
 
 if __name__ == "__main__":
-    threading.Thread(target=_prefetch_loop, daemon=True).start()
-    threading.Thread(target=_self_ping,     daemon=True).start()
-
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
