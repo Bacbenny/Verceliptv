@@ -405,10 +405,7 @@ def _build_tieulam_entries(matches: list) -> list[tuple[float, str, str]]:
         stream_key  = (match.get("stream_key") or "").strip()
         is_live     = bool(match.get("is_live"))
 
-        # Chỉ giữ trận có BLV (bình luận viên tiếng Việt)
-        if not blv:
-            continue
-
+        # Chỉ giữ trận có nguồn phát (stream_key hoặc source_live)
         if source_live:
             stream_url = source_live
         elif stream_key:
@@ -421,8 +418,8 @@ def _build_tieulam_entries(matches: list) -> list[tuple[float, str, str]]:
 
         if start_str and not is_live:
             elapsed = time.time() - sort_ts
-            # BLV: hiển thị từ 12h trước đến hết MATCH_MAX_AGE_SECONDS sau giờ bắt đầu
-            if elapsed < -43200:
+            # Hiển thị từ 30 phút trước giờ bắt đầu đến hết MATCH_MAX_AGE_SECONDS
+            if elapsed < -1800:
                 continue
             if elapsed > MATCH_MAX_AGE_SECONDS:
                 continue
