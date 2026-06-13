@@ -385,25 +385,32 @@ def _build_tieulam_entries(matches: list) -> list[tuple[float, str, str]]:
         source_live = (match.get("source_live") or "").strip()
         blv         = (match.get("blv") or "").strip()
         stream_key  = (match.get("stream_key") or "").strip()
+        is_live     = bool(match.get("is_live"))
 
         if source_live:
+            # Đang live, có CDN URL xác nhận
             stream_url = source_live
-        elif blv and stream_key:
+        elif stream_key:
+            # Có stream_key — xây URL từ CDN (bao gồm cả trận có/không có BLV)
             stream_url = f"{TIEULAM_STREAM_CDN}/live/{stream_key}/playlist.m3u8"
         else:
             continue
 
         start_str = match.get("start_date", "")
-        is_live   = bool(match.get("is_live"))
         sort_ts   = _parse_iso_to_ts(start_str) if start_str else float("inf")
 
         if start_str and not is_live:
             elapsed = time.time() - sort_ts
             if blv:
+                # BLV: hiển thị từ 12h trước đến hết MATCH_MAX_AGE_SECONDS sau giờ bắt đầu
                 if elapsed < -43200:
                     continue
+            elif source_live:
+                # source_live không cần check elapsed — CDN đang phát
+                pass
             else:
-                if elapsed < 0:
+                # Chỉ có stream_key: hiển thị từ 30 phút trước khi bắt đầu
+                if elapsed < -1800:
                     continue
             if elapsed > MATCH_MAX_AGE_SECONDS:
                 continue
