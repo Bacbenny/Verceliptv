@@ -59,7 +59,9 @@ async function fetchTieuLamData(req: Request, res: Response): Promise<void> {
   const now = Date.now();
 
   // All cutoff strings must be in Vietnam time so TieuLam backend interprets them correctly
-  const cutoff    = toVNDateStr(now - MATCH_MAX_DURATION * 1000);
+  // Look back 6h so matches that started before MATCH_MAX_DURATION are still captured
+  const LOOKBACK_MS = Math.max(MATCH_MAX_DURATION * 1000, 6 * 3600 * 1000);
+  const cutoff    = toVNDateStr(now - LOOKBACK_MS);
   const cutoffEnd = toVNDateStr(now + 24 * 3600 * 1000);
 
   const apiBase = await getApiBase();
