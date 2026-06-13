@@ -23,7 +23,9 @@ app = Flask(__name__)
 TIEULAM_FRONTEND_URL  = os.environ.get("TIEULAM_FRONTEND", "https://sv1.tieulam1.live")
 TIEULAM_KNOWN_API_BASE= os.environ.get("TIEULAM_API",      "https://api.tlap12062026.xyz")
 TIEULAM_STREAM_CDN    = os.environ.get("TIEULAM_CDN",      "https://live.secufun.xyz")
-TIEULAM_RELAY_URL     = os.environ.get("TIEULAM_RELAY_URL", "")
+# Public relay on Replit — no secret needed, used as fallback when direct API is blocked (Vercel/Render)
+_REPLIT_PUBLIC_RELAY  = "https://28e46fcb-65b5-49ef-beae-ea8e7ec9c655-00-2bju9pr3171vc.pike.replit.dev/api/tieulam-relay-public"
+TIEULAM_RELAY_URL     = os.environ.get("TIEULAM_RELAY_URL", _REPLIT_PUBLIC_RELAY)
 TIEULAM_RELAY_SECRET  = os.environ.get("RELAY_SECRET", "")
 
 # ─── Hội Quán TV config ───────────────────────────────────────────────────────
