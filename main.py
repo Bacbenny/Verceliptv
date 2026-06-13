@@ -359,9 +359,7 @@ _TIEULAM_SPORT_VI = {
 
 
 def _tieulam_logo(match: dict) -> str:
-    logo = match.get("team_1_logo") or match.get("team_2_logo") or ""
-    if logo:
-        return logo
+    # Dùng icon môn thể thao (giống HQ/KDA) thay vì logo đội — nhất quán hơn
     desc = (match.get("desc") or "").upper()
     sport_info = _TIEULAM_SPORT_VI.get(desc)
     if sport_info:
@@ -543,15 +541,52 @@ def _fetch_khandaia_fixtures() -> list:
 #  IPTV static list
 # ══════════════════════════════════════════════════════════════════════════════
 
+# URL substrings xác nhận chết: 403, TLS cert sai, IP cứng không còn hoạt động
+_DEAD_URL_PARTS = {
+    "liveh12.vtvprime.vn/hls/ANNINHTV",           # ANTV bản 403 (còn bản fptplay ok)
+    "liveh34.vtvprime.vn/hls/HANOI1TV",            # HanoiTV1 bản 403 (còn bản tek4tv ok)
+    "megasystems-6c680321cd.gw-dthcdn.com",        # TLS cert lỗi (Cần Thơ TV2, Đồng Tháp)
+    "618b88f69e53b.streamlock.net",                # TLS cert lỗi + dead (Đồng Tháp)
+    "118.107.85.4",                                # IP cứng Đồng Nai [Not 24/7]
+    "118.107.85.5",                                # IP cứng Lâm Đồng
+}
+
+# Tên kênh chứa "[Not 24/7]" — chỉ phát sóng theo giờ, hay bị offline
+_NOT_247_TAG = "[Not 24/7]"
+
+
 def _fetch_dekiki_lines() -> list:
     resp = requests.get(DEKIKI_M3U_URL, timeout=20)
     resp.raise_for_status()
-    lines = []
-    for line in resp.text.splitlines():
-        stripped = line.rstrip()
-        if not stripped or stripped.startswith("#EXTM3U"):
+    raw_lines = [l.rstrip() for l in resp.text.splitlines() if l.rstrip()]
+
+    # Parse thành cặp (EXTINF, URL) rồi lọc
+    pairs: list[tuple[str, str]] = []
+    i = 0
+    while i < len(raw_lines):
+        line = raw_lines[i]
+        if line.startswith("#EXTM3U"):
+            i += 1
             continue
-        lines.append(stripped)
+        if line.startswith("#EXTINF"):
+            if i + 1 < len(raw_lines):
+                pairs.append((line, raw_lines[i + 1]))
+                i += 2
+            else:
+                i += 1
+        else:
+            i += 1
+
+    lines = []
+    for inf, url in pairs:
+        # Bỏ kênh [Not 24/7]
+        if _NOT_247_TAG in inf:
+            continue
+        # Bỏ kênh có URL chứa domain/IP đã xác nhận chết
+        if any(dead in url for dead in _DEAD_URL_PARTS):
+            continue
+        lines.append(inf)
+        lines.append(url)
     return lines
 
 
