@@ -374,9 +374,17 @@ def _tieulam_sport_label(match: dict) -> str:
 def _build_tieulam_lines(matches: list) -> list:
     lines = []
     for match in matches:
-        # Chỉ lấy trận có nguồn phát xác nhận (source_live) — bỏ stream_key chưa active
-        stream_url = (match.get("source_live") or "").strip()
-        if not stream_url:
+        source_live = (match.get("source_live") or "").strip()
+        blv         = (match.get("blv") or "").strip()
+        stream_key  = (match.get("stream_key") or "").strip()
+
+        if source_live:
+            # Trận đang live — có URL CDN xác nhận
+            stream_url = source_live
+        elif blv and stream_key:
+            # Trận có BLV được assign — dùng stream_key (BLV đã nhận kèo, sắp phát)
+            stream_url = f"{TIEULAM_STREAM_CDN}/live/{stream_key}/playlist.m3u8"
+        else:
             continue
 
         start_str = match.get("start_date", "")
@@ -387,8 +395,14 @@ def _build_tieulam_lines(matches: list) -> list:
                 if dt_start.tzinfo is None:
                     dt_start = dt_start.replace(tzinfo=timezone.utc)
                 elapsed = time.time() - dt_start.timestamp()
-                if elapsed < 0:
-                    continue
+                if blv:
+                    # Trận BLV: cho phép tối đa 3h trước giờ đấu (BLV đã chuẩn bị)
+                    if elapsed < -10800:
+                        continue
+                else:
+                    # Trận ẩn danh: phải đã bắt đầu mới có stream
+                    if elapsed < 0:
+                        continue
                 if elapsed > MATCH_MAX_AGE_SECONDS:
                     continue
             except Exception:
