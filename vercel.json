@@ -19,6 +19,7 @@
     "TIEULAM_FRONTEND": "https://sv1.tieulam1.live",
     "TIEULAM_API": "https://api.tlap12062026.xyz",
     "TIEULAM_CDN": "https://live.secufun.xyz",
+    "TIEULAM_RELAY_URL": "https://a0eb0dd4-6eff-4ca4-af43-6dc79271738f-00-1g3i8pkmeifo4.pike.replit.dev/api/tieulam-relay",
     "HOIQUAN_FRONTEND": "https://sv2.hoiquan4.live",
     "HOIQUAN_API": "https://sv.hoiquantv.xyz/api/v1/external",
     "KHANDAIA_FRONTEND": "https://tructiep.khandaia.link",
