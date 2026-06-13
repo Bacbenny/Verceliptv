@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type Request, type Response, type IRouter } from "express";
 
 const router: IRouter = Router();
 
@@ -7,25 +7,16 @@ const TIEULAM_API        = process.env.TIEULAM_API         ?? "https://api.tlap1
 const RELAY_SECRET       = process.env.RELAY_SECRET        ?? "";
 const MATCH_MAX_DURATION = parseInt(process.env.MATCH_MAX_DURATION ?? "7200", 10);
 
-router.get("/tieulam-relay", async (req, res) => {
-  if (RELAY_SECRET) {
-    const token = req.headers["x-relay-token"];
-    if (token !== RELAY_SECRET) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
-  }
-
+/** Core logic — fetch, deduplicate and sort TieuLam matches */
+async function fetchTieuLamData(req: Request, res: Response): Promise<void> {
   const now = new Date();
   const cutoff = new Date(now.getTime() - MATCH_MAX_DURATION * 1000)
-    .toISOString()
-    .slice(0, 19);
+    .toISOString().slice(0, 19);
   const cutoffEnd = new Date(now.getTime() + 24 * 3600 * 1000)
-    .toISOString()
-    .slice(0, 19);
+    .toISOString().slice(0, 19);
 
   const apiUrl = `${TIEULAM_API.replace(/\/$/, "")}/matches/graph`;
-  const headers = {
+  const headers: Record<string, string> = {
     "Accept": "application/json, text/plain, */*",
     "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
     "Content-Type": "application/json",
@@ -71,9 +62,9 @@ router.get("/tieulam-relay", async (req, res) => {
       return;
     }
 
-    const j1    = (await r1.json()) as { data?: unknown[] };
-    const j2    = r2.ok   ? ((await r2.json())   as { data?: unknown[] }) : { data: [] };
-    const jBlv  = rBlv.ok ? ((await rBlv.json()) as { data?: unknown[] }) : { data: [] };
+    const j1   = (await r1.json()) as { data?: unknown[] };
+    const j2   = r2.ok   ? ((await r2.json())   as { data?: unknown[] }) : { data: [] };
+    const jBlv = rBlv.ok ? ((await rBlv.json()) as { data?: unknown[] }) : { data: [] };
 
     const cutoffMs = now.getTime() - MATCH_MAX_DURATION * 1000;
     const blvMatches = (jBlv.data ?? []).filter(m => {
@@ -87,19 +78,15 @@ router.get("/tieulam-relay", async (req, res) => {
 
     const seen = new Set<string>();
     const combined: unknown[] = [];
-
     for (const m of [...blvMatches, ...(j1.data ?? []), ...(j2.data ?? [])]) {
       const match = m as Record<string, unknown>;
       const key = String(match.id ?? match.stream_key ?? JSON.stringify(m));
       if (!seen.has(key)) { seen.add(key); combined.push(m); }
     }
 
-    // Sort combined by start_date ascending so relay output is already ordered
     combined.sort((a, b) => {
-      const ma = a as Record<string, unknown>;
-      const mb = b as Record<string, unknown>;
-      const ta = String(ma.start_date ?? "");
-      const tb = String(mb.start_date ?? "");
+      const ta = String((a as Record<string, unknown>).start_date ?? "");
+      const tb = String((b as Record<string, unknown>).start_date ?? "");
       return ta.localeCompare(tb);
     });
 
@@ -108,6 +95,30 @@ router.get("/tieulam-relay", async (req, res) => {
     req.log.error({ err }, "TieuLam relay fetch failed");
     res.status(502).json({ error: String(err), data: [] });
   }
+}
+
+/**
+ * /api/tieulam-relay  — secured with RELAY_SECRET header
+ * Used by trusted callers (Vercel with env var configured)
+ */
+router.get("/tieulam-relay", async (req, res) => {
+  if (RELAY_SECRET) {
+    const token = req.headers["x-relay-token"];
+    if (token !== RELAY_SECRET) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+  }
+  await fetchTieuLamData(req, res);
+});
+
+/**
+ * /api/tieulam-relay-public  — no auth required
+ * Default fallback used by Vercel when TIEULAM_RELAY_URL is not explicitly set.
+ * Rate limiting should be added if this becomes abused.
+ */
+router.get("/tieulam-relay-public", async (req, res) => {
+  await fetchTieuLamData(req, res);
 });
 
 export default router;
