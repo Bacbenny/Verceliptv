@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type Request, type Response, type IRouter } from "express";
 
 const router: IRouter = Router();
 
@@ -7,6 +7,114 @@ const TIEULAM_API        = process.env.TIEULAM_API         ?? "https://api.tlap1
 const RELAY_SECRET       = process.env.RELAY_SECRET        ?? "";
 const MATCH_MAX_DURATION = parseInt(process.env.MATCH_MAX_DURATION ?? "7200", 10);
 
+const REQUEST_HEADERS = {
+  "Accept": "application/json, text/plain, */*",
+  "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
+  "Content-Type": "application/json",
+  "Referer": `${TIEULAM_FRONTEND}/`,
+  "Origin": TIEULAM_FRONTEND,
+  "sec-fetch-dest": "empty",
+  "sec-fetch-mode": "cors",
+  "sec-fetch-site": "cross-site",
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+};
+
+async function fetchPage(apiUrl: string, cutoff: string, cutoffEnd: string, page: number): Promise<unknown[]> {
+  try {
+    const r = await fetch(apiUrl, {
+      method: "POST",
+      headers: REQUEST_HEADERS,
+      body: JSON.stringify({
+        queries: [
+          { field: "start_date", type: "gte", value: cutoff },
+          { field: "start_date", type: "lte", value: cutoffEnd },
+        ],
+        query_and: true,
+        limit: 50,
+        page,
+        order_asc: "start_date",
+      }),
+    });
+    if (!r.ok) return [];
+    const j = (await r.json()) as { data?: unknown[] };
+    return j.data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Core handler — fetches 8 pages in parallel, filters BLV client-side.
+ * The TieuLam API's server-side blv=is_not_null filter is broken (returns all matches),
+ * so we must scan all pages and filter in relay.
+ */
+async function handleRelay(req: Request, res: Response): Promise<void> {
+  const now = new Date();
+
+  // 48h window: from MATCH_MAX_DURATION ago to 48h ahead
+  const cutoff    = new Date(now.getTime() - MATCH_MAX_DURATION * 1000).toISOString().slice(0, 19);
+  const cutoffEnd = new Date(now.getTime() + 48 * 3600 * 1000).toISOString().slice(0, 19);
+  const cutoffMs  = now.getTime() - MATCH_MAX_DURATION * 1000;
+  const cutoffEndMs = now.getTime() + 48 * 3600 * 1000;
+
+  const apiUrl = `${TIEULAM_API.replace(/\/$/, "")}/matches/graph`;
+
+  try {
+    // Fetch pages 1-8 in parallel — BLV matches are scattered across all pages
+    const pages = await Promise.all(
+      [1, 2, 3, 4, 5, 6, 7, 8].map(p => fetchPage(apiUrl, cutoff, cutoffEnd, p))
+    );
+
+    // Flatten all pages, deduplicate by id/stream_key
+    const seen = new Set<string>();
+    const allMatches: unknown[] = [];
+    for (const page of pages) {
+      for (const m of page) {
+        const match = m as Record<string, unknown>;
+        const key = String(match.id ?? match.stream_key ?? JSON.stringify(m));
+        if (!seen.has(key)) { seen.add(key); allMatches.push(m); }
+      }
+    }
+
+    // Separate BLV matches (filter client-side since API filter is broken)
+    const blvMatches: unknown[] = [];
+    const otherMatches: unknown[] = [];
+
+    for (const m of allMatches) {
+      const match = m as Record<string, unknown>;
+      const startDate = String(match.start_date ?? "");
+      const t = startDate
+        ? new Date(startDate.includes("Z") ? startDate : startDate + "Z").getTime()
+        : now.getTime();
+      if (t < cutoffMs || t > cutoffEndMs) continue; // outside window
+      if (match.blv) {
+        blvMatches.push(m);
+      } else {
+        otherMatches.push(m);
+      }
+    }
+
+    // BLV matches first, then others — sort each group by start_date
+    const sortByDate = (a: unknown, b: unknown) =>
+      String((a as Record<string, unknown>).start_date ?? "")
+        .localeCompare(String((b as Record<string, unknown>).start_date ?? ""));
+
+    blvMatches.sort(sortByDate);
+    otherMatches.sort(sortByDate);
+
+    const combined = [...blvMatches, ...otherMatches];
+
+    req.log?.info?.({ blv: blvMatches.length, total: combined.length }, "TieuLam relay OK");
+    res.json({ data: combined });
+  } catch (err) {
+    req.log?.error?.({ err }, "TieuLam relay fetch failed");
+    res.status(502).json({ error: String(err), data: [] });
+  }
+}
+
+/**
+ * /api/tieulam-relay — secured with RELAY_SECRET header
+ */
 router.get("/tieulam-relay", async (req, res) => {
   if (RELAY_SECRET) {
     const token = req.headers["x-relay-token"];
@@ -15,97 +123,7 @@ router.get("/tieulam-relay", async (req, res) => {
       return;
     }
   }
-
-  const now = new Date();
-  const cutoff = new Date(now.getTime() - MATCH_MAX_DURATION * 1000)
-    .toISOString()
-    .slice(0, 19);
-  const cutoffEnd = new Date(now.getTime() + 24 * 3600 * 1000)
-    .toISOString()
-    .slice(0, 19);
-
-  const apiUrl = `${TIEULAM_API.replace(/\/$/, "")}/matches/graph`;
-  const headers = {
-    "Accept": "application/json, text/plain, */*",
-    "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Content-Type": "application/json",
-    "Referer": `${TIEULAM_FRONTEND}/`,
-    "Origin": TIEULAM_FRONTEND,
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "cross-site",
-    "User-Agent":
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
-      "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-  };
-
-  // Query A: trận đang/vừa live trong khung giờ (có source_live)
-  const timeWindowPayload = (page: number) => ({
-    queries: [
-      { field: "start_date", type: "gte", value: cutoff },
-      { field: "start_date", type: "lte", value: cutoffEnd },
-    ],
-    query_and: true,
-    limit: 100,
-    page,
-    order_asc: "start_date",
-  });
-
-  // Query B: trận có BLV — KHÔNG thêm time filter (kết hợp time+blv phá filter API)
-  // Time filtering sẽ được thực hiện ở relay code bên dưới
-  const blvEnd = now.getTime() + 48 * 3600 * 1000; // 48h window (ms) cho BLV
-  const blvPayload = {
-    queries: [{ field: "blv", type: "is_not_null", value: "" }],
-    query_and: true,
-    limit: 50,
-    page: 1,
-    // No order_asc, no time filter — both break the blv filter in TieuLam API
-  };
-
-  try {
-    const [r1, r2, rBlv] = await Promise.all([
-      fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(timeWindowPayload(1)) }),
-      fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(timeWindowPayload(2)) }),
-      fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(blvPayload) }),
-    ]);
-
-    if (!r1.ok) {
-      req.log.warn({ status: r1.status }, "TieuLam upstream error");
-      res.status(502).json({ error: `Upstream ${r1.status}`, data: [] });
-      return;
-    }
-
-    const j1    = (await r1.json()) as { data?: unknown[] };
-    const j2    = r2.ok   ? ((await r2.json())   as { data?: unknown[] }) : { data: [] };
-    const jBlv  = rBlv.ok ? ((await rBlv.json()) as { data?: unknown[] }) : { data: [] };
-
-    // Filter BLV matches by time window in relay (API-side time filter breaks blv filter)
-    const cutoffMs  = now.getTime() - MATCH_MAX_DURATION * 1000;
-    const blvEndMs  = blvEnd;
-    const blvMatches = (jBlv.data ?? []).filter(m => {
-      const match = m as Record<string, unknown>;
-      if (!match.blv) return false; // only keep truly non-null blv
-      const startDate = String(match.start_date ?? "");
-      if (!startDate) return true;
-      const t = new Date(startDate.includes("Z") ? startDate : startDate + "Z").getTime();
-      return t >= cutoffMs && t <= blvEndMs;
-    });
-
-    const seen = new Set<string>();
-    const combined: unknown[] = [];
-
-    // BLV matches first — ensures blv field is preserved when deduplicating
-    for (const m of [...blvMatches, ...(j1.data ?? []), ...(j2.data ?? [])]) {
-      const match = m as Record<string, unknown>;
-      const key = String(match.id ?? match.stream_key ?? JSON.stringify(m));
-      if (!seen.has(key)) { seen.add(key); combined.push(m); }
-    }
-
-    res.json({ data: combined });
-  } catch (err) {
-    req.log.error({ err }, "TieuLam relay fetch failed");
-    res.status(502).json({ error: String(err), data: [] });
-  }
+  await handleRelay(req, res);
 });
 
 /**
@@ -113,56 +131,7 @@ router.get("/tieulam-relay", async (req, res) => {
  * Vercel dùng endpoint này làm fallback khi TIEULAM_RELAY_URL chưa được set
  */
 router.get("/tieulam-relay-public", async (req, res) => {
-  // Reuse the same handler logic inline (no auth check)
-  const MATCH_MAX_DURATION_LOCAL = parseInt(process.env.MATCH_MAX_DURATION ?? "7200", 10);
-  const TIEULAM_FRONTEND_LOCAL = process.env.TIEULAM_FRONTEND ?? "https://sv1.tieulam1.live";
-  const TIEULAM_API_LOCAL = process.env.TIEULAM_API ?? "https://api.tlap12062026.xyz";
-
-  const now = new Date();
-  const cutoff = new Date(now.getTime() - MATCH_MAX_DURATION_LOCAL * 1000)
-    .toISOString().slice(0, 19);
-  const cutoffEnd = new Date(now.getTime() + 24 * 3600 * 1000)
-    .toISOString().slice(0, 19);
-  const apiUrl = `${TIEULAM_API_LOCAL.replace(/\/$/, "")}/matches/graph`;
-  const headers: Record<string, string> = {
-    "Accept": "application/json, text/plain, */*",
-    "Content-Type": "application/json",
-    "Referer": `${TIEULAM_FRONTEND_LOCAL}/`,
-    "Origin": TIEULAM_FRONTEND_LOCAL,
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-  };
-  const payload = (page: number) => ({
-    queries: [
-      { field: "start_date", type: "gte", value: cutoff },
-      { field: "start_date", type: "lte", value: cutoffEnd },
-    ],
-    query_and: true, limit: 100, page, order_asc: "start_date",
-  });
-  const blvPayload = {
-    queries: [{ field: "blv", type: "is_not_null", value: "" }],
-    query_and: true, limit: 50, page: 1,
-  };
-  try {
-    const [r1, r2, rBlv] = await Promise.all([
-      fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(payload(1)) }),
-      fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(payload(2)) }),
-      fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(blvPayload) }),
-    ]);
-    if (!r1.ok) { res.status(502).json({ error: `Upstream ${r1.status}`, data: [] }); return; }
-    const j1 = (await r1.json()) as { data?: unknown[] };
-    const j2 = r2.ok ? ((await r2.json()) as { data?: unknown[] }) : { data: [] };
-    const jBlv = rBlv.ok ? ((await rBlv.json()) as { data?: unknown[] }) : { data: [] };
-    const seen = new Set<string>();
-    const combined: unknown[] = [];
-    for (const m of [...(jBlv.data ?? []), ...(j1.data ?? []), ...(j2.data ?? [])]) {
-      const key = String((m as Record<string, unknown>).id ?? (m as Record<string, unknown>).stream_key ?? JSON.stringify(m));
-      if (!seen.has(key)) { seen.add(key); combined.push(m); }
-    }
-    combined.sort((a, b) => String((a as Record<string, unknown>).start_date ?? "").localeCompare(String((b as Record<string, unknown>).start_date ?? "")));
-    res.json({ data: combined });
-  } catch (err) {
-    res.status(502).json({ error: String(err), data: [] });
-  }
+  await handleRelay(req, res);
 });
 
 export default router;
