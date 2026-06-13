@@ -347,11 +347,37 @@ def _fetch_tieulam_matches() -> list:
     return resp.json().get("data", [])
 
 
+_TIEULAM_SPORT_VI = {
+    "FOOTBALL":    ("⚽ Bóng đá",   SPORT_LOGOS["football"]),
+    "VOLLEYBALL":  ("🏐 Bóng chuyền", SPORT_LOGOS["volleyball"]),
+    "BASKETBALL":  ("🏀 Bóng rổ",   SPORT_LOGOS["basketball"]),
+    "TENNIS":      ("🎾 Quần vợt",  SPORT_LOGOS["tennis"]),
+    "BADMINTON":   ("🏸 Cầu lông",  SPORT_LOGOS["badminton"]),
+    "BILLIARD":    ("🎱 Bi-a",      SPORT_LOGOS["billiards"]),
+    "SNOOKER":     ("🎱 Snooker",   SPORT_LOGOS["billiards"]),
+}
+
+
 def _tieulam_logo(match: dict) -> str:
     logo = match.get("team_1_logo") or match.get("team_2_logo") or ""
     if logo:
         return logo
-    return _logo_from_text(match.get("desc", "") + " " + match.get("league", ""))
+    desc = (match.get("desc") or "").upper()
+    sport_info = _TIEULAM_SPORT_VI.get(desc)
+    if sport_info:
+        return sport_info[1]
+    return _logo_from_text(desc + " " + match.get("league", ""))
+
+
+def _tieulam_sport_label(match: dict) -> str:
+    """Trả về nhãn môn thể thao tiếng Việt từ field desc."""
+    desc = (match.get("desc") or "").upper()
+    sport_info = _TIEULAM_SPORT_VI.get(desc)
+    if sport_info:
+        return sport_info[0]
+    if desc:
+        return desc.capitalize()
+    return ""
 
 
 def _build_tieulam_lines(matches: list) -> list:
@@ -377,11 +403,12 @@ def _build_tieulam_lines(matches: list) -> list:
             except Exception:
                 pass
 
-        logo = _tieulam_logo(match)
+        logo  = _tieulam_logo(match)
         team1  = match.get("team_1", "Home").strip()
         team2  = match.get("team_2", "Away").strip()
         league = match.get("league", "").strip()
         blv    = (match.get("blv") or "").strip()
+        sport  = _tieulam_sport_label(match)
 
         try:
             dt_start = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
@@ -394,8 +421,10 @@ def _build_tieulam_lines(matches: list) -> list:
             time_str = "--:--"
             date_str = "--/--"
 
-        if blv:
-            display = f"{time_str} - {date_str} | {team1} VS {team2} ({league}) | {blv}"
+        # Ưu tiên BLV nếu có, fallback hiển thị môn thể thao như HQ
+        suffix = blv if blv else sport
+        if suffix:
+            display = f"{time_str} - {date_str} | {team1} VS {team2} ({league}) | {suffix}"
         else:
             display = f"{time_str} - {date_str} | {team1} VS {team2} ({league})"
 
