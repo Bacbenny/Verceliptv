@@ -90,9 +90,9 @@ async function fetchTieuLamData(req: Request, res: Response): Promise<void> {
     order_asc: "start_date",
   });
 
-  // Also fetch BLV matches from up to 48h ahead (VN time)
+  // Fetch BLV matches up to 72h ahead (VN time) — wide window to catch all upcoming commentated matches
   const blvCutoff    = toVNDateStr(now - MATCH_MAX_DURATION * 1000);
-  const blvCutoffEnd = toVNDateStr(now + 48 * 3600 * 1000);
+  const blvCutoffEnd = toVNDateStr(now + 72 * 3600 * 1000);
   const blvPayload = {
     queries: [
       { field: "blv",        type: "is_not_null", value: "" },
@@ -100,7 +100,7 @@ async function fetchTieuLamData(req: Request, res: Response): Promise<void> {
       { field: "start_date", type: "lte",          value: blvCutoffEnd },
     ],
     query_and: true,
-    limit: 50,
+    limit: 100,
     page: 1,
   };
 
