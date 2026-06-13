@@ -41,7 +41,7 @@ KHANDAIA_KNOWN_API_BASE = os.environ.get("KHANDAIA_API",      "https://sv.khanda
 # ─── IPTV (GitHub-hosted static list) ────────────────────────────────────────
 DEKIKI_M3U_URL = os.environ.get(
     "DEKIKI_M3U_URL",
-    "https://raw.githubusercontent.com/blvbatman/iptv/refs/heads/main/iptv.m3u",
+    "https://raw.githubusercontent.com/blvbatman/iptv/main/iptv.m3u",
 )
 
 # ─── EPG — override via env var, otherwise auto-built from /epg.xml endpoint ─
@@ -245,12 +245,13 @@ _TIEULAM_HTTPX_HEADERS = {
 #  TieuLam TV — POST /matches/graph API
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _discover_tieulam_api_base_httpx(client) -> str:
+def _discover_tieulam_api_base(scraper) -> str:
+    """Quét JS bundle của frontend để tìm API base URL hiện tại (dùng cloudscraper)."""
     try:
-        r = client.get(TIEULAM_FRONTEND_URL, timeout=10)
+        r = scraper.get(TIEULAM_FRONTEND_URL, timeout=10)
         js_files = re.findall(r'src="(/assets/[^"]+\.js)"', r.text)
         for js_path in js_files[:3]:
-            js = client.get(
+            js = scraper.get(
                 TIEULAM_FRONTEND_URL.rstrip("/") + js_path, timeout=20
             ).text
             hits = re.findall(r'create\(\{baseURL:"(https://[^"]+)"\}', js)
@@ -264,34 +265,11 @@ def _discover_tieulam_api_base_httpx(client) -> str:
     return TIEULAM_KNOWN_API_BASE
 
 
-def _discover_tieulam_api_base_requests() -> str:
-    """Fallback discovery using requests (HTTP/1.1) when httpx unavailable."""
-    try:
-        r = requests.get(TIEULAM_FRONTEND_URL, timeout=10, headers=_HQ_HEADERS)
-        js_files = re.findall(r'src="(/assets/[^"]+\.js)"', r.text)
-        for js_path in js_files[:3]:
-            js = requests.get(
-                TIEULAM_FRONTEND_URL.rstrip("/") + js_path,
-                timeout=20, headers=_HQ_HEADERS
-            ).text
-            hits = re.findall(r'create\(\{baseURL:"(https://[^"]+)"\}', js)
-            if hits:
-                return hits[0].rstrip("/")
-            hits = re.findall(r'baseURL:"(https://[^"]{10,60})"', js)
-            if hits:
-                return hits[0].rstrip("/")
-    except Exception:
-        pass
-    return TIEULAM_KNOWN_API_BASE
-
-
-def _get_tieulam_api_url(client=None) -> str:
+def _get_tieulam_api_url(scraper=None) -> str:
     now = time.time()
     if now - _tieulam_api_cache["discovered_at"] > API_DISCOVERY_TTL:
-        if client is not None:
-            discovered = _discover_tieulam_api_base_httpx(client)
-        else:
-            discovered = _discover_tieulam_api_base_requests()
+        sc = scraper or cloudscraper.create_scraper()
+        discovered = _discover_tieulam_api_base(sc)
         _tieulam_api_cache["url"] = discovered + "/matches/graph"
         _tieulam_api_cache["discovered_at"] = now
     return _tieulam_api_cache["url"]
@@ -308,7 +286,7 @@ def _fetch_tieulam_via_relay() -> list:
 
 
 def _fetch_tieulam_matches() -> list:
-    """Fetch TieuLam matches — dùng relay nếu TIEULAM_RELAY_URL được set."""
+    """Fetch TieuLam matches — dùng cloudscraper để bypass Cloudflare."""
     if TIEULAM_RELAY_URL:
         try:
             return _fetch_tieulam_via_relay()
@@ -330,33 +308,18 @@ def _fetch_tieulam_matches() -> list:
         "order_asc": "start_date",
     }
 
-    if _HTTPX_H2:
-        # Dùng httpx với HTTP/2 nếu có
-        try:
-            with httpx.Client(http2=True, timeout=15) as client:
-                api_url = _get_tieulam_api_url(client)
-                try:
-                    resp = client.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS)
-                    resp.raise_for_status()
-                except Exception:
-                    _tieulam_api_cache["discovered_at"] = 0
-                    api_url = _get_tieulam_api_url(client)
-                    resp = client.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS)
-                    resp.raise_for_status()
-                return resp.json().get("data", [])
-        except Exception:
-            pass
-
-    # Fallback: dùng requests (HTTP/1.1)
-    api_url = _get_tieulam_api_url()
+    scraper = cloudscraper.create_scraper()
+    api_url = _get_tieulam_api_url(scraper)
     try:
-        resp = requests.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS, timeout=15)
+        resp = scraper.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS, timeout=15)
         resp.raise_for_status()
     except Exception:
+        # Reset cache và thử lại với URL mới
         _tieulam_api_cache["discovered_at"] = 0
-        api_url = _get_tieulam_api_url()
-        resp = requests.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS, timeout=15)
+        api_url = _get_tieulam_api_url(scraper)
+        resp = scraper.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS, timeout=15)
         resp.raise_for_status()
+
     return resp.json().get("data", [])
 
 
