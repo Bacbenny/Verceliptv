@@ -374,12 +374,10 @@ def _tieulam_sport_label(match: dict) -> str:
 def _build_tieulam_lines(matches: list) -> list:
     lines = []
     for match in matches:
+        # Chỉ lấy trận có nguồn phát xác nhận (source_live) — bỏ stream_key chưa active
         stream_url = (match.get("source_live") or "").strip()
         if not stream_url:
-            stream_key = (match.get("stream_key") or "").strip()
-            if not stream_key:
-                continue
-            stream_url = f"{TIEULAM_STREAM_CDN}/live/{stream_key}/playlist.m3u8"
+            continue
 
         start_str = match.get("start_date", "")
         is_live = bool(match.get("is_live"))
@@ -389,10 +387,8 @@ def _build_tieulam_lines(matches: list) -> list:
                 if dt_start.tzinfo is None:
                     dt_start = dt_start.replace(tzinfo=timezone.utc)
                 elapsed = time.time() - dt_start.timestamp()
-                # Bỏ trận chưa bắt đầu (stream_key có sẵn nhưng nguồn chưa live)
                 if elapsed < 0:
                     continue
-                # Bỏ trận đã kết thúc quá 2h
                 if elapsed > MATCH_MAX_AGE_SECONDS:
                     continue
             except Exception:
