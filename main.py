@@ -24,6 +24,8 @@ TIEULAM_FRONTEND_URL  = os.environ.get("TIEULAM_FRONTEND", "https://sv1.tieulam1
 TIEULAM_KNOWN_API_BASE= os.environ.get("TIEULAM_API",      "https://api.tlap12062026.xyz")
 # CDN phát stream — khi source_live=None, build từ stream_key
 TIEULAM_STREAM_CDN    = os.environ.get("TIEULAM_CDN",      "https://live.secufun.xyz")
+# Kênh IPTV tĩnh
+VTV_M3U_URL           = os.environ.get("VTV_M3U_URL", "https://raw.githubusercontent.com/Bacbenny/Verceliptv/refs/heads/main/VTV.m3u")
 # Nếu IP bị chặn (Render/Vercel), dùng relay endpoint trên Replit để lấy data TieuLam
 # Set TIEULAM_RELAY_URL=https://<replit-app>.replit.app/api/tieulam-relay
 # Set RELAY_SECRET=<shared-secret> (tuỳ chọn, để bảo vệ endpoint)
@@ -78,10 +80,11 @@ _playlist_cache = {
     "tieulam":  _empty_entry(),
     "hoiquan":  _empty_entry(),
     "khandaia": _empty_entry(),
+    "vtv":      _empty_entry(),
 }
 
 _last_counts = {
-    "tieulam": 0, "hoiquan": 0, "khandaia": 0,
+    "tieulam": 0, "hoiquan": 0, "khandaia": 0, "vtv": 0,
     "refreshed_at": 0, "last_error": "",
 }
 
@@ -439,6 +442,35 @@ def _build_tieulam_lines(matches: list) -> list:
     return lines
 
 
+
+def _build_lines_from_fixtures(fixtures: list) -> list:
+    """Chuyển fixtures (đã xử lý từ relay) thành M3U lines."""
+    lines = []
+    for f in fixtures:
+        stream_url = (f.get("streamUrl") or "").strip()
+        if not stream_url:
+            continue
+        logo  = f.get("sportLogo", "")
+        group = f.get("groupTitle", "TieuLam TV")
+        title = f.get("title", "")
+        lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="{group}",{title}')
+        lines.append(stream_url)
+    return lines
+
+
+def _fetch_vtv_lines() -> list:
+    """Fetch kênh VTV tĩnh từ GitHub M3U."""
+    resp = requests.get(VTV_M3U_URL, timeout=10)
+    resp.raise_for_status()
+    result = []
+    for line in resp.text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#EXTM3U"):
+            continue
+        result.append(stripped)
+    return result
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 #  Hội Quán TV
 # ══════════════════════════════════════════════════════════════════════════════
@@ -644,6 +676,21 @@ def _refresh_all_playlists():
     errors = []
 
     def fetch_tieulam():
+        if TIEULAM_RELAY_URL:
+            try:
+                hdrs = {}
+                if TIEULAM_RELAY_SECRET:
+                    hdrs["X-Relay-Token"] = TIEULAM_RELAY_SECRET
+                r = requests.get(TIEULAM_RELAY_URL, headers=hdrs, timeout=15)
+                r.raise_for_status()
+                rdata = r.json()
+                fixtures = rdata.get("fixtures", [])
+                if fixtures:
+                    return _build_lines_from_fixtures(fixtures)
+                return _build_tieulam_lines(rdata.get("data", []))
+            except Exception as _e:
+                import sys
+                print(f"⚠️ Relay failed: {_e}", file=sys.stderr)
         return _build_tieulam_lines(_fetch_tieulam_matches())
 
     def fetch_hq():
@@ -652,11 +699,18 @@ def _refresh_all_playlists():
     def fetch_kda():
         return _build_fixture_lines(_fetch_khandaia_fixtures(), "Khán Đài A")
 
-    with ThreadPoolExecutor(max_workers=3) as ex:
+    def fetch_vtv():
+        try:
+            return _fetch_vtv_lines()
+        except Exception:
+            return []
+
+    with ThreadPoolExecutor(max_workers=4) as ex:
         futures = {
             ex.submit(fetch_tieulam): "tieulam",
             ex.submit(fetch_hq):      "hoiquan",
             ex.submit(fetch_kda):     "khandaia",
+            ex.submit(fetch_vtv):     "vtv",
         }
         results = {}
         for fut in as_completed(futures):
@@ -682,8 +736,9 @@ def _refresh_all_playlists():
     _store("tieulam",  epg_header + "\n" + "\n".join(tieulam_lines))
     _store("hoiquan",  epg_header + "\n" + "\n".join(hq_lines))
     _store("khandaia", epg_header + "\n" + "\n".join(kda_lines))
+    _store("vtv",      epg_header + "\n" + "\n".join(vtv_lines))
 
-    all_lines = tieulam_lines + hq_lines + kda_lines
+    all_lines = tieulam_lines + hq_lines + kda_lines + vtv_lines
     combined_text = epg_header + "\n" + "\n".join(all_lines)
     if err_str:
         combined_text += f"\n# Errors: {err_str}"
@@ -693,6 +748,7 @@ def _refresh_all_playlists():
         "tieulam":      count(tieulam_lines),
         "hoiquan":      count(hq_lines),
         "khandaia":     count(kda_lines),
+        "vtv":          count(vtv_lines),
         "refreshed_at": time.time(),
         "last_error":   err_str,
     })
@@ -767,6 +823,11 @@ def khandaia_m3u():
     return _m3u_response("khandaia", "khandaia.m3u")
 
 
+@app.route("/vtv.m3u")
+def vtv_m3u():
+    return _m3u_response("vtv", "vtv.m3u")
+
+
 @app.route("/epg.xml")
 def epg_xml():
     entry = _get_or_build_epg()
@@ -825,7 +886,8 @@ def index():
     tieulam_count = _last_counts.get("tieulam", 0)
     hq_count      = _last_counts.get("hoiquan", 0)
     kda_count     = _last_counts.get("khandaia", 0)
-    total         = tieulam_count + hq_count + kda_count
+    vtv_count     = _last_counts.get("vtv", 0)
+    total         = tieulam_count + hq_count + kda_count + vtv_count
 
     epg_link = _epg_url()
     return (
@@ -835,6 +897,7 @@ def index():
         "<li><a href='/tieulam.m3u'>/tieulam.m3u</a> — TieuLam TV only</li>"
         "<li><a href='/hoiquan.m3u'>/hoiquan.m3u</a> — Hội Quán TV only</li>"
         "<li><a href='/khandaia.m3u'>/khandaia.m3u</a> — Khán Đài A only</li>"
+        "<li><a href='/vtv.m3u'>/vtv.m3u</a> — Kênh VTV tĩnh (VTV1-10, Vietnam Today)</li>"
         "</ul>"
         "<h3>📡 EPG</h3><ul>"
         f"<li><a href='/epg.xml'>/epg.xml</a> — XMLTV tự sinh từ danh sách kênh (cache 1h)</li>"
@@ -850,6 +913,7 @@ def index():
         f"&nbsp;|&nbsp; <code>{_hoiquan_api_cache['url']}</code></p>"
         f"<p>🟢 Khán Đài A: <strong>{kda_count} kênh</strong>"
         f"&nbsp;|&nbsp; <code>{_khandaia_api_cache['url']}</code></p>"
+        f"<p>📡 VTV (tĩnh): <strong>{vtv_count} kênh</strong></p>"
         f"{err_html}"
         "<h3>⚙️ Tối ưu băng thông</h3>"
         "<ul>"
