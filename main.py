@@ -27,7 +27,7 @@ TIEULAM_STREAM_CDN    = os.environ.get("TIEULAM_CDN",      "https://live.secufun
 # Nếu IP bị chặn (Render/Vercel), dùng relay endpoint trên Replit để lấy data TieuLam
 # Set TIEULAM_RELAY_URL=https://<replit-app>.replit.app/api/tieulam-relay
 # Set RELAY_SECRET=<shared-secret> (tuỳ chọn, để bảo vệ endpoint)
-_DEFAULT_RELAY = "https://28e46fcb-65b5-49ef-beae-ea8e7ec9c655-00-2bju9pr3171vc.pike.replit.dev/api/tieulam-relay-public"
+_DEFAULT_RELAY = "https://a9ad1c81-aa0e-4108-86a8-5b05fa562d96-00-1rp01pegi8sso.pike.replit.dev/api/tieulam-relay-public"
 TIEULAM_RELAY_URL    = os.environ.get("TIEULAM_RELAY_URL", _DEFAULT_RELAY)
 TIEULAM_RELAY_SECRET = os.environ.get("RELAY_SECRET", "")
 
