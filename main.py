@@ -401,7 +401,7 @@ def _build_tieulam_lines(matches: list) -> list:
                 elapsed = time.time() - dt_start.timestamp()
                 if blv:
                     # Trận BLV: cho phép tối đa 12h trước giờ đấu (hiện lịch World Cup ngày mai)
-                    if elapsed < -43200:
+                    if elapsed < -259200:  # 72h trước (World Cup)
                         continue
                 else:
                     # Trận ẩn danh: phải đã bắt đầu mới có stream
@@ -450,7 +450,7 @@ def _build_lines_from_fixtures(fixtures: list) -> list:
         stream_url = (f.get("streamUrl") or "").strip()
         if not stream_url:
             continue
-        logo  = f.get("sportLogo", "")
+        logo  = f.get("logo") or f.get("sportLogo", "")
         group = f.get("groupTitle", "TieuLam TV")
         title = f.get("title", "")
         lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="{group}",{title}')
