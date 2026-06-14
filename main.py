@@ -344,7 +344,10 @@ def _tieulam_sport_label(match: dict) -> str:
     return ""
 
 def _build_tieulam_lines(matches: list) -> list:
-    lines = []
+    # Chia danh sách thành 2 mảng: 1 mảng có BLV, 1 mảng không có BLV (để sắp xếp BLV lên đầu)
+    lines_blv = []
+    lines_normal = []
+    
     for match in matches:
         source_live = (match.get("source_live") or "").strip()
         blv         = (match.get("blv") or "").strip()
@@ -352,8 +355,9 @@ def _build_tieulam_lines(matches: list) -> list:
 
         if source_live:
             stream_url = source_live
-        elif blv and stream_key:
-            stream_url = f"{TIEULAM_STREAM_CDN}/live/{stream_key}/playlist.m3u8"
+        elif blv:
+            s_key = stream_key if stream_key else match.get("id", "upcoming")
+            stream_url = f"{TIEULAM_STREAM_CDN}/live/{s_key}/playlist.m3u8"
         else:
             continue
 
@@ -380,7 +384,6 @@ def _build_tieulam_lines(matches: list) -> list:
         team1  = match.get("team_1", "Home").strip()
         team2  = match.get("team_2", "Away").strip()
         league = match.get("league", "").strip()
-        blv    = (match.get("blv") or "").strip()
         sport  = _tieulam_sport_label(match)
 
         try:
@@ -400,9 +403,16 @@ def _build_tieulam_lines(matches: list) -> list:
         else:
             display = f"{time_str} - {date_str} | {team1} VS {team2} ({league})"
 
-        lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="TieuLam TV",{display}')
-        lines.append(stream_url)
-    return lines
+        extinf = f'#EXTINF:-1 tvg-logo="{logo}" group-title="TieuLam TV",{display}'
+        
+        # Đưa vào nhóm tương ứng
+        if blv:
+            lines_blv.extend([extinf, stream_url])
+        else:
+            lines_normal.extend([extinf, stream_url])
+            
+    # Nối 2 danh sách: Trận có BLV sẽ nằm trên cùng, tiếp theo là trận thường
+    return lines_blv + lines_normal
 
 def _build_lines_from_fixtures(fixtures: list) -> list:
     lines = []
