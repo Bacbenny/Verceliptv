@@ -22,4 +22,22 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+  startKeepAlive(port);
 });
+
+function startKeepAlive(serverPort: number) {
+  const INTERVAL_MS = 4 * 60 * 1000;
+
+  setInterval(async () => {
+    try {
+      await fetch(`http://localhost:${serverPort}/api/healthz`, {
+        signal: AbortSignal.timeout(10_000),
+      });
+      logger.info("keep-alive ping ok");
+    } catch (err) {
+      logger.warn({ err }, "keep-alive ping failed");
+    }
+  }, INTERVAL_MS);
+
+  logger.info({ intervalMinutes: 4 }, "keep-alive started");
+}
