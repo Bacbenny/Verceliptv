@@ -223,6 +223,7 @@ _HQ_HEADERS = {
 }
 
 _TIEULAM_HTTPX_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "application/json, text/plain, */*",
     "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
     "Content-Type": "application/json",
@@ -307,7 +308,7 @@ def _fetch_tieulam_matches() -> list:
             api_url = _get_tieulam_api_url()
             resp = curl_requests.post(
                 api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS,
-                timeout=15, impersonate="chrome110",
+                timeout=15, impersonate="chrome120",
             )
             resp.raise_for_status()
             return resp.json().get("data", [])
@@ -318,7 +319,7 @@ def _fetch_tieulam_matches() -> list:
                 api_url = _get_tieulam_api_url()
                 resp = curl_requests.post(
                     api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS,
-                    timeout=15, impersonate="chrome110",
+                    timeout=15, impersonate="chrome120",
                 )
                 resp.raise_for_status()
                 return resp.json().get("data", [])
