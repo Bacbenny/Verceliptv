@@ -724,6 +724,7 @@ def _refresh_all_playlists():
     tieulam_lines = results.get("tieulam",  [])
     hq_lines      = results.get("hoiquan",  [])
     kda_lines     = results.get("khandaia", [])
+    vtv_lines     = results.get("vtv",      [])
 
     err_str = "; ".join(errors)
 
