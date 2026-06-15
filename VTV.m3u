@@ -49,3 +49,29 @@ https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_Vie_DRAMAS_HD_du_phong
 https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_VFamily_HD_du_phong
 #EXTINF:-1 tvg-id="onkids" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab21%20-%20ON%20Kids%20HD.png",ON Kids HD
 https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_Kids_HD_du_phong
+#EXTINF:-1 tvg-id="htv1" group-title="HTV / HTVC" tvg-logo="https://vnepg.site/logos/32.png",HTV1
+https://live.fptplay53.net/epzhd1/htv1_hls.smil/chunklist_b2500000.m3u8
+#EXTINF:-1 tvg-id="htv2hd" group-title="HTV / HTVC" tvg-logo="https://vnepg.site/logos/33.png",HTV2
+https://live.fptplay53.net/epzhd1/htv2hd_vhls.smil/chunklist_b5000000.m3u8
+#EXTINF:-1 tvg-id="htv3" group-title="HTV / HTVC" tvg-logo="https://vnepg.site/logos/34.png",HTV3
+https://live.fptplay53.net/epzhd1/htv3_hls.smil/chunklist_b2500000.m3u8
+#EXTINF:-1 tvg-id="htvkey" group-title="HTV / HTVC" tvg-logo="https://vnepg.site/logos/35.png",HTV4
+https://live.fptplay53.net/epzhd1/htv4_hls.smil/chunklist_b2500000.m3u8
+#EXTINF:-1 tvg-id="htv5" group-title="HTV / HTVC" tvg-logo="https://vnepg.site/logos/85.png",HTV5
+https://live.fptplay53.net/fnxsd1/btv9_hls.smil/chunklist_b2500000.m3u8
+#EXTINF:-1 tvg-id="htv7hd" group-title="HTV / HTVC" tvg-logo="https://vnepg.site/logos/36.png",HTV7
+https://live.fptplay53.net/epzch2/htv7hd_abr.smil/chunklist_b4200000.m3u8
+#EXTINF:-1 tvg-id="htv9hd" group-title="HTV / HTVC" tvg-logo="https://vnepg.site/logos/37.png",HTV9
+https://live.fptplay53.net/epzhd1/htv9hd_vhls.smil/chunklist_b5000000.m3u8
+#EXTINF:-1 tvg-id="htvthethaohd" group-title="HTV / HTVC" tvg-logo="https://vnepg.site/logos/38.png",HTV THỂ THAO
+https://live.fptplay53.net/epzhd1/htvcthethao_vhls.smil/chunklist_b5000000.m3u8
+#EXTINF:-1 tvg-id="htvcthuanviet" group-title="HTV / HTVC" tvg-logo="https://vnepg.site/logos/39.png",HTVC THUẦN VIỆT HD
+https://live.fptplay53.net/epzhd1/htvcthuanviethd_vhls.smil/chunklist_b5000000.m3u8
+#EXTINF:-1 tvg-id="htvcdulichhd" group-title="HTV / HTVC" tvg-logo="https://vnepg.site/logos/44.png",HTVC DU LỊCH & CUỘC SỐNG HD
+https://live.fptplay53.net/epzhd1/htvcdulich_vhls.smil/chunklist_b5000000.m3u8
+#EXTINF:-1 tvg-id="htvcgiadinhhd" group-title="HTV / HTVC" tvg-logo="https://vnepg.site/logos/40.png",HTVC GIA ĐÌNH HD
+https://live.fptplay53.net/epzhd1/htvcgiadinh_vhls.smil/chunklist_b5000000.m3u8
+#EXTINF:-1 tvg-id="htvcphunuhd" group-title="HTV / HTVC" tvg-logo="https://vnepg.site/logos/41.png",HTVC PHỤ NỮ HD
+https://live.fptplay53.net/epzhd1/htvcphunu_vhls.smil/chunklist_b5000000.m3u8
+#EXTINF:-1 tvg-id="htvcphimhd" group-title="HTV / HTVC" tvg-logo="https://vnepg.site/logos/42.png",HTVC PHIM HD
+https://live.fptplay53.net/epzhd1/htvcmovieshd_vhls.smil/chunklist_b5000000.m3u8
