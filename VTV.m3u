@@ -21,3 +21,31 @@ https://HaNoiIPTV.short.gy/HaNoiIPTV-VTV9_HD
 https://HaNoiIPTV.short.gy/HaNoiIPTV-VTV_Can_Tho
 #EXTINF:-1 tvg-id="vietnamtoday" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/Vietnam%20Today%20HD.png" group-title="VTV" tvg-link="https://livesct.vtvprime.vn/mean/VIETNAMTODAY/manifest.mpd"   catchup="append" catchup-source="?playseek=${(b)yyyyMMddHHmmss}-${(e)yyyyMMddHHmmss}",VIETNAM TODAY HD
 https://HaNoiIPTV.short.gy/HaNoiIPTV-Vietnam_Today_HD
+#EXTINF:-1 tvg-id="onviegiaitri" tvg-link="http://4.3.2.1:0000/rtp/232.84.3.78:11584" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab1%20-%20ON%20Vie%20GI%E1%BA%A2I%20TR%C3%8D%20HD.png",ON Vie GIẢI TRÍ HD
+https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_Vie_GIAI_TRI_HD_du_phong
+#EXTINF:-1 tvg-id="onphimviet" tvg-link="http://4.3.2.1:0000/rtp/232.84.3.77:11590" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab2%20-%20ON%20Phim%20Vi%E1%BB%87t%20HD.png",ON Phim Việt HD
+https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_Phim_Viet_HD
+#EXTINF:-1 tvg-id="onmovies" tvg-link="http://4.3.2.1:0000/rtp/232.84.2.190:10924" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab4%20-%20ON%20Movies%20HD.png",ON Movies HD
+https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_Movies_HD_du_phong
+#EXTINF:-1 tvg-id="onechannel" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab5%20-%20ON%20E%20Channel%20HD.png",ON E Channel HD
+https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_E_Channel_HD_du_phong
+#EXTINF:-1 tvg-id="oncine" tvg-link="http://4.3.2.1:0000/rtp/232.84.3.72:11620 và https://tthd.site/360/176/index.m3u8" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab10%20-%20ON%20Cine%20HD.png",ON Cine HD
+https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_Cine_HD_du_phong
+#EXTINF:-1 tvg-id="onbibi" tvg-link="http://4.3.2.1:0000/rtp/232.84.3.217:11224" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab8%20-%20ON%20BiBi%20HD.png",ON BiBi HD
+https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_BiBi_HD_du_phong
+#EXTINF:-1 tvg-id="oninfotv" tvg-link="http://4.3.2.1:0000/rtp/232.84.3.73:11614 và https://tthd.site/360/189/index.m3u8" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab9%20-%20ON%20Info%20TV%20HD.png",ON Info TV HD
+https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_Info_TV_HD_du_phong
+#EXTINF:-1 tvg-id="ono2tv" tvg-link="http://4.3.2.1:0000/rtp/232.84.3.74:11608" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab7%20-%20ON%20O2TV%20HD.png",ON O2TV HD
+https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_O2TV_HD_du_phong
+#EXTINF:-1 tvg-id="onstyletv" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab12%20-%20ON%20Style%20TV%20HD.png",ON Style TV HD
+https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_Style_TV_HD_du_phong
+#EXTINF:-1 tvg-id="onmusic" tvg-link="http://4.3.2.1:0000/rtp/232.84.3.70:11632" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab15%20-%20ON%20Music%20HD.png",ON Music HD
+https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_Music_HD_du_phong
+#EXTINF:-1 tvg-id="ontrending" tvg-link="http://4.3.2.1:0000/rtp/232.84.3.69:11638" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab17%20-%20ON%20Trending%20TV.png",ON Trending TV
+https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_Trending_TV_du_phong
+#EXTINF:-1 tvg-id="onviedramas" tvg-link="http://4.3.2.1:0000/rtp/232.84.3.218:11230" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab19%20-%20ON%20Vie%20DRAMAS%20HD.png",ON Vie DRAMAS HD
+https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_Vie_DRAMAS_HD_du_phong
+#EXTINF:-1 tvg-id="onvfamily" tvg-link="http://4.3.2.1:0000/rtp/232.84.3.68:11644" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab20%20-%20ON%20VFamily.png",ON VFamily
+https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_VFamily_HD_du_phong
+#EXTINF:-1 tvg-id="onkids" group-title="VTVcab" tvg-logo="https://raw.githubusercontent.com/HaNoiIPTV/HaNoiIPTV.m3u/master/VTVCab21%20-%20ON%20Kids%20HD.png",ON Kids HD
+https://HaNoiIPTV.short.gy/HaNoiIPTV-ON_Kids_HD_du_phong
