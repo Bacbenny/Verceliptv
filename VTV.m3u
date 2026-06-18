@@ -485,6 +485,8 @@ http://ua.online24.pm/play/1102/350B326FB34F4B8/video.m3u8
 http://ua.online24.pm/play/1103/350B326FB34F4B8/video.m3u8
 #EXTINF:-1 tvg-id="" group-title="Thể thao quốc tế" tvg-logo="https://ip-tv.dev/images/ico/bein-sport-4.png",BeIN Sport 4 HD Serbia
 http://ua.online24.pm/play/1104/350B326FB34F4B8/video.m3u8
+#EXTINF:-1 tvg-id="" tvg-logo="https://schedulesdirect-api20141201-logos.s3.dualstack.us-east-1.amazonaws.com/stationLogos/s131810_dark_360w_270h.png" group-title="Thể thao quốc tế",DAZN
+https://1nyaler.streamhostingcdn.top/stream/94/index.m3u8
 #EXTINF:-1 tvg-name="DAZN 1" tvg-logo="http://51.158.145.100/picons/logos/PPV/DAZN.png" group-title="Thể thao quốc tế",DAZN 1
 http://line.main4k.com:80/8d1d003784/9fdbb7b821f5/1918192
 #EXTINF:-1 tvg-name="DAZN 2" tvg-logo="http://51.158.145.100/picons/logos/PPV/DAZN.png" group-title="Thể thao quốc tế",DAZN 2
