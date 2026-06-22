@@ -589,17 +589,26 @@ def _fetch_khandaia_fixtures() -> list:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _fetch_vongcam_matches() -> list:
-    """Fetch matches from Vòng Cấm TV API."""
+    """Fetch matches from Vòng Cấm TV API.
+
+    Response: { code, message, data: [...] }
+    Each item has commentator.streamSourceHd / .streamSourceSd for stream URLs.
+    """
     headers = {
         "Authorization": f"Bearer {VONGCAM_API_TOKEN}",
         "Content-Type": "application/json",
         "Accept": "application/json",
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        ),
+        "Referer": VONGCAM_FRONTEND_URL,
+        "Origin": VONGCAM_FRONTEND_URL.rstrip("/"),
     }
     try:
         resp = requests.get(VONGCAM_API_URL, headers=headers, timeout=15)
         resp.raise_for_status()
         data = resp.json()
-        # Handle different response formats
         if isinstance(data, list):
             return data
         if isinstance(data, dict):
@@ -612,47 +621,84 @@ def _fetch_vongcam_matches() -> list:
 
 
 def _build_vongcam_lines(matches: list) -> list:
-    """Convert Vòng Cấm matches to M3U lines."""
+    """Convert Vòng Cấm matches to M3U lines.
+
+    API response shape (sv.bugiotv.xyz/internal/api/matches):
+      - commentator.streamSourceHd / .streamSourceSd  — actual HLS URL
+      - homeClub.name / awayClub.name                 — team names
+      - tournamentName                                 — league/tournament
+      - homeClub.logoUrl / featuredImageUrl            — logo
+      - isLive                                         — live flag
+      - commentator.nickname                           — BLV name
+      - startTime                                      — ISO datetime (local, no tz suffix)
+    """
     lines = []
+    now_ts = time.time()
     for match in matches:
-        # Try different possible field names for stream URL
+        commentator = match.get("commentator") or {}
+
+        # Stream URL: prefer HD, fall back to SD
         stream_url = (
-            match.get("stream_url") or
-            match.get("streamUrl") or
-            match.get("url") or
-            match.get("link") or
-            match.get("sourceUrl") or
+            commentator.get("streamSourceHd") or
+            commentator.get("streamSourceSd") or
             ""
         ).strip()
 
         if not stream_url:
             continue
 
-        # Get match info
-        title = match.get("title") or match.get("name") or ""
-        home = match.get("home") or match.get("homeTeam", {}).get("name", "") or match.get("team_1", "")
-        away = match.get("away") or match.get("awayTeam", {}).get("name", "") or match.get("team_2", "")
-        league = match.get("league") or match.get("tournament", {}).get("name", "") if isinstance(match.get("tournament"), dict) else match.get("tournament", "")
-        thumbnail = match.get("thumbnail") or match.get("logo") or match.get("image") or ""
+        # Time filter: skip matches older than MATCH_MAX_AGE_SECONDS
+        start_time_str = match.get("startTime", "")
+        if start_time_str and not match.get("isLive"):
+            try:
+                # API returns local time without timezone ("2026-06-23T04:00:00")
+                # Treat as UTC for comparison — close enough for a ±few-hour window
+                dt = datetime.fromisoformat(start_time_str.replace("Z", "+00:00"))
+                if dt.tzinfo is None:
+                    from datetime import timezone as _tz
+                    dt = dt.replace(tzinfo=_tz.utc)
+                elapsed = now_ts - dt.timestamp()
+                if elapsed > MATCH_MAX_AGE_SECONDS:
+                    continue
+            except Exception:
+                pass
+
+        # Team / title fields
+        home_club = match.get("homeClub") or {}
+        away_club = match.get("awayClub") or {}
+        home  = home_club.get("name") or match.get("home") or match.get("team_1", "")
+        away  = away_club.get("name") or match.get("away") or match.get("team_2", "")
+        title = match.get("title") or ""
+        league = match.get("tournamentName") or ""
+
+        # BLV (commentator) nickname
+        blv = commentator.get("nickname") or commentator.get("fullName") or ""
 
         # Build display name
         if home and away:
-            display = f"{home} VS {away}"
+            display = f"{home} vs {away}"
             if league:
-                display += f" ({league})"
+                display += f" | {league}"
+            if blv:
+                display += f" [{blv}]"
         elif title:
             display = title
+            if blv:
+                display += f" [{blv}]"
         else:
             continue
 
-        # Add live indicator
-        is_live = match.get("is_live") or match.get("isLive") or match.get("live", False)
-        if is_live:
-            display = f"[LIVE] {display}"
+        # Live indicator
+        if match.get("isLive"):
+            display = f"🔴 {display}"
 
-        # Use sport logo as fallback
-        if not thumbnail:
-            thumbnail = _logo_from_text(f"{home} {away} {league}")
+        # Logo: home club → featured image → fallback
+        thumbnail = (
+            home_club.get("logoUrl") or
+            match.get("featuredImageUrl") or
+            match.get("thumbnail") or
+            _logo_from_text(f"{home} {away} {league}")
+        )
 
         lines.append(f'#EXTINF:-1 tvg-logo="{thumbnail}" group-title="Vòng Cấm TV",{display}')
         lines.append(stream_url)
