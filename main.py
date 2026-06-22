@@ -20,16 +20,17 @@ except ImportError:
 app = Flask(__name__)
 
 # ─── TieuLam TV config ────────────────────────────────────────────────────────
-TIEULAM_FRONTEND_URL  = os.environ.get("TIEULAM_FRONTEND", "https://sv1.tieulam1.live")
-TIEULAM_KNOWN_API_BASE= os.environ.get("TIEULAM_API",      "https://api.tlap12062026.xyz")
+TIEULAM_FRONTEND_URL  = os.environ.get("TIEULAM_FRONTEND", "https://sv2.tieulam.info")
+TIEULAM_KNOWN_API_BASE= os.environ.get("TIEULAM_API",      "https://api.tlap17062026.com")
 # CDN phát stream — khi source_live=None, build từ stream_key
-TIEULAM_STREAM_CDN    = os.environ.get("TIEULAM_CDN",      "https://live.secufun.xyz")
+TIEULAM_STREAM_CDN    = os.environ.get("TIEULAM_CDN",      "https://live.lilive2.eu.cc")
 # Kênh IPTV tĩnh
 VTV_M3U_URL           = os.environ.get("VTV_M3U_URL", "https://raw.githubusercontent.com/Bacbenny/Verceliptv/refs/heads/main/VTV.m3u")
-# Nếu IP bị chặn (Render/Vercel), dùng relay endpoint trên Replit để lấy data TieuLam
-# Set TIEULAM_RELAY_URL=https://<replit-app>.replit.app/api/tieulam-relay
-# Set RELAY_SECRET=<shared-secret> (tuỳ chọn, để bảo vệ endpoint)
-_DEFAULT_RELAY = "https://a9ad1c81-aa0e-4108-86a8-5b05fa562d96-00-1rp01pegi8sso.pike.replit.dev/api/tieulam-relay-public"
+# Nếu IP bị chặn (Render/Vercel), dùng relay worker để lấy data TieuLam
+# dekki worker:      https://dekki.bacbenny95.workers.dev/
+# tieulam-relay:     https://tieulam-relay.bacbenny95.workers.dev/
+# Set TIEULAM_RELAY_URL=<worker-url>  và  RELAY_SECRET=<shared-secret>
+_DEFAULT_RELAY = "https://tieulam-relay.bacbenny95.workers.dev/"
 TIEULAM_RELAY_URL    = os.environ.get("TIEULAM_RELAY_URL", _DEFAULT_RELAY)
 TIEULAM_RELAY_SECRET = os.environ.get("RELAY_SECRET", "")
 
@@ -621,86 +622,90 @@ def _fetch_vongcam_matches() -> list:
 
 
 def _build_vongcam_lines(matches: list) -> list:
-    """Convert Vòng Cấm matches to M3U lines.
+    """Convert Vòng Cấm matches to M3U lines — format giống Hội Quán TV.
 
     API response shape (sv.bugiotv.xyz/internal/api/matches):
-      - commentator.streamSourceHd / .streamSourceSd  — actual HLS URL
-      - homeClub.name / awayClub.name                 — team names
-      - tournamentName                                 — league/tournament
-      - homeClub.logoUrl / featuredImageUrl            — logo
-      - isLive                                         — live flag
-      - commentator.nickname                           — BLV name
-      - startTime                                      — ISO datetime (local, no tz suffix)
+      - commentator.streamSourceHd / .streamSourceSd  — HLS URL (HD ưu tiên)
+      - homeClub.name / awayClub.name                 — tên đội
+      - tournamentName                                 — tên giải
+      - isLive                                         — đang live
+      - commentator.nickname                           — tên BLV
+      - startTime                                      — giờ VN local (không có tz)
     """
+    try:
+        matches = sorted(matches, key=lambda m: m.get("startTime") or "")
+    except Exception:
+        pass
+
     lines = []
     now_ts = time.time()
     for match in matches:
         commentator = match.get("commentator") or {}
 
-        # Stream URL: prefer HD, fall back to SD
+        # Chất lượng cao nhất: HD trước, fallback SD
         stream_url = (
             commentator.get("streamSourceHd") or
             commentator.get("streamSourceSd") or
             ""
         ).strip()
-
         if not stream_url:
             continue
 
-        # Time filter: skip matches older than MATCH_MAX_AGE_SECONDS
+        # Lọc theo thời gian (bỏ qua trận đã kết thúc > MATCH_MAX_AGE_SECONDS)
         start_time_str = match.get("startTime", "")
-        if start_time_str and not match.get("isLive"):
+        is_live = bool(match.get("isLive"))
+        if start_time_str and not is_live:
             try:
-                # API returns local time without timezone ("2026-06-23T04:00:00")
-                # Treat as UTC for comparison — close enough for a ±few-hour window
-                dt = datetime.fromisoformat(start_time_str.replace("Z", "+00:00"))
-                if dt.tzinfo is None:
-                    from datetime import timezone as _tz
-                    dt = dt.replace(tzinfo=_tz.utc)
+                # startTime là giờ VN local ("2026-06-23T04:00:00"), không có tz
+                dt = datetime.fromisoformat(start_time_str)
+                dt = dt.replace(tzinfo=VN_TZ)
                 elapsed = now_ts - dt.timestamp()
                 if elapsed > MATCH_MAX_AGE_SECONDS:
+                    continue
+                # Chưa bắt đầu quá 72h: bỏ qua
+                if elapsed < -259200:
                     continue
             except Exception:
                 pass
 
-        # Team / title fields
+        # Thông tin trận
         home_club = match.get("homeClub") or {}
         away_club = match.get("awayClub") or {}
-        home  = home_club.get("name") or match.get("home") or match.get("team_1", "")
-        away  = away_club.get("name") or match.get("away") or match.get("team_2", "")
-        title = match.get("title") or ""
+        home   = home_club.get("name") or ""
+        away   = away_club.get("name") or ""
+        title  = match.get("title") or ""
         league = match.get("tournamentName") or ""
+        blv    = (commentator.get("nickname") or commentator.get("fullName") or "").strip().upper()
 
-        # BLV (commentator) nickname
-        blv = commentator.get("nickname") or commentator.get("fullName") or ""
+        # Format giờ VN — giống Hội Quán TV
+        if start_time_str:
+            try:
+                dt = datetime.fromisoformat(start_time_str)
+                dt = dt.replace(tzinfo=VN_TZ)
+                time_str = dt.strftime("%H:%M")
+                date_str = dt.strftime("%d/%m")
+            except Exception:
+                time_str = "--:--"
+                date_str = "--/--"
+        else:
+            time_str = "--:--"
+            date_str = "--/--"
 
-        # Build display name
+        # Tên kênh — đúng format Hội Quán: "HH:MM - DD/MM | Home VS Away (League) | BLV"
         if home and away:
-            display = f"{home} vs {away}"
-            if league:
-                display += f" | {league}"
-            if blv:
-                display += f" [{blv}]"
+            display = f"{time_str} - {date_str} | {home} VS {away} ({league})"
         elif title:
-            display = title
-            if blv:
-                display += f" [{blv}]"
+            display = f"{time_str} - {date_str} | {title}"
         else:
             continue
 
-        # Live indicator
-        if match.get("isLive"):
-            display = f"🔴 {display}"
+        if blv:
+            display += f" | {blv}"
 
-        # Logo: home club → featured image → fallback
-        thumbnail = (
-            home_club.get("logoUrl") or
-            match.get("featuredImageUrl") or
-            match.get("thumbnail") or
-            _logo_from_text(f"{home} {away} {league}")
-        )
+        # Logo: sport emoji dựa trên tên giải (giống Hội Quán — nhất quán hơn team logo)
+        logo = _logo_from_text(f"{home} {away} {league}")
 
-        lines.append(f'#EXTINF:-1 tvg-logo="{thumbnail}" group-title="Vòng Cấm TV",{display}')
+        lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="Vòng Cấm TV",{display}')
         lines.append(stream_url)
 
     return lines
@@ -813,10 +818,16 @@ def _refresh_all_playlists():
                 r = requests.get(TIEULAM_RELAY_URL, headers=hdrs, timeout=15)
                 r.raise_for_status()
                 rdata = r.json()
+                # Relay trả {"error":...} khi unauthorized — fall through
+                if "error" in rdata:
+                    raise ValueError(f"Relay error: {rdata['error']}")
                 fixtures = rdata.get("fixtures", [])
                 if fixtures:
                     return _build_lines_from_fixtures(fixtures)
-                return _build_tieulam_lines(rdata.get("data", []))
+                data = rdata.get("data", [])
+                if data:
+                    return _build_tieulam_lines(data)
+                raise ValueError("Relay returned empty data")
             except Exception as _e:
                 import sys
                 print(f"⚠️ Relay failed: {_e}", file=sys.stderr)
