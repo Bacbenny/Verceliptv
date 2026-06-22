@@ -41,6 +41,11 @@ HOIQUAN_KNOWN_API_BASE= os.environ.get("HOIQUAN_API",      "https://sv.hoiquantv
 KHANDAIA_FRONTEND_URL   = os.environ.get("KHANDAIA_FRONTEND", "https://tructiep.khandaia.link")
 KHANDAIA_KNOWN_API_BASE = os.environ.get("KHANDAIA_API",      "https://sv.khandai-a.xyz/api/v1/external")
 
+# ─── Vòng Cấm TV config ──────────────────────────────────────────────────────
+VONGCAM_FRONTEND_URL  = os.environ.get("VONGCAM_FRONTEND", "https://sv2.vongcam3.live/")
+VONGCAM_API_URL       = os.environ.get("VONGCAM_API",      "https://sv.bugiotv.xyz/internal/api/matches")
+VONGCAM_API_TOKEN     = os.environ.get("VONGCAM_TOKEN",    "AB321C")
+
 # ─── EPG — override via env var, otherwise auto-built from /epg.xml endpoint ─
 EPG_URL_OVERRIDE = os.environ.get("EPG_URL", "")
 
@@ -69,6 +74,7 @@ SPORT_LOGOS = {
 _tieulam_api_cache  = {"url": TIEULAM_KNOWN_API_BASE,  "discovered_at": 0}
 _hoiquan_api_cache  = {"url": HOIQUAN_KNOWN_API_BASE,  "discovered_at": 0}
 _khandaia_api_cache = {"url": KHANDAIA_KNOWN_API_BASE, "discovered_at": 0}
+_vongcam_api_cache  = {"url": VONGCAM_API_URL,        "discovered_at": 0}
 
 # ─── Playlist content cache ───────────────────────────────────────────────────
 def _empty_entry():
@@ -80,11 +86,12 @@ _playlist_cache = {
     "tieulam":  _empty_entry(),
     "hoiquan":  _empty_entry(),
     "khandaia": _empty_entry(),
+    "vongcam":  _empty_entry(),
     "vtv":      _empty_entry(),
 }
 
 _last_counts = {
-    "tieulam": 0, "hoiquan": 0, "khandaia": 0, "vtv": 0,
+    "tieulam": 0, "hoiquan": 0, "khandaia": 0, "vongcam": 0, "vtv": 0,
     "refreshed_at": 0, "last_error": "",
 }
 
@@ -578,6 +585,82 @@ def _fetch_khandaia_fixtures() -> list:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+#  Vòng Cấm TV
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _fetch_vongcam_matches() -> list:
+    """Fetch matches from Vòng Cấm TV API."""
+    headers = {
+        "Authorization": f"Bearer {VONGCAM_API_TOKEN}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    try:
+        resp = requests.get(VONGCAM_API_URL, headers=headers, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        # Handle different response formats
+        if isinstance(data, list):
+            return data
+        if isinstance(data, dict):
+            return data.get("data") or data.get("matches") or data.get("fixtures") or []
+        return []
+    except Exception as e:
+        import sys
+        print(f"⚠️ Vòng Cấm TV API error: {e}", file=sys.stderr)
+        return []
+
+
+def _build_vongcam_lines(matches: list) -> list:
+    """Convert Vòng Cấm matches to M3U lines."""
+    lines = []
+    for match in matches:
+        # Try different possible field names for stream URL
+        stream_url = (
+            match.get("stream_url") or
+            match.get("streamUrl") or
+            match.get("url") or
+            match.get("link") or
+            match.get("sourceUrl") or
+            ""
+        ).strip()
+
+        if not stream_url:
+            continue
+
+        # Get match info
+        title = match.get("title") or match.get("name") or ""
+        home = match.get("home") or match.get("homeTeam", {}).get("name", "") or match.get("team_1", "")
+        away = match.get("away") or match.get("awayTeam", {}).get("name", "") or match.get("team_2", "")
+        league = match.get("league") or match.get("tournament", {}).get("name", "") if isinstance(match.get("tournament"), dict) else match.get("tournament", "")
+        thumbnail = match.get("thumbnail") or match.get("logo") or match.get("image") or ""
+
+        # Build display name
+        if home and away:
+            display = f"{home} VS {away}"
+            if league:
+                display += f" ({league})"
+        elif title:
+            display = title
+        else:
+            continue
+
+        # Add live indicator
+        is_live = match.get("is_live") or match.get("isLive") or match.get("live", False)
+        if is_live:
+            display = f"[LIVE] {display}"
+
+        # Use sport logo as fallback
+        if not thumbnail:
+            thumbnail = _logo_from_text(f"{home} {away} {league}")
+
+        lines.append(f'#EXTINF:-1 tvg-logo="{thumbnail}" group-title="Vòng Cấm TV",{display}')
+        lines.append(stream_url)
+
+    return lines
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 #  Shared fixture helpers
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -699,17 +782,21 @@ def _refresh_all_playlists():
     def fetch_kda():
         return _build_fixture_lines(_fetch_khandaia_fixtures(), "Khán Đài A")
 
+    def fetch_vongcam():
+        return _build_vongcam_lines(_fetch_vongcam_matches())
+
     def fetch_vtv():
         try:
             return _fetch_vtv_lines()
         except Exception:
             return []
 
-    with ThreadPoolExecutor(max_workers=4) as ex:
+    with ThreadPoolExecutor(max_workers=5) as ex:
         futures = {
             ex.submit(fetch_tieulam): "tieulam",
             ex.submit(fetch_hq):      "hoiquan",
             ex.submit(fetch_kda):     "khandaia",
+            ex.submit(fetch_vongcam): "vongcam",
             ex.submit(fetch_vtv):     "vtv",
         }
         results = {}
@@ -724,6 +811,7 @@ def _refresh_all_playlists():
     tieulam_lines = results.get("tieulam",  [])
     hq_lines      = results.get("hoiquan",  [])
     kda_lines     = results.get("khandaia", [])
+    vongcam_lines = results.get("vongcam",  [])
     vtv_lines     = results.get("vtv",      [])
 
     err_str = "; ".join(errors)
@@ -737,9 +825,10 @@ def _refresh_all_playlists():
     _store("tieulam",  epg_header + "\n" + "\n".join(tieulam_lines))
     _store("hoiquan",  epg_header + "\n" + "\n".join(hq_lines))
     _store("khandaia", epg_header + "\n" + "\n".join(kda_lines))
+    _store("vongcam",  epg_header + "\n" + "\n".join(vongcam_lines))
     _store("vtv",      epg_header + "\n" + "\n".join(vtv_lines))
 
-    all_lines = tieulam_lines + hq_lines + kda_lines + vtv_lines
+    all_lines = tieulam_lines + hq_lines + kda_lines + vongcam_lines + vtv_lines
     combined_text = epg_header + "\n" + "\n".join(all_lines)
     if err_str:
         combined_text += f"\n# Errors: {err_str}"
@@ -749,6 +838,7 @@ def _refresh_all_playlists():
         "tieulam":      count(tieulam_lines),
         "hoiquan":      count(hq_lines),
         "khandaia":     count(kda_lines),
+        "vongcam":      count(vongcam_lines),
         "vtv":          count(vtv_lines),
         "refreshed_at": time.time(),
         "last_error":   err_str,
@@ -824,6 +914,11 @@ def khandaia_m3u():
     return _m3u_response("khandaia", "khandaia.m3u")
 
 
+@app.route("/vongcam.m3u")
+def vongcam_m3u():
+    return _m3u_response("vongcam", "vongcam.m3u")
+
+
 @app.route("/vtv.m3u")
 def vtv_m3u():
     return _m3u_response("vtv", "vtv.m3u")
@@ -887,8 +982,9 @@ def index():
     tieulam_count = _last_counts.get("tieulam", 0)
     hq_count      = _last_counts.get("hoiquan", 0)
     kda_count     = _last_counts.get("khandaia", 0)
+    vongcam_count = _last_counts.get("vongcam", 0)
     vtv_count     = _last_counts.get("vtv", 0)
-    total         = tieulam_count + hq_count + kda_count + vtv_count
+    total         = tieulam_count + hq_count + kda_count + vongcam_count + vtv_count
 
     epg_link = _epg_url()
     return (
@@ -898,6 +994,7 @@ def index():
         "<li><a href='/tieulam.m3u'>/tieulam.m3u</a> — TieuLam TV only</li>"
         "<li><a href='/hoiquan.m3u'>/hoiquan.m3u</a> — Hội Quán TV only</li>"
         "<li><a href='/khandaia.m3u'>/khandaia.m3u</a> — Khán Đài A only</li>"
+        "<li><a href='/vongcam.m3u'>/vongcam.m3u</a> — Vòng Cấm TV only</li>"
         "<li><a href='/vtv.m3u'>/vtv.m3u</a> — Kênh VTV tĩnh (VTV1-10, Vietnam Today)</li>"
         "</ul>"
         "<h3>📡 EPG</h3><ul>"
@@ -914,6 +1011,8 @@ def index():
         f"&nbsp;|&nbsp; <code>{_hoiquan_api_cache['url']}</code></p>"
         f"<p>🟢 Khán Đài A: <strong>{kda_count} kênh</strong>"
         f"&nbsp;|&nbsp; <code>{_khandaia_api_cache['url']}</code></p>"
+        f"<p>🟢 Vòng Cấm TV: <strong>{vongcam_count} kênh</strong>"
+        f"&nbsp;|&nbsp; <code>{VONGCAM_API_URL}</code></p>"
         f"<p>📡 VTV (tĩnh): <strong>{vtv_count} kênh</strong></p>"
         f"{err_html}"
         "<h3>⚙️ Tối ưu băng thông</h3>"
@@ -921,7 +1020,7 @@ def index():
         "<li>Gzip nén tự động (giảm ~70% dữ liệu truyền)</li>"
         "<li>ETag + HTTP 304 — client có sẵn cache không cần tải lại</li>"
         f"<li>Cache-Control: public, max-age={PREFETCH_INTERVAL}s</li>"
-        "<li>Fetch 4 nguồn song song (ThreadPoolExecutor)</li>"
+        "<li>Fetch 5 nguồn song song (ThreadPoolExecutor)</li>"
         f"<li>Làm mới cache mỗi <strong>{PREFETCH_INTERVAL // 60} phút</strong></li>"
         "</ul>"
     )
