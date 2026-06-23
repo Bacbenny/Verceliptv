@@ -323,7 +323,7 @@ def _fetch_tieulam_from_cache() -> list:
     age = int(time.time()) - fetched_at
     if age > TIEULAM_CACHE_MAX_AGE:
         raise ValueError(f"Cache quá cũ: {age}s (max {TIEULAM_CACHE_MAX_AGE}s)")
-    data = payload.get("data", [])
+    data = payload.get("data") or payload.get("matches") or []
     if not data:
         raise ValueError("Cache rỗng")
     return data
