@@ -339,10 +339,9 @@ def _call_one_relay(url: str) -> list:
     rdata = resp.json()
     if "error" in rdata:
         raise ValueError(f"Relay error: {rdata['error']}")
-    data = rdata.get("data", [])
-    if not data:
-        raise ValueError("Relay returned empty data")
-    return data
+    if "data" not in rdata:
+        raise ValueError(f"Relay format error: {list(rdata.keys())[:5]}")
+    return rdata["data"]   # empty list is valid (no matches right now)
 
 
 def _fetch_tieulam_via_relay() -> list:
@@ -380,8 +379,12 @@ def _fetch_tieulam_matches() -> list:
         print(f"⚠️ Cache miss: {e}", file=sys.stderr)
 
     # Tầng 2 — Relay (Cloudflare worker / Replit)
-    if TIEULAM_RELAY_URL or TIEULAM_RELAY_URL_2:
-        return _fetch_tieulam_via_relay()
+    try:
+        data = _fetch_tieulam_via_relay()
+        print(f"✅ Tier 2 relay OK: {len(data)} matches", file=sys.stderr)
+        return data
+    except Exception as e:
+        print(f"⚠️ Tier 2 relay failed: {e}", file=sys.stderr)
 
     # Tầng 3 — Direct API (yêu cầu curl_cffi / cloudscraper)
 
