@@ -49,9 +49,8 @@ router.get("/tieulam-relay-public", async (req, res) => {
       method:  "POST",
       headers: HEADERS,
       body:    JSON.stringify(payload),
-      // node-fetch v2 doesn't have built-in timeout; use AbortController
-      signal:  AbortSignal.timeout(15000),
-    });
+      timeout: 15000,         // node-fetch v2 native timeout option
+    } as Parameters<typeof fetch>[1]);
 
     if (!r.ok) {
       req.log.warn({ status: r.status }, "TieuLam upstream error");

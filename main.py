@@ -37,7 +37,12 @@ VTV_M3U_URL           = os.environ.get("VTV_M3U_URL", "https://raw.githubusercon
 #   RELAY_SECRET=<shared-secret>
 #
 # Để trống = tắt relay, dùng direct API (OK trên Replit, thường bị 403 trên Vercel)
-TIEULAM_RELAY_URL    = os.environ.get("TIEULAM_RELAY_URL",   "")
+# Nếu REPLIT_DOMAINS tồn tại → dùng /api/tieulam-relay-public trên chính Replit này
+_replit_domain = os.environ.get("REPLIT_DOMAINS", "").split(",")[0].strip()
+_DEFAULT_REPLIT_RELAY = (
+    f"https://{_replit_domain}/api/tieulam-relay-public" if _replit_domain else ""
+)
+TIEULAM_RELAY_URL    = os.environ.get("TIEULAM_RELAY_URL",   _DEFAULT_REPLIT_RELAY)
 TIEULAM_RELAY_URL_2  = os.environ.get("TIEULAM_RELAY_URL_2", "")
 TIEULAM_RELAY_SECRET = os.environ.get("RELAY_SECRET", "")
 
