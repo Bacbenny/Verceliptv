@@ -281,13 +281,21 @@ def _get_tieulam_api_url(scraper=None) -> str:
 
 
 def _fetch_tieulam_via_relay() -> list:
-    """Gọi relay endpoint (bỏ qua IP block trên Render/Vercel)."""
+    """Gọi relay endpoint (bỏ qua IP block trên Render/Vercel).
+    Raise ValueError nếu relay trả lỗi hoặc rỗng — caller sẽ fallback sang direct API.
+    """
     headers: dict = {}
     if TIEULAM_RELAY_SECRET:
         headers["X-Relay-Token"] = TIEULAM_RELAY_SECRET
     resp = requests.get(TIEULAM_RELAY_URL, headers=headers, timeout=15)
     resp.raise_for_status()
-    return resp.json().get("data", [])
+    rdata = resp.json()
+    if "error" in rdata:
+        raise ValueError(f"Relay error: {rdata['error']}")
+    data = rdata.get("data", [])
+    if not data:
+        raise ValueError("Relay returned empty data")
+    return data
 
 
 def _fetch_tieulam_matches() -> list:
@@ -642,8 +650,9 @@ def _build_vongcam_lines(matches: list) -> list:
     for match in matches:
         commentator = match.get("commentator") or {}
 
-        # Chất lượng cao nhất: HD trước, fallback SD
+        # Chất lượng cao nhất: FHD → HD → SD
         stream_url = (
+            commentator.get("streamSourceFhd") or
             commentator.get("streamSourceHd") or
             commentator.get("streamSourceSd") or
             ""
