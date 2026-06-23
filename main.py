@@ -36,12 +36,30 @@ VTV_M3U_URL           = os.environ.get("VTV_M3U_URL", "https://raw.githubusercon
 #   TIEULAM_RELAY_URL_2=https://dekki.bacbenny95.workers.dev/          ← fallback
 #   RELAY_SECRET=<shared-secret>
 #
-# Để trống = tắt relay, dùng direct API (OK trên Replit, thường bị 403 trên Vercel)
-# Nếu REPLIT_DOMAINS tồn tại → dùng /api/tieulam-relay-public trên chính Replit này
+# ── TieuLam 3-tier free setup ────────────────────────────────────────────────
+#
+# Tầng 1 — GitHub Actions cache (mỗi 30 phút, miễn phí 24/7):
+#   TIEULAM_CACHE_URL=https://raw.githubusercontent.com/Bacbenny/Verceliptv/main/data/tieulam_cache.json
+#   (mặc định đã set sẵn, không cần cấu hình thêm)
+#
+# Tầng 2 — Cloudflare Workers relay (miễn phí 100k req/ngày):
+#   TIEULAM_RELAY_URL=https://tieulam-relay.bacbenny95.workers.dev/
+#   TIEULAM_RELAY_URL_2=https://dekki.bacbenny95.workers.dev/
+#   RELAY_SECRET=<same secret in Cloudflare worker>
+#
+# Tầng 3 — Direct API (chỉ hoạt động khi không bị Cloudflare chặn)
+#
+# Nếu REPLIT_DOMAINS tồn tại (dev mode) → dùng /api/tieulam-relay-public trên chính Replit này
 _replit_domain = os.environ.get("REPLIT_DOMAINS", "").split(",")[0].strip()
 _DEFAULT_REPLIT_RELAY = (
     f"https://{_replit_domain}/api/tieulam-relay-public" if _replit_domain else ""
 )
+
+TIEULAM_CACHE_URL    = os.environ.get(
+    "TIEULAM_CACHE_URL",
+    "https://raw.githubusercontent.com/Bacbenny/Verceliptv/main/data/tieulam_cache.json",
+)
+TIEULAM_CACHE_MAX_AGE = int(os.environ.get("TIEULAM_CACHE_MAX_AGE", "2100"))  # 35 min
 TIEULAM_RELAY_URL    = os.environ.get("TIEULAM_RELAY_URL",   _DEFAULT_REPLIT_RELAY)
 TIEULAM_RELAY_URL_2  = os.environ.get("TIEULAM_RELAY_URL_2", "")
 TIEULAM_RELAY_SECRET = os.environ.get("RELAY_SECRET", "")
@@ -292,6 +310,25 @@ def _get_tieulam_api_url(scraper=None) -> str:
     return _tieulam_api_cache["url"]
 
 
+def _fetch_tieulam_from_cache() -> list:
+    """Tải cache từ GitHub raw URL (cập nhật mỗi 30 phút bởi GitHub Actions).
+    Raise ValueError nếu cache không có hoặc quá cũ.
+    """
+    if not TIEULAM_CACHE_URL:
+        raise ValueError("TIEULAM_CACHE_URL not set")
+    r = requests.get(TIEULAM_CACHE_URL, timeout=10)
+    r.raise_for_status()
+    payload = r.json()
+    fetched_at = payload.get("fetched_at", 0)
+    age = int(time.time()) - fetched_at
+    if age > TIEULAM_CACHE_MAX_AGE:
+        raise ValueError(f"Cache quá cũ: {age}s (max {TIEULAM_CACHE_MAX_AGE}s)")
+    data = payload.get("data", [])
+    if not data:
+        raise ValueError("Cache rỗng")
+    return data
+
+
 def _call_one_relay(url: str) -> list:
     """Gọi một relay URL, raise ValueError nếu không thành công."""
     headers: dict = {}
@@ -326,17 +363,27 @@ def _fetch_tieulam_via_relay() -> list:
 
 
 def _fetch_tieulam_matches() -> list:
-    """Fetch TieuLam matches.
+    """Fetch TieuLam matches — 3-tier free setup:
 
-    Nếu TIEULAM_RELAY_URL được cấu hình → dùng relay làm nguồn duy nhất.
-    Không fallback sang direct API khi relay thất bại (direct API bị Cloudflare
-    chặn 403 trên Vercel/Render — fallback chỉ gây lỗi khó hiểu).
-
-    Nếu không có relay → gọi trực tiếp API (cần curl_cffi / cloudscraper).
+    1. GitHub Actions cache (mỗi 30 phút, nhanh nhất, không gọi API)
+    2. Relay (Cloudflare worker hoặc Replit relay — khi cache cũ/lỗi)
+    3. Direct API (fallback cuối, chỉ OK khi không bị Cloudflare chặn)
     """
-    if TIEULAM_RELAY_URL:
-        # Relay cấu hình → raise ngay nếu lỗi (caller xử lý)
+    import sys
+
+    # Tầng 1 — GitHub Actions cache
+    try:
+        data = _fetch_tieulam_from_cache()
+        print(f"✅ TieuLam cache: {len(data)} matches", file=sys.stderr)
+        return data
+    except Exception as e:
+        print(f"⚠️ Cache miss: {e}", file=sys.stderr)
+
+    # Tầng 2 — Relay (Cloudflare worker / Replit)
+    if TIEULAM_RELAY_URL or TIEULAM_RELAY_URL_2:
         return _fetch_tieulam_via_relay()
+
+    # Tầng 3 — Direct API (yêu cầu curl_cffi / cloudscraper)
 
     cutoff     = (datetime.now(timezone.utc) - timedelta(seconds=MATCH_MAX_AGE_SECONDS)).strftime("%Y-%m-%dT%H:%M:%S")
     cutoff_end = (datetime.now(timezone.utc) + timedelta(hours=72)).strftime("%Y-%m-%dT%H:%M:%S")
@@ -1049,7 +1096,9 @@ def debug_status():
     import sys
     result = {
         "config": {
+            "tieulam_cache_url":    TIEULAM_CACHE_URL or None,
             "tieulam_relay_url":    TIEULAM_RELAY_URL or None,
+            "tieulam_relay_url_2":  TIEULAM_RELAY_URL_2 or None,
             "tieulam_relay_secret": "SET" if TIEULAM_RELAY_SECRET else "NOT SET",
             "tieulam_api_cache":    _tieulam_api_cache["url"],
             "tieulam_frontend":     TIEULAM_FRONTEND_URL,
@@ -1064,6 +1113,17 @@ def debug_status():
         },
         "live_tests": {}
     }
+
+    # Test GitHub Actions cache
+    try:
+        cache_data = _fetch_tieulam_from_cache()
+        result["live_tests"]["gh_cache"] = {
+            "ok": True, "count": len(cache_data), "url": TIEULAM_CACHE_URL,
+        }
+    except Exception as e:
+        result["live_tests"]["gh_cache"] = {
+            "ok": False, "error": str(e), "url": TIEULAM_CACHE_URL,
+        }
 
     # Test từng relay riêng
     for label, url in [("relay_1", TIEULAM_RELAY_URL), ("relay_2", TIEULAM_RELAY_URL_2)]:
