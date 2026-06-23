@@ -26,12 +26,19 @@ TIEULAM_KNOWN_API_BASE= os.environ.get("TIEULAM_API",      "https://api.tlap1706
 TIEULAM_STREAM_CDN    = os.environ.get("TIEULAM_CDN",      "https://live.lilive2.eu.cc")
 # Kênh IPTV tĩnh
 VTV_M3U_URL           = os.environ.get("VTV_M3U_URL", "https://raw.githubusercontent.com/Bacbenny/Verceliptv/refs/heads/main/VTV.m3u")
-# Nếu IP bị chặn (Render/Vercel), dùng relay worker để lấy data TieuLam
-# dekki worker:      https://dekki.bacbenny95.workers.dev/
-# tieulam-relay:     https://tieulam-relay.bacbenny95.workers.dev/
-# Set TIEULAM_RELAY_URL=<worker-url>  và  RELAY_SECRET=<shared-secret>
-_DEFAULT_RELAY = "https://tieulam-relay.bacbenny95.workers.dev/"
-TIEULAM_RELAY_URL    = os.environ.get("TIEULAM_RELAY_URL", _DEFAULT_RELAY)
+# ── TieuLam relay (bỏ qua Cloudflare IP-block trên Vercel/Render) ────────────
+#
+# KHUYẾN NGHỊ: Dùng Replit public relay (không cần secret):
+#   TIEULAM_RELAY_URL=https://<your-replit-app>.replit.app/api/tieulam-relay-public
+#
+# Tuỳ chọn — Cloudflare workers (cần RELAY_SECRET khớp với worker config):
+#   TIEULAM_RELAY_URL=https://tieulam-relay.bacbenny95.workers.dev/
+#   TIEULAM_RELAY_URL_2=https://dekki.bacbenny95.workers.dev/          ← fallback
+#   RELAY_SECRET=<shared-secret>
+#
+# Để trống = tắt relay, dùng direct API (OK trên Replit, thường bị 403 trên Vercel)
+TIEULAM_RELAY_URL    = os.environ.get("TIEULAM_RELAY_URL",   "")
+TIEULAM_RELAY_URL_2  = os.environ.get("TIEULAM_RELAY_URL_2", "")
 TIEULAM_RELAY_SECRET = os.environ.get("RELAY_SECRET", "")
 
 # ─── Hội Quán TV config ───────────────────────────────────────────────────────
@@ -280,14 +287,12 @@ def _get_tieulam_api_url(scraper=None) -> str:
     return _tieulam_api_cache["url"]
 
 
-def _fetch_tieulam_via_relay() -> list:
-    """Gọi relay endpoint (bỏ qua IP block trên Render/Vercel).
-    Raise ValueError nếu relay trả lỗi hoặc rỗng — caller sẽ fallback sang direct API.
-    """
+def _call_one_relay(url: str) -> list:
+    """Gọi một relay URL, raise ValueError nếu không thành công."""
     headers: dict = {}
     if TIEULAM_RELAY_SECRET:
         headers["X-Relay-Token"] = TIEULAM_RELAY_SECRET
-    resp = requests.get(TIEULAM_RELAY_URL, headers=headers, timeout=15)
+    resp = requests.get(url, headers=headers, timeout=15)
     resp.raise_for_status()
     rdata = resp.json()
     if "error" in rdata:
@@ -296,6 +301,23 @@ def _fetch_tieulam_via_relay() -> list:
     if not data:
         raise ValueError("Relay returned empty data")
     return data
+
+
+def _fetch_tieulam_via_relay() -> list:
+    """Thử relay URLs theo thứ tự: TIEULAM_RELAY_URL → TIEULAM_RELAY_URL_2.
+    Raise ValueError nếu tất cả đều thất bại.
+    """
+    import sys
+    last_err: Exception = ValueError("No relay URL configured")
+
+    for url in filter(None, [TIEULAM_RELAY_URL, TIEULAM_RELAY_URL_2]):
+        try:
+            return _call_one_relay(url)
+        except Exception as e:
+            print(f"⚠️ Relay {url} failed: {e}", file=sys.stderr)
+            last_err = e
+
+    raise last_err
 
 
 def _fetch_tieulam_matches() -> list:
@@ -1038,13 +1060,16 @@ def debug_status():
         "live_tests": {}
     }
 
-    # Test relay
-    if TIEULAM_RELAY_URL:
+    # Test từng relay riêng
+    for label, url in [("relay_1", TIEULAM_RELAY_URL), ("relay_2", TIEULAM_RELAY_URL_2)]:
+        if not url:
+            result["live_tests"][label] = {"ok": None, "url": None, "msg": "not configured"}
+            continue
         try:
-            data = _fetch_tieulam_via_relay()
-            result["live_tests"]["relay"] = {"ok": True, "count": len(data), "url": TIEULAM_RELAY_URL}
+            data = _call_one_relay(url)
+            result["live_tests"][label] = {"ok": True, "count": len(data), "url": url}
         except Exception as e:
-            result["live_tests"]["relay"] = {"ok": False, "error": str(e), "url": TIEULAM_RELAY_URL}
+            result["live_tests"][label] = {"ok": False, "error": str(e), "url": url}
 
     # Test direct API (timeout ngắn để debug nhanh)
     try:
