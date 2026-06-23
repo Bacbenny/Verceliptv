@@ -299,13 +299,17 @@ def _fetch_tieulam_via_relay() -> list:
 
 
 def _fetch_tieulam_matches() -> list:
-    """Fetch TieuLam matches — dùng cloudscraper để bypass Cloudflare."""
+    """Fetch TieuLam matches.
+
+    Nếu TIEULAM_RELAY_URL được cấu hình → dùng relay làm nguồn duy nhất.
+    Không fallback sang direct API khi relay thất bại (direct API bị Cloudflare
+    chặn 403 trên Vercel/Render — fallback chỉ gây lỗi khó hiểu).
+
+    Nếu không có relay → gọi trực tiếp API (cần curl_cffi / cloudscraper).
+    """
     if TIEULAM_RELAY_URL:
-        try:
-            return _fetch_tieulam_via_relay()
-        except Exception as e:
-            import sys
-            print(f"⚠️ Relay failed: {e}", file=sys.stderr)
+        # Relay cấu hình → raise ngay nếu lỗi (caller xử lý)
+        return _fetch_tieulam_via_relay()
 
     cutoff     = (datetime.now(timezone.utc) - timedelta(seconds=MATCH_MAX_AGE_SECONDS)).strftime("%Y-%m-%dT%H:%M:%S")
     cutoff_end = (datetime.now(timezone.utc) + timedelta(hours=72)).strftime("%Y-%m-%dT%H:%M:%S")
@@ -819,27 +823,8 @@ def _refresh_all_playlists():
     errors = []
 
     def fetch_tieulam():
-        if TIEULAM_RELAY_URL:
-            try:
-                hdrs = {}
-                if TIEULAM_RELAY_SECRET:
-                    hdrs["X-Relay-Token"] = TIEULAM_RELAY_SECRET
-                r = requests.get(TIEULAM_RELAY_URL, headers=hdrs, timeout=15)
-                r.raise_for_status()
-                rdata = r.json()
-                # Relay trả {"error":...} khi unauthorized — fall through
-                if "error" in rdata:
-                    raise ValueError(f"Relay error: {rdata['error']}")
-                fixtures = rdata.get("fixtures", [])
-                if fixtures:
-                    return _build_lines_from_fixtures(fixtures)
-                data = rdata.get("data", [])
-                if data:
-                    return _build_tieulam_lines(data)
-                raise ValueError("Relay returned empty data")
-            except Exception as _e:
-                import sys
-                print(f"⚠️ Relay failed: {_e}", file=sys.stderr)
+        # _fetch_tieulam_matches() xử lý relay/direct logic — raise nếu lỗi
+        # Exception sẽ bị bắt bởi ThreadPoolExecutor và ghi vào errors list
         return _build_tieulam_lines(_fetch_tieulam_matches())
 
     def fetch_hq():
@@ -1029,6 +1014,61 @@ def tieulam_relay():
         return {"data": data}
     except Exception as e:
         return Response(f"Error: {e}", status=500, mimetype="text/plain")
+
+
+@app.route("/api/debug")
+def debug_status():
+    """Kiểm tra live trạng thái từng nguồn — hữu ích khi debug trên Vercel."""
+    import sys
+    result = {
+        "config": {
+            "tieulam_relay_url":    TIEULAM_RELAY_URL or None,
+            "tieulam_relay_secret": "SET" if TIEULAM_RELAY_SECRET else "NOT SET",
+            "tieulam_api_cache":    _tieulam_api_cache["url"],
+            "tieulam_frontend":     TIEULAM_FRONTEND_URL,
+        },
+        "cached_counts": {
+            "tieulam":  _last_counts.get("tieulam", 0),
+            "hoiquan":  _last_counts.get("hoiquan", 0),
+            "khandaia": _last_counts.get("khandaia", 0),
+            "vongcam":  _last_counts.get("vongcam", 0),
+            "vtv":      _last_counts.get("vtv", 0),
+            "last_error": _last_counts.get("last_error", ""),
+        },
+        "live_tests": {}
+    }
+
+    # Test relay
+    if TIEULAM_RELAY_URL:
+        try:
+            data = _fetch_tieulam_via_relay()
+            result["live_tests"]["relay"] = {"ok": True, "count": len(data), "url": TIEULAM_RELAY_URL}
+        except Exception as e:
+            result["live_tests"]["relay"] = {"ok": False, "error": str(e), "url": TIEULAM_RELAY_URL}
+
+    # Test direct API (timeout ngắn để debug nhanh)
+    try:
+        hdrs = {**_TIEULAM_HTTPX_HEADERS, "User-Agent": "Mozilla/5.0"}
+        payload = {
+            "queries": [{"field": "start_date", "type": "gte", "value": (datetime.now(timezone.utc)).strftime("%Y-%m-%dT%H:%M:%S")}],
+            "query_and": True, "limit": 3, "page": 1,
+        }
+        r = requests.post(
+            TIEULAM_KNOWN_API_BASE + "/matches/graph",
+            json=payload, headers=hdrs, timeout=8,
+        )
+        result["live_tests"]["direct_api"] = {
+            "ok": r.ok, "status": r.status_code,
+            "url": TIEULAM_KNOWN_API_BASE + "/matches/graph",
+            "count": len((r.json().get("data") or [])) if r.ok else 0,
+        }
+    except Exception as e:
+        result["live_tests"]["direct_api"] = {
+            "ok": False, "error": str(e),
+            "url": TIEULAM_KNOWN_API_BASE + "/matches/graph",
+        }
+
+    return result
 
 
 @app.route("/")
