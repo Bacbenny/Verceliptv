@@ -1,29 +1,14 @@
 #EXTM3U url-tvg="https://lichphatsong.site/schedule/epg.xml.gz"
 #EXTINF:-1 tvg-id="vtv1hd" group-title="VTV" group-logo="https://sgchill.duckdns.org/logo/vtv.png" tvg-logo="https://sgchill.duckdns.org/logo/vtv1.png",VTV1
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36
-#EXTVLCOPT:adaptive-variant=max
-#EXTVLCOPT:network-caching=5000
-https://sgchill.duckdns.org/source/fptplay.m3u8?id=vtv1
+https://HaNoiIPTV.short.gy/HaNoiIPTV-VTV1_HD
 #EXTINF:-1 tvg-id="vtv2hd" group-title="VTV" group-logo="https://sgchill.duckdns.org/logo/vtv.png" tvg-logo="https://sgchill.duckdns.org/logo/vtv2.png",VTV2
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36
-#EXTVLCOPT:adaptive-variant=max
-#EXTVLCOPT:network-caching=5000
-https://sgchill.duckdns.org/source/fptplay.m3u8?id=vtv2
+https://HaNoiIPTV.short.gy/HaNoiIPTV-VTV2_HD
 #EXTINF:-1 tvg-id="vtv3hd" group-title="VTV" group-logo="https://sgchill.duckdns.org/logo/vtv.png" tvg-logo="https://sgchill.duckdns.org/logo/vtv3.png",VTV3
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36
-#EXTVLCOPT:adaptive-variant=max
-#EXTVLCOPT:network-caching=5000
-https://sgchill.duckdns.org/source/fptplay.m3u8?id=vtv3
+https://HaNoiIPTV.short.gy/HaNoiIPTV-VTV3_HD
 #EXTINF:-1 tvg-id="vtv4hd" group-title="VTV" group-logo="https://sgchill.duckdns.org/logo/vtv.png" tvg-logo="https://sgchill.duckdns.org/logo/vtv4.png",VTV4
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36
-#EXTVLCOPT:adaptive-variant=max
-#EXTVLCOPT:network-caching=5000
-https://sgchill.duckdns.org/source/fptplay.m3u8?id=vtv4
+https://HaNoiIPTV.short.gy/HaNoiIPTV-VTV4_HD
 #EXTINF:-1 tvg-id="vtv5hd" group-title="VTV" group-logo="https://sgchill.duckdns.org/logo/vtv.png" tvg-logo="https://sgchill.duckdns.org/logo/vtv5.png",VTV5
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36
-#EXTVLCOPT:adaptive-variant=max
-#EXTVLCOPT:network-caching=5000
-https://sgchill.duckdns.org/source/fptplay.m3u8?id=vtv5
+https://HaNoiIPTV.short.gy/HaNoiIPTV-VTV5_HD
 #EXTINF:-1 tvg-id="vtv5hdtnb" group-title="VTV" group-logo="https://sgchill.duckdns.org/logo/vtv.png" tvg-logo="https://sgchill.duckdns.org/logo/vtv5tnb.png",VTV5 Tây Nam Bộ
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:adaptive-variant=max
@@ -37,25 +22,16 @@ https://sgchill.duckdns.org/source/fptplay.m3u8?id=vtv5tn
 #EXTINF:-1 tvg-id="vtv6hd" group-title="VTV" tvg-logo="https://sgchill.duckdns.org/logo/vtv6.png",VTV6
 https://HaNoiIPTV.short.gy/HaNoiIPTV-VTV6_HD
 #EXTINF:-1 tvg-id="vtv7hd" group-title="VTV" group-logo="https://sgchill.duckdns.org/logo/vtv.png" tvg-logo="https://sgchill.duckdns.org/logo/vtv7.png",VTV7
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36
-#EXTVLCOPT:adaptive-variant=max
-#EXTVLCOPT:network-caching=5000
-https://sgchill.duckdns.org/source/fptplay.m3u8?id=vtv7
+https://HaNoiIPTV.short.gy/HaNoiIPTV-VTV7_HD
 #EXTINF:-1 tvg-id="vtv8hd" group-title="VTV" group-logo="https://sgchill.duckdns.org/logo/vtv.png" tvg-logo="https://sgchill.duckdns.org/logo/vtv8.png",VTV8
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:adaptive-variant=max
 #EXTVLCOPT:network-caching=5000
 https://hoiquan.dpdns.org/VTVGo/?vtv8-hd
 #EXTINF:-1 tvg-id="vtv9hd" group-title="VTV" group-logo="https://sgchill.duckdns.org/logo/vtv.png" tvg-logo="https://sgchill.duckdns.org/logo/vtv9.png",VTV9
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36
-#EXTVLCOPT:adaptive-variant=max
-#EXTVLCOPT:network-caching=5000
-https://sgchill.duckdns.org/source/fptplay.m3u8?id=vtv9
+https://HaNoiIPTV.short.gy/HaNoiIPTV-VTV9_HD
 #EXTINF:-1 tvg-id="vtv10hd" group-title="VTV" group-logo="https://sgchill.duckdns.org/logo/vtv.png" tvg-logo="https://sgchill.duckdns.org/logo/vtv10.png",VTV10
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36
-#EXTVLCOPT:adaptive-variant=max
-#EXTVLCOPT:network-caching=5000
-https://sgchill.duckdns.org/source/fptplay.m3u8?id=vtv10
+https://HaNoiIPTV.short.gy/HaNoiIPTV-VTV_Can_Tho
 #EXTINF:-1 tvg-name="Vietnam Today" group-title="VTV" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/e/e0/Vietnam_Today_Logo.png",Vietnam Today
 https://live.fptplay53.net/fnxhd1/vntoday_vhls.smil/chunklist.m3u8
 #EXTINF:0 tvg-id="vtv1hd" group-title="VTV" tvg-logo="https://i.imgur.com/nfkmvAY.png",VTV1 Udp
