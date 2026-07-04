@@ -11,6 +11,10 @@ import requests
 from curl_cffi import requests as cffi_requests
 from flask import Flask, Response, request
 
+# curl_requests = alias cho code TiêuLâm Tier-3; _CURL_CFFI luôn True vì curl_cffi là required dep
+curl_requests = cffi_requests
+_CURL_CFFI    = True
+
 app = Flask(__name__)
 
 # ─── TieuLam TV config ────────────────────────────────────────────────────────
