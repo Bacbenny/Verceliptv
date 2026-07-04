@@ -7,15 +7,9 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
 
-import cloudscraper
 import requests
+from curl_cffi import requests as cffi_requests
 from flask import Flask, Response, request
-
-try:
-    from curl_cffi import requests as curl_requests
-    _CURL_CFFI = True
-except ImportError:
-    _CURL_CFFI = False
 
 app = Flask(__name__)
 
@@ -73,7 +67,7 @@ KHANDAIA_FRONTEND_URL   = os.environ.get("KHANDAIA_FRONTEND", "https://tructiep.
 KHANDAIA_KNOWN_API_BASE = os.environ.get("KHANDAIA_API",      "https://sv.khandai-a.xyz/api/v1/external")
 
 # ─── Vòng Cấm TV config ──────────────────────────────────────────────────────
-VONGCAM_FRONTEND_URL  = os.environ.get("VONGCAM_FRONTEND", "https://sv2.vongcam3.live/")
+VONGCAM_FRONTEND_URL  = os.environ.get("VONGCAM_FRONTEND", "https://sv2.vongcam3.live")
 VONGCAM_API_URL       = os.environ.get("VONGCAM_API",      "https://sv.bugiotv.xyz/internal/api/matches")
 VONGCAM_API_TOKEN     = os.environ.get("VONGCAM_TOKEN",    "AB321C")
 
@@ -257,11 +251,14 @@ def _hq_kda_logo(fixture: dict) -> str:
 #  Shared HTTP headers
 # ══════════════════════════════════════════════════════════════════════════════
 
+_HQ_UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+)
 _HQ_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    ),
+    "User-Agent":      _HQ_UA,
+    "Accept":          "application/json, text/plain, */*",
+    "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
 }
 
 _TIEULAM_HTTPX_HEADERS = {
@@ -303,7 +300,7 @@ def _discover_tieulam_api_base(scraper) -> str:
 def _get_tieulam_api_url(scraper=None) -> str:
     now = time.time()
     if now - _tieulam_api_cache["discovered_at"] > API_DISCOVERY_TTL:
-        sc = scraper or cloudscraper.create_scraper()
+        sc = scraper or cffi_requests.Session(impersonate="chrome120")
         discovered = _discover_tieulam_api_base(sc)
         _tieulam_api_cache["url"] = discovered + "/matches/graph"
         _tieulam_api_cache["discovered_at"] = now
@@ -427,7 +424,7 @@ def _fetch_tieulam_matches() -> list:
                 pass  # fallback sang cloudscraper
 
     # Fallback: cloudscraper (bypass JS challenge nhưng không bypass IP block)
-    scraper = cloudscraper.create_scraper()
+    scraper = cffi_requests.Session(impersonate="chrome120")
     api_url = _get_tieulam_api_url(scraper)
     try:
         resp = scraper.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS, timeout=15)
@@ -601,7 +598,7 @@ def _get_hoiquan_api_base(scraper) -> str:
 
 
 def _fetch_hoiquan_fixtures() -> list:
-    scraper = cloudscraper.create_scraper()
+    scraper = cffi_requests.Session(impersonate="chrome120")
     api_base = _get_hoiquan_api_base(scraper)
     url = api_base.rstrip("/") + "/fixtures/unfinished"
     headers = {**_HQ_HEADERS, "Referer": HOIQUAN_FRONTEND_URL + "/"}
@@ -655,7 +652,7 @@ def _get_khandaia_api_base(scraper) -> str:
 
 
 def _fetch_khandaia_fixtures() -> list:
-    scraper = cloudscraper.create_scraper()
+    scraper = cffi_requests.Session(impersonate="chrome120")
     api_base = _get_khandaia_api_base(scraper)
     url = api_base.rstrip("/") + "/fixtures/unfinished"
     headers = {**_HQ_HEADERS, "Referer": KHANDAIA_FRONTEND_URL + "/"}
@@ -765,7 +762,7 @@ def _build_vongcam_lines(matches: list) -> list:
         away   = away_club.get("name") or ""
         title  = match.get("title") or ""
         league = match.get("tournamentName") or ""
-        blv    = (commentator.get("nickname") or commentator.get("fullName") or "").strip().upper()
+        blv    = (commentator.get("nickname") or commentator.get("fullName") or "").strip()
 
         # Format giờ VN — giống Hội Quán TV
         if start_time_str:
@@ -796,6 +793,9 @@ def _build_vongcam_lines(matches: list) -> list:
         logo = _logo_from_text(f"{home} {away} {league}")
 
         lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="Vòng Cấm TV",{display}')
+        _vc_ref = VONGCAM_FRONTEND_URL.rstrip("/") + "/"
+        lines.append(f"#EXTVLCOPT:http-user-agent={_HQ_UA}")
+        lines.append(f"#EXTVLCOPT:http-referrer={_vc_ref}")
         lines.append(stream_url)
 
     return lines
@@ -840,7 +840,7 @@ def _pick_best_stream(streams: list) -> str:
     return ""
 
 
-def _build_fixture_lines(fixtures: list, group_title: str) -> list:
+def _build_fixture_lines(fixtures: list, group_title: str, frontend_url: str = "") -> list:
     try:
         fixtures = sorted(fixtures, key=lambda f: f.get("startTime") or "")
     except Exception:
@@ -870,6 +870,10 @@ def _build_fixture_lines(fixtures: list, group_title: str) -> list:
                 continue
             display = f"{time_str} - {date_str} | {home} VS {away} ({league}) | {name}"
             lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="{group_title}",{display}')
+            if frontend_url:
+                _ref = frontend_url.rstrip("/") + "/"
+                lines.append(f"#EXTVLCOPT:http-user-agent={_HQ_UA}")
+                lines.append(f"#EXTVLCOPT:http-referrer={_ref}")
             lines.append(stream_url)
     return lines
 
@@ -905,10 +909,10 @@ def _refresh_all_playlists():
         return _build_tieulam_lines(_fetch_tieulam_matches())
 
     def fetch_hq():
-        return _build_fixture_lines(_fetch_hoiquan_fixtures(), "Hội Quán TV")
+        return _build_fixture_lines(_fetch_hoiquan_fixtures(), "Hội Quán TV", HOIQUAN_FRONTEND_URL)
 
     def fetch_kda():
-        return _build_fixture_lines(_fetch_khandaia_fixtures(), "Khán Đài A")
+        return _build_fixture_lines(_fetch_khandaia_fixtures(), "Khán Đài A", KHANDAIA_FRONTEND_URL)
 
     def fetch_vongcam():
         return _build_vongcam_lines(_fetch_vongcam_matches())
