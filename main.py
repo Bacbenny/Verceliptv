@@ -80,9 +80,9 @@ EPG_URL_OVERRIDE = os.environ.get("EPG_URL", "")
 
 # ─── Shared config ────────────────────────────────────────────────────────────
 VN_TZ                = timezone(timedelta(hours=7))
-SELF_PING_INTERVAL   = 240   # seconds
-PREFETCH_INTERVAL    = 300   # seconds — refresh cache every 5 minutes
-API_DISCOVERY_TTL    = 3600  # seconds — re-discover API URL every 1 hour
+SELF_PING_INTERVAL   = 240   
+PREFETCH_INTERVAL    = 1800  
+API_DISCOVERY_TTL    = 3600 
 
 FINISHED_STATUS_STRINGS = {"finished", "end", "ended", "complete", "completed"}
 MATCH_MAX_AGE_SECONDS   = int(os.environ.get("MATCH_MAX_DURATION", 7200))  # 2 h
