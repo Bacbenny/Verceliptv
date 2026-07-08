@@ -135,7 +135,7 @@ https://hoiquan.dpdns.org/VTVGo/?sctv3
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36
 #EXTVLCOPT:adaptive-variant=max
 #EXTVLCOPT:network-caching=5000
-https://vpsttt.vietanhtv.top/sctv/tv.php?ua=android&id=sctv4-ae779f7e
+https://hoiquan.dpdns.org/VTVGo/?sctv4
 #EXTINF:-1 tvg-id="sctv6hd" group-title="SCTV" tvg-logo="https://i.ibb.co/HpgQgB5/logo26072108-sctv6-hd.png",SCTV6
 http://live.fptplay53.net/epzhd2/film360_vhls.smil/chunklist.m3u8
 #EXTINF:-1 tvg-id="sctv7hd" group-title="SCTV" tvg-logo="https://i.ibb.co/q52fk4p/logo26072108-sctv7-hd.png",SCTV7
