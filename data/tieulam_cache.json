@@ -1,13 +1,13 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1783832157,
-  "fetched_at_utc": "2026-07-12T04:55:57.038482+00:00",
+  "fetched_at": 1783841541,
+  "fetched_at_utc": "2026-07-12T07:32:21.450179+00:00",
   "count": 20,
   "channels": [
     {
-      "title": "11:30 12/07 Thailand W vs Turkey W (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FpWVxGjFa-zLx3xGjj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FpWVxGjFa-zLx3xGjj.png&time=11%3A30+12%2F07",
+      "title": "13:30 12/07 Thailand W vs Turkey W (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FpWVxGjFa-zLx3xGjj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FpWVxGjFa-zLx3xGjj.png&time=13%3A30+12%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/49396ed597cd4c8b91e01df6bc74e459/index.m3u8"
     },
