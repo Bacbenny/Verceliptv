@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1783850152,
-  "fetched_at_utc": "2026-07-12T09:55:52.589710+00:00",
-  "count": 20,
+  "fetched_at": 1783855043,
+  "fetched_at_utc": "2026-07-12T11:17:23.801383+00:00",
+  "count": 19,
   "channels": [
-    {
-      "title": "15:00 12/07 Beijing Women vs Shanghai Women (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F926a4e735eec88e50e764ece73fe4116.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F926a4e735eec88e50e764ece73fe4116.png&time=15%3A00+12%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/11e028d6f7514e498d7fe41c9889ad51/index.m3u8"
-    },
-    {
-      "title": "15:30 12/07 Canada W vs Dominican Republic W (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FfmKzkXh5-fkHV0g99.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FfmKzkXh5-fkHV0g99.png&time=15%3A30+12%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/b01ef1c9015040af90726c4b2e3edf0a/index.m3u8"
-    },
     {
       "title": "17:20 12/07 Japan W vs Poland W (BLV TRẠNG BỊP) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F0WJLxnGG-zLx3xGjj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F0WJLxnGG-zLx3xGjj.png&time=17%3A20+12%2F07",
@@ -124,6 +112,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc44580753ff5e1f47b7784d28b10af2f.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc44580753ff5e1f47b7784d28b10af2f.png&time=21%3A00+13%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/5439f9b9100245719d5087624ee9ff2c/index.m3u8"
+    },
+    {
+      "title": "23:30 13/07 Arsenal Tula vs Tekstilshchik Ivanovo (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fcd338eefa3f2d8f275a952bd55d06b6b.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fcd338eefa3f2d8f275a952bd55d06b6b.png&time=23%3A30+13%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/efb64b56bb424796892483e1730b374f/index.m3u8"
     }
   ]
 }
