@@ -1,34 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1783870500,
-  "fetched_at_utc": "2026-07-12T15:35:00.386318+00:00",
-  "count": 14,
+  "fetched_at": 1783875902,
+  "fetched_at_utc": "2026-07-12T17:05:02.450391+00:00",
+  "count": 10,
   "channels": [
-    {
-      "title": "19:30 12/07 KFUM Oslo vs Bodo Glimt (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F78581e2ef61df4a79eb3b24254665b88.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F78581e2ef61df4a79eb3b24254665b88.png&time=19%3A30+12%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/aba31785c8054a7eb68245f45ec67cb1/index.m3u8"
-    },
-    {
-      "title": "21:00 12/07 FC Astana vs FK Aktobe Lento (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5c481f41c0a1d43dcb508650562d840f.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5c481f41c0a1d43dcb508650562d840f.png&time=21%3A00+12%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/e96a2618a1214aaa8e70fdb4b58e761e/index.m3u8"
-    },
-    {
-      "title": "21:30 12/07 Bulgaria W vs Germany W (BLV TRẠNG BỊP) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtrgkvtFa-p8cOXAXu.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtrgkvtFa-p8cOXAXu.png&time=21%3A30+12%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/95a21864c82d47188b243327dcbbacc5/index.m3u8"
-    },
-    {
-      "title": "22:00 12/07 Brann vs Start Kristiansand (BLV TRẠNG BÉO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F448b88beb6cdaf0accf126b280b177d9.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F448b88beb6cdaf0accf126b280b177d9.png&time=22%3A00+12%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/2c0e7d1943884f0e89ff8dc95b1f579c/index.m3u8"
-    },
     {
       "title": "00:15 13/07 Sarpsborg 08 vs Viking (BLV TRẠNG NGỐ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F97b182dc35a57e1fbfce5ab2382fe317.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F97b182dc35a57e1fbfce5ab2382fe317.png&time=00%3A15+13%2F07",
