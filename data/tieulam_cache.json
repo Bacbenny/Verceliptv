@@ -1,27 +1,15 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1783880952,
-  "fetched_at_utc": "2026-07-12T18:29:12.330559+00:00",
+  "fetched_at": 1783885452,
+  "fetched_at_utc": "2026-07-12T19:44:12.857608+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "00:15 13/07 Sarpsborg 08 vs Viking (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F97b182dc35a57e1fbfce5ab2382fe317.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F97b182dc35a57e1fbfce5ab2382fe317.png&time=00%3A15+13%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/771a3ca3b6c546eabd7ba3bfe7a3a441/index.m3u8"
-    },
     {
       "title": "01:00 13/07 KR Reykjavik vs IBV Vestmannaeyjar (BLV TRẠNG BÉO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F14858f3c16315392bcb7d732bbe9af26.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F14858f3c16315392bcb7d732bbe9af26.png&time=01%3A00+13%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/85025a8c37174926b1ce06d6796fb2fb/index.m3u8"
-    },
-    {
-      "title": "01:00 13/07 Serbia W vs Netherlands W (BLV TRẠNG BỊP) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fx4FgDryB-zLx3xGjj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fx4FgDryB-zLx3xGjj.png&time=01%3A00+13%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/e3de6f5aa2aa46e09090c2c004e4ffb4/index.m3u8"
     },
     {
       "title": "02:15 13/07 Independiente Rivadavia vs Club Atletico Tigre (BLV TRẠNG TỒ) [geo]",
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F808a63c4e021d1ee40dd6d9d07d3baa3.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F808a63c4e021d1ee40dd6d9d07d3baa3.png&time=23%3A00+14%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/b566d4c8dbb04d6580809ea4ac6ab5e8/index.m3u8"
+    },
+    {
+      "title": "00:00 15/07 Győri ETO FC vs Vikingur Reykjavik (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F1fac0c84b8a2914bc8449c720f56a2da.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F1fac0c84b8a2914bc8449c720f56a2da.png&time=00%3A00+15%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/5adc6315a9674c7aa619a845476c1915/index.m3u8"
+    },
+    {
+      "title": "02:00 15/07 France vs Spain (BLV TRẠNG PỜM) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=02%3A00+15%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/4bd56d7731cc486ab44524b2df5c0123/index.m3u8"
     }
   ]
 }
