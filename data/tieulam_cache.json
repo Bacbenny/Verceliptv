@@ -3,5 +3,277 @@
   "source_url": "https://tinhlagi.pro/s.m3u",
   "fetched_at": 1783821447,
   "fetched_at_utc": "2026-07-12T01:57:27.000Z",
-  "count": 0
+  "count": 45,
+  "channels": [
+    {
+      "title": "08:00 12/07 Argentina vs Switzerland (BLV TRẠNG PỜM) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&time=08%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/0aaeb2c034894c4b80ee62f49530d501/index.m3u8"
+    },
+    {
+      "title": "08:00 12/07 Argentina vs Switzerland (BLV TRẠNG PỜM) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&time=08%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/0aaeb2c034894c4b80ee62f49530d501/index.m3u8"
+    },
+    {
+      "title": "08:00 12/07 Argentina vs Switzerland (Nhà đài)",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&time=08%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://lilive1.eu.cc/live/42b3977d2fb6806f2962f754cf8c9f47/playlist.m3u8"
+    },
+    {
+      "title": "08:00 12/07 Argentina vs Switzerland (BLV TRẠNG QUỶ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&time=08%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/89813414a85d4498b83d8c534d23717b/index.m3u8"
+    },
+    {
+      "title": "08:00 12/07 Argentina vs Switzerland (BLV TRẠNG QUỶ) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&time=08%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/89813414a85d4498b83d8c534d23717b/index.m3u8"
+    },
+    {
+      "title": "08:00 12/07 Argentina vs Switzerland (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&time=08%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/ff48d5397ece41af8f7f9b5f770c5d5b/index.m3u8"
+    },
+    {
+      "title": "08:00 12/07 Argentina vs Switzerland (BLV TRẠNG TỒ) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&time=08%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/ff48d5397ece41af8f7f9b5f770c5d5b/index.m3u8"
+    },
+    {
+      "title": "08:00 12/07 Argentina vs Switzerland (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&time=08%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/bba6df7b1777468aa68cf7691fcea119/index.m3u8"
+    },
+    {
+      "title": "08:00 12/07 Argentina vs Switzerland (BLV TRẠNG TÈO) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FxQCUe9zB-AmY8ktbk.png&time=08%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/bba6df7b1777468aa68cf7691fcea119/index.m3u8"
+    },
+    {
+      "title": "10:00 12/07 USA W vs Brazil W (BLV TRẠNG BỊP) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FIoeNdfwS-MPdHoKT3.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FIoeNdfwS-MPdHoKT3.png&time=10%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/08458cc36223448e962a59afba9a9e57/index.m3u8"
+    },
+    {
+      "title": "10:00 12/07 USA W vs Brazil W (BLV TRẠNG BỊP) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FIoeNdfwS-MPdHoKT3.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FIoeNdfwS-MPdHoKT3.png&time=10%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/08458cc36223448e962a59afba9a9e57/index.m3u8"
+    },
+    {
+      "title": "11:30 12/07 Thailand W vs Turkey W (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FpWVxGjFa-zLx3xGjj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FpWVxGjFa-zLx3xGjj.png&time=11%3A30+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/49396ed597cd4c8b91e01df6bc74e459/index.m3u8"
+    },
+    {
+      "title": "11:30 12/07 Thailand W vs Turkey W (BLV TRẠNG NGỐ) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FpWVxGjFa-zLx3xGjj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FpWVxGjFa-zLx3xGjj.png&time=11%3A30+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/49396ed597cd4c8b91e01df6bc74e459/index.m3u8"
+    },
+    {
+      "title": "14:00 12/07 Queensland Lions SC vs Eastern Suburbs Brisbane (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fae6301924eac2e5f0ad32a32ab7355f2.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fae6301924eac2e5f0ad32a32ab7355f2.png&time=14%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/82d654c135ae498db36786ecdb7dec23/index.m3u8"
+    },
+    {
+      "title": "14:00 12/07 Queensland Lions SC vs Eastern Suburbs Brisbane (BLV TRẠNG TÈO) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fae6301924eac2e5f0ad32a32ab7355f2.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fae6301924eac2e5f0ad32a32ab7355f2.png&time=14%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/82d654c135ae498db36786ecdb7dec23/index.m3u8"
+    },
+    {
+      "title": "14:00 12/07 Queensland Lions SC vs Eastern Suburbs Brisbane (Nhà đài)",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fae6301924eac2e5f0ad32a32ab7355f2.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fae6301924eac2e5f0ad32a32ab7355f2.png&time=14%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://lilive1.eu.cc/live/229cf609a6c63f4dba6434523cfd3a0a/playlist.m3u8"
+    },
+    {
+      "title": "15:00 12/07 Beijing Women vs Shanghai Women (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F926a4e735eec88e50e764ece73fe4116.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F926a4e735eec88e50e764ece73fe4116.png&time=15%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/11e028d6f7514e498d7fe41c9889ad51/index.m3u8"
+    },
+    {
+      "title": "15:00 12/07 Beijing Women vs Shanghai Women (BLV TRẠNG TÍ) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F926a4e735eec88e50e764ece73fe4116.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F926a4e735eec88e50e764ece73fe4116.png&time=15%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/11e028d6f7514e498d7fe41c9889ad51/index.m3u8"
+    },
+    {
+      "title": "15:00 12/07 Beijing Women vs Shanghai Women (Nhà đài)",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F926a4e735eec88e50e764ece73fe4116.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F926a4e735eec88e50e764ece73fe4116.png&time=15%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://lilive1.eu.cc/live/166e26c1f4be5b6b8f820ea466e25389/playlist.m3u8"
+    },
+    {
+      "title": "15:30 12/07 Canada W vs Dominican Republic W (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FfmKzkXh5-fkHV0g99.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FfmKzkXh5-fkHV0g99.png&time=15%3A30+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/b01ef1c9015040af90726c4b2e3edf0a/index.m3u8"
+    },
+    {
+      "title": "15:30 12/07 Canada W vs Dominican Republic W (BLV TRẠNG TỒ) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FfmKzkXh5-fkHV0g99.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FfmKzkXh5-fkHV0g99.png&time=15%3A30+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/b01ef1c9015040af90726c4b2e3edf0a/index.m3u8"
+    },
+    {
+      "title": "17:20 12/07 Japan W vs Poland W (BLV TRẠNG BỊP) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F0WJLxnGG-zLx3xGjj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F0WJLxnGG-zLx3xGjj.png&time=17%3A20+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/e89721b15c08458fb4d1e89a3cbfada2/index.m3u8"
+    },
+    {
+      "title": "17:20 12/07 Japan W vs Poland W (BLV TRẠNG BỊP) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F0WJLxnGG-zLx3xGjj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F0WJLxnGG-zLx3xGjj.png&time=17%3A20+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/e89721b15c08458fb4d1e89a3cbfada2/index.m3u8"
+    },
+    {
+      "title": "17:30 12/07 Football Club Seoul vs Gangwon Football Club (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad010af729c420626d1865ad744168d3.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad010af729c420626d1865ad744168d3.png&time=17%3A30+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/186ced68f06944298364aa7d9941e7bc/index.m3u8"
+    },
+    {
+      "title": "17:30 12/07 Football Club Seoul vs Gangwon Football Club (BLV TRẠNG BÉO) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad010af729c420626d1865ad744168d3.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad010af729c420626d1865ad744168d3.png&time=17%3A30+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/186ced68f06944298364aa7d9941e7bc/index.m3u8"
+    },
+    {
+      "title": "17:30 12/07 Football Club Seoul vs Gangwon Football Club (Nhà đài)",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad010af729c420626d1865ad744168d3.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad010af729c420626d1865ad744168d3.png&time=17%3A30+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://lilive1.eu.cc/live/70aaca58af08f70992f9588bcc935d24/playlist.m3u8"
+    },
+    {
+      "title": "18:00 12/07 Tianjin Jinmen Tiger vs Liaoning Tieren (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc1786665c81e5dba734d5a8c2346d69e.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc1786665c81e5dba734d5a8c2346d69e.png&time=18%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/dcc819b98de8434a906aeedfb4032248/index.m3u8"
+    },
+    {
+      "title": "18:00 12/07 Tianjin Jinmen Tiger vs Liaoning Tieren (BLV TRẠNG TÈO) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc1786665c81e5dba734d5a8c2346d69e.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc1786665c81e5dba734d5a8c2346d69e.png&time=18%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/dcc819b98de8434a906aeedfb4032248/index.m3u8"
+    },
+    {
+      "title": "18:00 12/07 France W vs Czech Republic W (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fne4FVih5-rcthslVl.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fne4FVih5-rcthslVl.png&time=18%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/25fbbb6008234fb8868c7a62335595ff/index.m3u8"
+    },
+    {
+      "title": "18:00 12/07 France W vs Czech Republic W (BLV TRẠNG NGỐ) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fne4FVih5-rcthslVl.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fne4FVih5-rcthslVl.png&time=18%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/25fbbb6008234fb8868c7a62335595ff/index.m3u8"
+    },
+    {
+      "title": "18:35 12/07 Shanghai Port vs Dalian Yingbo (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc4e143e537412003565cdb7c2d212538.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc4e143e537412003565cdb7c2d212538.png&time=18%3A35+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/89e71e91bdf94392b5b0a8269851a7a6/index.m3u8"
+    },
+    {
+      "title": "18:35 12/07 Shanghai Port vs Dalian Yingbo (BLV TRẠNG TÍ) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc4e143e537412003565cdb7c2d212538.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc4e143e537412003565cdb7c2d212538.png&time=18%3A35+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/89e71e91bdf94392b5b0a8269851a7a6/index.m3u8"
+    },
+    {
+      "title": "19:00 12/07 China W vs Italy W (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FUFsHESEa-dUwawdyp.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FUFsHESEa-dUwawdyp.png&time=19%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/0ecf51f95e214d09951402ef58421b9c/index.m3u8"
+    },
+    {
+      "title": "19:00 12/07 China W vs Italy W (BLV TRẠNG TỒ) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FUFsHESEa-dUwawdyp.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FUFsHESEa-dUwawdyp.png&time=19%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/0ecf51f95e214d09951402ef58421b9c/index.m3u8"
+    },
+    {
+      "title": "21:00 12/07 FC Astana vs FK Aktobe Lento (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5c481f41c0a1d43dcb508650562d840f.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5c481f41c0a1d43dcb508650562d840f.png&time=21%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/e96a2618a1214aaa8e70fdb4b58e761e/index.m3u8"
+    },
+    {
+      "title": "21:00 12/07 FC Astana vs FK Aktobe Lento (BLV TRẠNG TÍ) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5c481f41c0a1d43dcb508650562d840f.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5c481f41c0a1d43dcb508650562d840f.png&time=21%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/e96a2618a1214aaa8e70fdb4b58e761e/index.m3u8"
+    },
+    {
+      "title": "21:00 12/07 FC Astana vs FK Aktobe Lento (Nhà đài)",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5c481f41c0a1d43dcb508650562d840f.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5c481f41c0a1d43dcb508650562d840f.png&time=21%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://lilive1.eu.cc/live/219620f169683eb793ceb88ce6d47fdc/playlist.m3u8"
+    },
+    {
+      "title": "21:30 12/07 Bulgaria W vs Germany W (BLV TRẠNG BỊP) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtrgkvtFa-p8cOXAXu.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtrgkvtFa-p8cOXAXu.png&time=21%3A30+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/95a21864c82d47188b243327dcbbacc5/index.m3u8"
+    },
+    {
+      "title": "21:30 12/07 Bulgaria W vs Germany W (BLV TRẠNG BỊP) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtrgkvtFa-p8cOXAXu.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtrgkvtFa-p8cOXAXu.png&time=21%3A30+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/95a21864c82d47188b243327dcbbacc5/index.m3u8"
+    },
+    {
+      "title": "22:00 12/07 Brann vs Start Kristiansand (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F448b88beb6cdaf0accf126b280b177d9.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F448b88beb6cdaf0accf126b280b177d9.png&time=22%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/2c0e7d1943884f0e89ff8dc95b1f579c/index.m3u8"
+    },
+    {
+      "title": "22:00 12/07 Brann vs Start Kristiansand (BLV TRẠNG BÉO) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F448b88beb6cdaf0accf126b280b177d9.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F448b88beb6cdaf0accf126b280b177d9.png&time=22%3A00+12%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/2c0e7d1943884f0e89ff8dc95b1f579c/index.m3u8"
+    },
+    {
+      "title": "00:15 13/07 Sarpsborg 08 vs Viking (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F97b182dc35a57e1fbfce5ab2382fe317.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F97b182dc35a57e1fbfce5ab2382fe317.png&time=00%3A15+13%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/771a3ca3b6c546eabd7ba3bfe7a3a441/index.m3u8"
+    },
+    {
+      "title": "00:15 13/07 Sarpsborg 08 vs Viking (BLV TRẠNG NGỐ) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F97b182dc35a57e1fbfce5ab2382fe317.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F97b182dc35a57e1fbfce5ab2382fe317.png&time=00%3A15+13%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/771a3ca3b6c546eabd7ba3bfe7a3a441/index.m3u8"
+    },
+    {
+      "title": "01:00 13/07 KR Reykjavik vs IBV Vestmannaeyjar (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F14858f3c16315392bcb7d732bbe9af26.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F14858f3c16315392bcb7d732bbe9af26.png&time=01%3A00+13%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/85025a8c37174926b1ce06d6796fb2fb/index.m3u8"
+    },
+    {
+      "title": "01:00 13/07 KR Reykjavik vs IBV Vestmannaeyjar (BLV TRẠNG BÉO) (HD2) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F14858f3c16315392bcb7d732bbe9af26.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F14858f3c16315392bcb7d732bbe9af26.png&time=01%3A00+13%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull1.asynccdn.com/live/85025a8c37174926b1ce06d6796fb2fb/index.m3u8"
+    }
+  ]
 }
