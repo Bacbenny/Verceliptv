@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1783841541,
-  "fetched_at_utc": "2026-07-12T07:32:21.450179+00:00",
+  "fetched_at": 1783850152,
+  "fetched_at_utc": "2026-07-12T09:55:52.589710+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "13:30 12/07 Thailand W vs Turkey W (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FpWVxGjFa-zLx3xGjj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FpWVxGjFa-zLx3xGjj.png&time=13%3A30+12%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/49396ed597cd4c8b91e01df6bc74e459/index.m3u8"
-    },
-    {
-      "title": "14:00 12/07 Queensland Lions SC vs Eastern Suburbs Brisbane (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fae6301924eac2e5f0ad32a32ab7355f2.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fae6301924eac2e5f0ad32a32ab7355f2.png&time=14%3A00+12%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/82d654c135ae498db36786ecdb7dec23/index.m3u8"
-    },
     {
       "title": "15:00 12/07 Beijing Women vs Shanghai Women (BLV TRẠNG TÍ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F926a4e735eec88e50e764ece73fe4116.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F926a4e735eec88e50e764ece73fe4116.png&time=15%3A00+12%2F07",
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F855ef04f1461ab3c19bfdad4702d21c8.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F855ef04f1461ab3c19bfdad4702d21c8.png&time=17%3A30+13%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/b3f788ef54dd4daab07b503346ac39ce/index.m3u8"
+    },
+    {
+      "title": "19:45 13/07 Singapore Women vs Laos Women (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F4146635215abb360c61d5106e5513ec6.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F4146635215abb360c61d5106e5513ec6.png&time=19%3A45+13%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/21f481100b4b47169f58d6b609a206ff/index.m3u8"
+    },
+    {
+      "title": "21:00 13/07 Ural Yekaterinburg vs Torpedo Moscow (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc44580753ff5e1f47b7784d28b10af2f.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc44580753ff5e1f47b7784d28b10af2f.png&time=21%3A00+13%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/5439f9b9100245719d5087624ee9ff2c/index.m3u8"
     }
   ]
 }
