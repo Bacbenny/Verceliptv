@@ -340,6 +340,10 @@ def _parse_tinhlagi_tieulam(text: str) -> list:
                         url = l2.strip()
                     j += 1
                 if url:
+                    title_upper = title.upper()
+                    if "(HD2)" in title_upper or "NHÀ ĐÀI" in title_upper:
+                        i = j
+                        continue
                     channels.append({"title": title, "logo": logo, "referrer": referrer, "url": url})
                 i = j
                 continue
