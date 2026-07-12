@@ -498,42 +498,60 @@ http://assarao4k.com:80/play/live.php?mac=00:1A:79:75:D7:5E&stream=1512428&exten
 http://assarao4k.com:80/play/live.php?mac=00:1A:79:75:D7:5E&stream=1512427&extension=ts
 #EXTINF:-1 tvg-id="" group-title="Thể thao quốc tế" tvg-logo="https://i.imgur.com/SEKXaAW.png",Eleven 4 PL Play+
 http://assarao4k.com:80/play/live.php?mac=00:1A:79:75:D7:5E&stream=1512426&extension=ts
-#EXTINF:-1 tvg-id="" group-title="Thể thao quốc tế" tvg-logo="https://ip-tv.dev/images/ico/bein-sport-1.png",BeIN Sport 1 HD Serbia
-http://ua.online24.pm/play/1101/350B326FB34F4B8/video.m3u8
-#EXTINF:-1 tvg-id="" group-title="Thể thao quốc tế" tvg-logo="https://ip-tv.dev/images/ico/bein-sport-2.png",BeIN Sport 2 HD Serbia
-http://ua.online24.pm/play/1102/350B326FB34F4B8/video.m3u8
-#EXTINF:-1 tvg-id="" group-title="Thể thao quốc tế" tvg-logo="https://ip-tv.dev/images/ico/bein-sport-3.png",BeIN Sport 3 HD Serbia
-http://ua.online24.pm/play/1103/350B326FB34F4B8/video.m3u8
-#EXTINF:-1 tvg-id="" group-title="Thể thao quốc tế" tvg-logo="https://ip-tv.dev/images/ico/bein-sport-4.png",BeIN Sport 4 HD Serbia
+#EXTINF:-1 tvg-id="" group-title="Thể thao quốc tế" tvg-logo="https://ip-tv.dev/images/ico/bein-sport-1.png",BeIN Sport 1
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 020A3E839CE18C38F329B77D5B2CCD7D
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1562828&extension=ts&play_token=EEB56vdGPc
+#EXTINF:-1 tvg-id="" group-title="Thể thao quốc tế" tvg-logo="https://ip-tv.dev/images/ico/bein-sport-2.png",BeIN Sport 2
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 020A3E839CE18C38F329B77D5B2CCD7D
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1562827&extension=ts&play_token=Xg5LZ9WvtZ
+#EXTINF:-1 tvg-id="" group-title="Thể thao quốc tế" tvg-logo="https://ip-tv.dev/images/ico/bein-sport-3.png",BeIN Sport 3
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 020A3E839CE18C38F329B77D5B2CCD7D
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1562826&extension=ts&play_token=8RElLEnwpX
+#EXTINF:-1 tvg-id="" group-title="Thể thao quốc tế" tvg-logo="https://ip-tv.dev/images/ico/bein-sport-4.png",BeIN Sport 4
 http://ua.online24.pm/play/1104/350B326FB34F4B8/video.m3u8
 #EXTINF:-1 tvg-id="" tvg-logo="https://schedulesdirect-api20141201-logos.s3.dualstack.us-east-1.amazonaws.com/stationLogos/s131810_dark_360w_270h.png" group-title="Thể thao quốc tế",DAZN
 https://1nyaler.streamhostingcdn.top/stream/94/index.m3u8
 #EXTINF:-1 tvg-name="DAZN 1" tvg-logo="http://51.158.145.100/picons/logos/PPV/DAZN.png" group-title="Thể thao quốc tế",DAZN 1
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
-#EXTVLCOPT:http-cookie=mac=00:1A:79:82:03:14; stb_lang=en; timezone=GMT
-#EXTVLCOPT:http-header=Authorization: Bearer B1FA6DA5500B7BB44D6FC447C39AEADD
-http://204.52.191.254:80/play/live.php?mac=00:1A:79:82:03:14&stream=1467813&extension=ts&play_token=WiCOgQQAE3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 020A3E839CE18C38F329B77D5B2CCD7D
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1695109&extension=ts&play_token=t0j93etvkP
 #EXTINF:-1 tvg-name="DAZN 2" tvg-logo="http://51.158.145.100/picons/logos/PPV/DAZN.png" group-title="Thể thao quốc tế",DAZN 2
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
-#EXTVLCOPT:http-cookie=mac=00:1A:79:82:03:14; stb_lang=en; timezone=GMT
-#EXTVLCOPT:http-header=Authorization: Bearer B1FA6DA5500B7BB44D6FC447C39AEADD
-http://204.52.191.254:80/play/live.php?mac=00:1A:79:82:03:14&stream=1467812&extension=ts&play_token=hSjlNfs87f
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 020A3E839CE18C38F329B77D5B2CCD7D
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1695108&extension=ts&play_token=aYsWHS4Gig
 #EXTINF:-1 tvg-name="DAZN 3" tvg-logo="http://51.158.145.100/picons/logos/PPV/DAZN.png" group-title="Thể thao quốc tế",DAZN 3
-http://line.main4k.com:80/8d1d003784/9fdbb7b821f5/1918190
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 020A3E839CE18C38F329B77D5B2CCD7D
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1695107&extension=ts&play_token=pypVacFvth
 #EXTINF:-1 tvg-name="DAZN 4" tvg-logo="http://51.158.145.100/picons/logos/PPV/DAZN.png" group-title="Thể thao quốc tế",DAZN 4
-http://line.main4k.com:80/8d1d003784/9fdbb7b821f5/1918189
+EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 020A3E839CE18C38F329B77D5B2CCD7D
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1695106&extension=ts&play_token=ekXWJ9x2vA
 #EXTINF:-1 tvg-name="DAZN 5" tvg-logo="http://51.158.145.100/picons/logos/PPV/DAZN.png" group-title="Thể thao quốc tế",DAZN 5
-http://line.main4k.com:80/8d1d003784/9fdbb7b821f5/1918188
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 020A3E839CE18C38F329B77D5B2CCD7D
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1695105&extension=ts&play_token=qdjNMuk8Hy
 #EXTINF:-1 tvg-name="Diema Sport HD" tvg-logo="http://51.158.145.100/picons/logos/logos/154827.png" group-title="Thể thao quốc tế",Diema Sport HD
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
-#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
-#EXTVLCOPT:http-header=Authorization: Bearer C0946A4F97309D913C2C3125833B2529
-http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1562903&extension=ts&play_token=ZepIpV7tyA
+#EXTVLCOPT:http-cookie=mac=00:1A:79:7D:93:30; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 47F9801A5A43FC862452851BA75BE377
+http://assarao4k.com:80/play/live.php?mac=00:1A:79:7D:93:30&stream=1460981&extension=ts&play_token=MEZg0jB2Ef
 #EXTINF:-1 tvg-name="Diema Sport 2 HD" tvg-logo="http://photo-tmdb.com/stalker_portal/logos/diemasport2hd.png" group-title="Thể thao quốc tế",Diema Sport 2 HD
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
-#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
-#EXTVLCOPT:http-header=Authorization: Bearer C0946A4F97309D913C2C3125833B2529
-http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1562902&extension=ts&play_token=NE8XExIa5V
+#EXTVLCOPT:http-cookie=mac=00:1A:79:7D:93:30; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 47F9801A5A43FC862452851BA75BE377
+http://assarao4k.com:80/play/live.php?mac=00:1A:79:7D:93:30&stream=1460980&extension=ts&play_token=TmFr0H2woj
 #EXTINF:-1 tvg-name="Diema Sport 3 HD" tvg-logo="http://51.158.145.100/picons/logos/logos/1457953.png" group-title="Thể thao quốc tế",Diema Sport 3 HD
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
 #EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
@@ -541,9 +559,9 @@ http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1562902&exte
 http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1562901&extension=ts&play_token=jlMUvd7Im6
 #EXTINF:-1 tvg-id="1954594" tvg-name="M+ LALIGA TV" tvg-logo="https://photo-tmdb.com/stalker_portal/misc/logos/320/8160.png?45398" group-title="Thể thao quốc tế" tvg-chno="14055",M+ LALIGA TV
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
-#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
-#EXTVLCOPT:http-header=Authorization: Bearer C0946A4F97309D913C2C3125833B2529
-http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1954594&extension=ts&play_token=gvn1lKhQju
+#EXTVLCOPT:http-cookie=mac=00:1A:79:7D:93:30; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 47F9801A5A43FC862452851BA75BE377
+http://assarao4k.com:80/play/live.php?mac=00:1A:79:7D:93:30&stream=1460979&extension=ts&play_token=fYZqoV97O5
 #EXTINF:-1 tvg-id="1954593" tvg-name="M+ LALIGA TV 2" tvg-logo="https://photo-tmdb.com/stalker_portal/misc/logos/320/8160.png?45398" group-title="Thể thao quốc tế" tvg-chno="14056",M+ LALIGA TV 2
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
 #EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
