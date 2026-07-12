@@ -6,7 +6,7 @@ IPTV M3U Playlist Server với nhiều nguồn thể thao trực tiếp.
 
 | Nhóm | URL | Mô tả |
 |------|-----|-------|
-| TieuLam TV | https://sv1.tieulam1.live | Bóng đá, bóng rổ, tennis... |
+| TieuLam TV | https://tinhlagi.pro/s.m3u (lọc nhóm "TIẾU LÂM TV") | Bóng đá, bóng rổ, tennis... |
 | Hội Quán TV | https://sv2.hoiquan4.live | Thể thao đa dạng |
 | Khán Đài A | https://tructiep.khandaia.link | Thể thao trực tiếp |
 | **Vòng Cấm TV** | https://sv2.vongcam3.live | Thể thao mới thêm |

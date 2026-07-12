@@ -311,6 +311,69 @@ def _get_tieulam_api_url(scraper=None) -> str:
     return _tieulam_api_cache["url"]
 
 
+TINHLAGI_M3U_URL = os.environ.get("TINHLAGI_M3U_URL", "https://tinhlagi.pro/s.m3u")
+_TINHLAGI_GROUP_MATCH = "TIẾU LÂM"
+
+
+def _parse_tinhlagi_tieulam(text: str) -> list:
+    """Parse M3U thô từ tinhlagi.pro, trả về list channel dict cho nhóm 'Tiếu Lâm TV'."""
+    lines = text.splitlines()
+    channels: list = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if line.startswith("#EXTINF"):
+            m = re.search(r'group-title="([^"]*)"', line)
+            group = m.group(1) if m else ""
+            if _TINHLAGI_GROUP_MATCH in group.upper():
+                logo_m = re.search(r'tvg-logo="([^"]*)"', line)
+                logo   = logo_m.group(1) if logo_m else ""
+                title  = line.split(",", 1)[1].strip() if "," in line else ""
+                referrer = ""
+                url      = ""
+                j = i + 1
+                while j < len(lines) and not lines[j].startswith("#EXTINF") and lines[j].strip():
+                    l2 = lines[j]
+                    if l2.startswith("#EXTVLCOPT:http-referrer="):
+                        referrer = l2.split("=", 1)[1].strip()
+                    elif not l2.startswith("#"):
+                        url = l2.strip()
+                    j += 1
+                if url:
+                    channels.append({"title": title, "logo": logo, "referrer": referrer, "url": url})
+                i = j
+                continue
+        i += 1
+    return channels
+
+
+def _fetch_tieulam_live_from_tinhlagi() -> list:
+    """Fallback: tải trực tiếp tinhlagi.pro/s.m3u và lọc nhóm 'Tiếu Lâm TV'."""
+    r = requests.get(TINHLAGI_M3U_URL, timeout=15, headers={"User-Agent": "Mozilla/5.0"})
+    r.raise_for_status()
+    channels = _parse_tinhlagi_tieulam(r.text)
+    if not channels:
+        raise ValueError("tinhlagi: không tìm thấy kênh Tiếu Lâm TV")
+    return channels
+
+
+def _build_tieulam_lines_from_channels(channels: list) -> list:
+    """Chuyển channel entries (đã lọc từ tinhlagi.pro) thành M3U lines."""
+    lines: list = []
+    for ch in channels:
+        title    = (ch.get("title") or "").strip()
+        url      = (ch.get("url") or "").strip()
+        if not title or not url:
+            continue
+        logo     = ch.get("logo") or ""
+        referrer = ch.get("referrer") or ""
+        lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="TieuLam TV",{title}')
+        if referrer:
+            lines.append(f"#EXTVLCOPT:http-referrer={referrer}")
+        lines.append(url)
+    return lines
+
+
 def _fetch_tieulam_from_cache() -> list:
     """Tải cache từ GitHub raw URL (cập nhật mỗi 30 phút bởi GitHub Actions).
     Raise ValueError nếu cache không có hoặc quá cũ.
@@ -324,7 +387,7 @@ def _fetch_tieulam_from_cache() -> list:
     age = int(time.time()) - fetched_at
     if age > TIEULAM_CACHE_MAX_AGE:
         raise ValueError(f"Cache quá cũ: {age}s (max {TIEULAM_CACHE_MAX_AGE}s)")
-    data = payload.get("data") or payload.get("matches") or []
+    data = payload.get("channels") or payload.get("data") or payload.get("matches") or []
     if not data:
         raise ValueError("Cache rỗng")
     return data
@@ -363,94 +426,24 @@ def _fetch_tieulam_via_relay() -> list:
 
 
 def _fetch_tieulam_matches() -> list:
-    """Fetch TieuLam matches — 3-tier free setup:
+    """Nguồn dữ liệu TieuLam TV — lấy từ danh sách tổng hợp tinhlagi.pro
+    (lọc nhóm 'TIẾU LÂM TV'), thay cho API riêng của TieuLam trước đây.
 
-    1. GitHub Actions cache (mỗi 30 phút, nhanh nhất, không gọi API)
-    2. Relay (Cloudflare worker hoặc Replit relay — khi cache cũ/lỗi)
-    3. Direct API (fallback cuối, chỉ OK khi không bị Cloudflare chặn)
+    1. GitHub Actions cache (mỗi 30 phút, đọc từ data/tieulam_cache.json)
+    2. Fallback: tải trực tiếp tinhlagi.pro/s.m3u nếu cache lỗi/cũ
     """
     import sys
 
-    # Tầng 1 — GitHub Actions cache
     try:
         data = _fetch_tieulam_from_cache()
-        print(f"✅ TieuLam cache: {len(data)} matches", file=sys.stderr)
+        print(f"✅ TieuLam cache (tinhlagi): {len(data)} channels", file=sys.stderr)
         return data
     except Exception as e:
         print(f"⚠️ Cache miss: {e}", file=sys.stderr)
 
-    # Tầng 2 — Relay (Cloudflare worker / Replit)
-    try:
-        data = _fetch_tieulam_via_relay()
-        print(f"✅ Tier 2 relay OK: {len(data)} matches", file=sys.stderr)
-        return data
-    except Exception as e:
-        print(f"⚠️ Tier 2 relay failed: {e}", file=sys.stderr)
-
-    # Tầng 3 — Direct API (yêu cầu curl_cffi / cloudscraper)
-
-    cutoff     = (datetime.now(timezone.utc) - timedelta(seconds=MATCH_MAX_AGE_SECONDS)).strftime("%Y-%m-%dT%H:%M:%S")
-    cutoff_end = (datetime.now(timezone.utc) + timedelta(hours=72)).strftime("%Y-%m-%dT%H:%M:%S")
-
-    payload = {
-        "queries": [
-            {"field": "start_date", "type": "gte", "value": cutoff},
-            {"field": "start_date", "type": "lte", "value": cutoff_end},
-        ],
-        "query_and": True,
-        "limit": 100,
-        "page": 1,
-        "order_asc": "start_date",
-    }
-
-    # Ưu tiên curl_cffi — giả lập TLS fingerprint Chrome, bypass Cloudflare IP-block
-    if _CURL_CFFI:
-        try:
-            api_url = _get_tieulam_api_url()
-            resp = curl_requests.post(
-                api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS,
-                timeout=15, impersonate="chrome110",
-            )
-            resp.raise_for_status()
-            return resp.json().get("data", [])
-        except Exception:
-            # Thử lại với URL discovery mới
-            _tieulam_api_cache["discovered_at"] = 0
-            try:
-                api_url = _get_tieulam_api_url()
-                resp = curl_requests.post(
-                    api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS,
-                    timeout=15, impersonate="chrome110",
-                )
-                resp.raise_for_status()
-                return resp.json().get("data", [])
-            except Exception:
-                pass  # fallback sang cloudscraper
-
-    # Fallback: cloudscraper (bypass JS challenge nhưng không bypass IP block)
-    scraper = cffi_requests.Session(impersonate="chrome120")
-    api_url = _get_tieulam_api_url(scraper)
-    try:
-        resp = scraper.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS, timeout=15)
-        resp.raise_for_status()
-    except Exception:
-        _tieulam_api_cache["discovered_at"] = 0
-        api_url = _get_tieulam_api_url(scraper)
-        resp = scraper.post(api_url, json=payload, headers=_TIEULAM_HTTPX_HEADERS, timeout=15)
-        resp.raise_for_status()
-
-    return resp.json().get("data", [])
-
-
-_TIEULAM_SPORT_VI = {
-    "FOOTBALL":    ("⚽ Bóng đá",   SPORT_LOGOS["football"]),
-    "VOLLEYBALL":  ("🏐 Bóng chuyền", SPORT_LOGOS["volleyball"]),
-    "BASKETBALL":  ("🏀 Bóng rổ",   SPORT_LOGOS["basketball"]),
-    "TENNIS":      ("🎾 Quần vợt",  SPORT_LOGOS["tennis"]),
-    "BADMINTON":   ("🏸 Cầu lông",  SPORT_LOGOS["badminton"]),
-    "BILLIARD":    ("🎱 Bi-a",      SPORT_LOGOS["billiards"]),
-    "SNOOKER":     ("🎱 Snooker",   SPORT_LOGOS["billiards"]),
-}
+    data = _fetch_tieulam_live_from_tinhlagi()
+    print(f"✅ TieuLam live (tinhlagi): {len(data)} channels", file=sys.stderr)
+    return data
 
 
 def _tieulam_logo(match: dict) -> str:
@@ -908,9 +901,9 @@ def _refresh_all_playlists():
     errors = []
 
     def fetch_tieulam():
-        # _fetch_tieulam_matches() xử lý relay/direct logic — raise nếu lỗi
+        # _fetch_tieulam_matches() trả về channel list từ tinhlagi.pro — raise nếu lỗi
         # Exception sẽ bị bắt bởi ThreadPoolExecutor và ghi vào errors list
-        return _build_tieulam_lines(_fetch_tieulam_matches())
+        return _build_tieulam_lines_from_channels(_fetch_tieulam_matches())
 
     def fetch_hq():
         return _build_fixture_lines(_fetch_hoiquan_fixtures(), "Hội Quán TV", HOIQUAN_FRONTEND_URL)
