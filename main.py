@@ -952,8 +952,7 @@ def _refresh_all_playlists():
     def count(lines):
         return sum(1 for l in lines if l.startswith("#EXTINF"))
 
-    current_epg = _epg_url()
-    epg_header = f'#EXTM3U url-tvg="{current_epg}" x-tvg-url="{current_epg}"'
+    epg_header = "#EXTM3U"
 
     _store("tieulam",  epg_header + "\n" + "\n".join(tieulam_lines))
     _store("hoiquan",  epg_header + "\n" + "\n".join(hq_lines))
