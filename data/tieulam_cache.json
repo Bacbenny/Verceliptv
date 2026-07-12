@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1783885452,
-  "fetched_at_utc": "2026-07-12T19:44:12.857608+00:00",
+  "fetched_at": 1783889822,
+  "fetched_at_utc": "2026-07-12T20:57:02.175780+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "01:00 13/07 KR Reykjavik vs IBV Vestmannaeyjar (BLV TRẠNG BÉO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F14858f3c16315392bcb7d732bbe9af26.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F14858f3c16315392bcb7d732bbe9af26.png&time=01%3A00+13%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/85025a8c37174926b1ce06d6796fb2fb/index.m3u8"
-    },
     {
       "title": "02:15 13/07 Independiente Rivadavia vs Club Atletico Tigre (BLV TRẠNG TỒ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F7e779bba58b944c8cfa786d857430383.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F7e779bba58b944c8cfa786d857430383.png&time=02%3A15+13%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=02%3A00+15%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/4bd56d7731cc486ab44524b2df5c0123/index.m3u8"
+    },
+    {
+      "title": "02:00 15/07 France vs Spain (BLV TRẠNG QUỶ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=02%3A00+15%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/f55f235fc8fb464da7c4857b1f8d4c85/index.m3u8"
     }
   ]
 }
