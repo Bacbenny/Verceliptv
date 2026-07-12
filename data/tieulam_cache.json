@@ -1,28 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1783859316,
-  "fetched_at_utc": "2026-07-12T12:28:36.845385+00:00",
-  "count": 18,
+  "fetched_at": 1783865334,
+  "fetched_at_utc": "2026-07-12T14:08:54.579412+00:00",
+  "count": 15,
   "channels": [
-    {
-      "title": "17:20 12/07 Japan W vs Poland W (BLV TRẠNG BỊP) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F0WJLxnGG-zLx3xGjj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F0WJLxnGG-zLx3xGjj.png&time=17%3A20+12%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/e89721b15c08458fb4d1e89a3cbfada2/index.m3u8"
-    },
-    {
-      "title": "17:30 12/07 Football Club Seoul vs Gangwon Football Club (BLV TRẠNG BÉO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad010af729c420626d1865ad744168d3.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad010af729c420626d1865ad744168d3.png&time=17%3A30+12%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/186ced68f06944298364aa7d9941e7bc/index.m3u8"
-    },
-    {
-      "title": "18:00 12/07 France W vs Czech Republic W (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fne4FVih5-rcthslVl.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fne4FVih5-rcthslVl.png&time=18%3A00+12%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/25fbbb6008234fb8868c7a62335595ff/index.m3u8"
-    },
     {
       "title": "19:00 12/07 China W vs Italy W (BLV TRẠNG TỒ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FUFsHESEa-dUwawdyp.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FUFsHESEa-dUwawdyp.png&time=19%3A00+12%2F07",
