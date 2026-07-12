@@ -75,9 +75,6 @@ VONGCAM_FRONTEND_URL  = os.environ.get("VONGCAM_FRONTEND", "https://sv2.vongcam3
 VONGCAM_API_URL       = os.environ.get("VONGCAM_API",      "https://sv.bugiotv.xyz/internal/api/matches")
 VONGCAM_API_TOKEN     = os.environ.get("VONGCAM_TOKEN",    "AB321C")
 
-# ─── EPG — override via env var, otherwise auto-built from /epg.xml endpoint ─
-EPG_URL_OVERRIDE = os.environ.get("EPG_URL", "")
-
 # ─── Shared config ────────────────────────────────────────────────────────────
 VN_TZ                = timezone(timedelta(hours=7))
 SELF_PING_INTERVAL   = 240   
@@ -124,12 +121,6 @@ _last_counts = {
     "refreshed_at": 0, "last_error": "",
 }
 
-# ─── EPG XML cache ────────────────────────────────────────────────────────────
-_epg_cache: dict = {"content": None, "gz": None, "etag": None, "built_at": 0}
-_epg_lock  = threading.Lock()
-EPG_CACHE_TTL = 3600  # rebuild every 1 hour
-
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  Public URL helpers
 # ══════════════════════════════════════════════════════════════════════════════
@@ -153,74 +144,6 @@ def _get_public_url() -> str:
     if app_url:
         return app_url.rstrip("/")
     return f"http://localhost:{os.environ.get('PORT', 5000)}"
-
-
-def _epg_url() -> str:
-    if EPG_URL_OVERRIDE:
-        return EPG_URL_OVERRIDE
-    return f"{_get_public_url()}/epg.xml"
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-#  EPG XML builder
-# ══════════════════════════════════════════════════════════════════════════════
-
-def _build_epg_xml() -> str:
-    seen_ids:   dict[str, tuple[str, str]] = {}
-    seen_names: dict[str, tuple[str, str]] = {}
-
-    combined = _playlist_cache.get("combined", {})
-    raw = combined.get("content") or b""
-    content = raw.decode("utf-8") if isinstance(raw, (bytes, bytearray)) else (raw or "")
-
-    for m in re.finditer(
-        r'#EXTINF[^\n]*?(?:tvg-id="(?P<tid>[^"]*)")?[^\n]*?'
-        r'(?:tvg-name="(?P<tname>[^"]*)")?[^\n]*?'
-        r'(?:tvg-logo="(?P<tlogo>[^"]*)")?[^\n]*?,(?P<label>[^\n]*)',
-        content,
-    ):
-        tid   = (m.group("tid")   or "").strip()
-        tname = (m.group("tname") or "").strip()
-        label = (m.group("label") or "").strip()
-        tlogo = (m.group("tlogo") or "").strip()
-
-        display = tname or label
-        if not display:
-            continue
-
-        if tid:
-            if tid not in seen_ids:
-                seen_ids[tid] = (display, tlogo)
-        else:
-            slug = re.sub(r"[^a-z0-9]", "", display.lower())[:32]
-            if slug and slug not in seen_names:
-                seen_names[slug] = (display, tlogo)
-
-    lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<tv generator-info-name="IPTV M3U Server">']
-
-    for cid, (name, logo) in seen_ids.items():
-        esc_name = name.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        logo_tag = f'\n    <icon src="{logo}" />' if logo else ""
-        lines.append(f'  <channel id="{cid}">\n    <display-name>{esc_name}</display-name>{logo_tag}\n  </channel>')
-
-    for slug, (name, logo) in seen_names.items():
-        esc_name = name.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        logo_tag = f'\n    <icon src="{logo}" />' if logo else ""
-        lines.append(f'  <channel id="{slug}">\n    <display-name>{esc_name}</display-name>{logo_tag}\n  </channel>')
-
-    lines.append("</tv>")
-    return "\n".join(lines)
-
-
-def _get_or_build_epg() -> dict:
-    with _epg_lock:
-        now = time.time()
-        if _epg_cache["content"] is None or (now - _epg_cache["built_at"]) > EPG_CACHE_TTL:
-            xml = _build_epg_xml()
-            gz  = gzip.compress(xml.encode("utf-8"), compresslevel=6)
-            etag = '"' + hashlib.md5(gz).hexdigest() + '"'
-            _epg_cache.update({"content": xml, "gz": gz, "etag": etag, "built_at": now})
-        return dict(_epg_cache)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1056,27 +979,6 @@ def vtv_m3u():
     return _m3u_response("vtv", "vtv.m3u")
 
 
-@app.route("/epg.xml")
-def epg_xml():
-    entry = _get_or_build_epg()
-
-    etag = entry["etag"]
-    if request.headers.get("If-None-Match") == etag:
-        return Response(status=304)
-
-    accept_enc = request.headers.get("Accept-Encoding", "")
-    use_gzip   = "gzip" in accept_enc and entry["gz"] is not None
-    body = entry["gz"] if use_gzip else entry["content"].encode("utf-8")
-
-    resp = Response(body, mimetype="application/xml; charset=utf-8")
-    resp.headers["ETag"]          = etag
-    resp.headers["Cache-Control"] = f"public, max-age={EPG_CACHE_TTL}"
-    resp.headers["Vary"]          = "Accept-Encoding"
-    if use_gzip:
-        resp.headers["Content-Encoding"] = "gzip"
-    return resp
-
-
 @app.route("/ping")
 def ping():
     return Response("OK", mimetype="text/plain")
@@ -1189,7 +1091,6 @@ def index():
     vtv_count     = _last_counts.get("vtv", 0)
     total         = tieulam_count + hq_count + kda_count + vongcam_count + vtv_count
 
-    epg_link = _epg_url()
     return (
         "<h2>🎬 IPTV M3U Server</h2>"
         "<h3>📋 Playlist</h3><ul>"
@@ -1199,10 +1100,6 @@ def index():
         "<li><a href='/khandaia.m3u'>/khandaia.m3u</a> — Khán Đài A only</li>"
         "<li><a href='/vongcam.m3u'>/vongcam.m3u</a> — Vòng Cấm TV only</li>"
         "<li><a href='/vtv.m3u'>/vtv.m3u</a> — Kênh VTV tĩnh (VTV1-10, Vietnam Today)</li>"
-        "</ul>"
-        "<h3>📡 EPG</h3><ul>"
-        f"<li><a href='/epg.xml'>/epg.xml</a> — XMLTV tự sinh từ danh sách kênh (cache 1h)</li>"
-        f"<li>URL đầy đủ: <code>{epg_link}</code></li>"
         "</ul>"
         "<h3>📊 Trạng thái</h3>"
         f"<p>📺 Tổng kênh live: <strong>{total}</strong></p>"
