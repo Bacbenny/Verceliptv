@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1783963863,
-  "fetched_at_utc": "2026-07-13T17:31:03.152220+00:00",
+  "fetched_at": 1783971361,
+  "fetched_at_utc": "2026-07-13T19:36:01.893097+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "23:30 13/07 Arsenal Tula vs Tekstilshchik Ivanovo (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fcd338eefa3f2d8f275a952bd55d06b6b.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fcd338eefa3f2d8f275a952bd55d06b6b.png&time=23%3A30+13%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/efb64b56bb424796892483e1730b374f/index.m3u8"
-    },
-    {
-      "title": "00:00 14/07 Djurgardens vs Halmstads (BLV TRẠNG BÉO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5d15445b5ebaaad062065f158f1d1fd8.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5d15445b5ebaaad062065f158f1d1fd8.png&time=00%3A00+14%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/e7869b9314d6438186f58e6abcb42bb6/index.m3u8"
-    },
     {
       "title": "06:30 14/07 Ceara vs Athletic Club (BLV TRẠNG TÈO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Faf8774ff48aa426f5516ba6d507c5381.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Faf8774ff48aa426f5516ba6d507c5381.png&time=06%3A30+14%2F07",
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fe731daef830fadf0adaa6be047d6dabe.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fe731daef830fadf0adaa6be047d6dabe.png&time=16%3A30+15%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/218ca400256449da8826c0995885b31a/index.m3u8"
+    },
+    {
+      "title": "17:20 15/07 Japan vs Italy (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Ff552VMEa-E1YhvyqD.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Ff552VMEa-E1YhvyqD.png&time=17%3A20+15%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/c5daf42542b94dd88ee94421406a4331/index.m3u8"
+    },
+    {
+      "title": "18:00 15/07 Germany vs Slovenia (BLV TRẠNG BỊP) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FhjKM6ZCr-6ys9CWQj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FhjKM6ZCr-6ys9CWQj.png&time=18%3A00+15%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/bcf9ff08109445d08665b2e064342ca6/index.m3u8"
     }
   ]
 }
