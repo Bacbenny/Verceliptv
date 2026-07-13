@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1783904788,
-  "fetched_at_utc": "2026-07-13T01:06:28.370060+00:00",
+  "fetched_at": 1783918951,
+  "fetched_at_utc": "2026-07-13T05:02:31.138028+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "06:30 13/07 Montreal Impact vs Vancouver FC (BLV TRẠNG TÍ ( Giáo Sư )) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fabd87a03b9befd43df6c45c9b17e9a79.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fabd87a03b9befd43df6c45c9b17e9a79.png&time=06%3A30+13%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/1adca8be101f44be9fe7266ee8273b7a/index.m3u8"
-    },
-    {
-      "title": "07:30 13/07 Austin FC II vs MINNESOTA United B (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F711b58aca949c7b98ae560b5d9f17c55.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F711b58aca949c7b98ae560b5d9f17c55.png&time=07%3A30+13%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/d693f09d6fe54ca98aea9b3ce5856490/index.m3u8"
-    },
     {
       "title": "15:45 13/07 Cambodia Women vs Timor Leste Women (BLV TRẠNG NGỐ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fb258d80ca0e0b767157ed3929a4216fd.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fb258d80ca0e0b767157ed3929a4216fd.png&time=15%3A45+13%2F07",
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=02%3A00+15%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/f55f235fc8fb464da7c4857b1f8d4c85/index.m3u8"
+    },
+    {
+      "title": "02:00 15/07 France vs Spain (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=02%3A00+15%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/df8c8ac1cea941e9ae50fee2de513504/index.m3u8"
+    },
+    {
+      "title": "02:00 15/07 France vs Spain (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=02%3A00+15%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/3faed9b93e234103b8118b74aac2d720/index.m3u8"
     }
   ]
 }
