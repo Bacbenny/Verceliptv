@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1783944690,
-  "fetched_at_utc": "2026-07-13T12:11:30.082958+00:00",
-  "count": 20,
+  "fetched_at": 1783956231,
+  "fetched_at_utc": "2026-07-13T15:23:51.648996+00:00",
+  "count": 19,
   "channels": [
-    {
-      "title": "17:30 13/07 FC Bulleen Lions vs Brunswick City (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F855ef04f1461ab3c19bfdad4702d21c8.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F855ef04f1461ab3c19bfdad4702d21c8.png&time=17%3A30+13%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/b3f788ef54dd4daab07b503346ac39ce/index.m3u8"
-    },
-    {
-      "title": "19:45 13/07 Singapore Women vs Laos Women (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F4146635215abb360c61d5106e5513ec6.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F4146635215abb360c61d5106e5513ec6.png&time=19%3A45+13%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/21f481100b4b47169f58d6b609a206ff/index.m3u8"
-    },
     {
       "title": "21:00 13/07 Ural Yekaterinburg vs Torpedo Moscow (BLV TRẠNG TỒ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc44580753ff5e1f47b7784d28b10af2f.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc44580753ff5e1f47b7784d28b10af2f.png&time=21%3A00+13%2F07",
@@ -124,6 +112,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F3679dc2a79876fe397c5a7e96c844e0e.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F3679dc2a79876fe397c5a7e96c844e0e.png&time=07%3A00+15%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/556746c5294c41cba828590024d61e82/index.m3u8"
+    },
+    {
+      "title": "07:30 15/07 Blooming vs Gualberto Villarroel Deportivo San José (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F1a8ffd06b2866504609c32ee6091ba7c.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F1a8ffd06b2866504609c32ee6091ba7c.png&time=07%3A30+15%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/ff003c76a56a466d9b33381893576340/index.m3u8"
     }
   ]
 }
