@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1783931623,
-  "fetched_at_utc": "2026-07-13T08:33:43.918582+00:00",
+  "fetched_at": 1783944690,
+  "fetched_at_utc": "2026-07-13T12:11:30.082958+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "15:45 13/07 Cambodia Women vs Timor Leste Women (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fb258d80ca0e0b767157ed3929a4216fd.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fb258d80ca0e0b767157ed3929a4216fd.png&time=15%3A45+13%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/eacfd3484a2042f5ad109484f01a17ea/index.m3u8"
-    },
     {
       "title": "17:30 13/07 FC Bulleen Lions vs Brunswick City (BLV TRẠNG TÈO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F855ef04f1461ab3c19bfdad4702d21c8.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F855ef04f1461ab3c19bfdad4702d21c8.png&time=17%3A30+13%2F07",
@@ -24,7 +18,7 @@
       "url": "https://pull.asynccdn.com/live/21f481100b4b47169f58d6b609a206ff/index.m3u8"
     },
     {
-      "title": "21:00 13/07 Ural Yekaterinburg vs Torpedo Moscow (BLV TRẠNG BÉO) [geo]",
+      "title": "21:00 13/07 Ural Yekaterinburg vs Torpedo Moscow (BLV TRẠNG TỒ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc44580753ff5e1f47b7784d28b10af2f.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc44580753ff5e1f47b7784d28b10af2f.png&time=21%3A00+13%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/5439f9b9100245719d5087624ee9ff2c/index.m3u8"
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=02%3A00+15%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/3faed9b93e234103b8118b74aac2d720/index.m3u8"
+    },
+    {
+      "title": "07:00 15/07 Manta FC vs Delfin SC (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F3679dc2a79876fe397c5a7e96c844e0e.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F3679dc2a79876fe397c5a7e96c844e0e.png&time=07%3A00+15%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/556746c5294c41cba828590024d61e82/index.m3u8"
     }
   ]
 }
