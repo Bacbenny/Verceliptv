@@ -284,14 +284,40 @@ def _fetch_tieulam_live_from_tinhlagi() -> list:
     return channels
 
 
+_TIEULAM_TITLE_RE = re.compile(
+    r'^(?P<time>\d{1,2}:\d{2})\s+(?P<date>\d{1,2}/\d{1,2})\s+'
+    r'(?P<home>.+?)\s+vs\s+(?P<away>.+?)\s*'
+    r'(?:\((?P<blv>[^)]*)\))?\s*(?:\[geo\])?$',
+    re.IGNORECASE,
+)
+
+
+def _format_tieulam_title(title: str) -> str:
+    """Chuẩn hoá tiêu đề Tiếu Lâm TV theo định dạng dùng dấu gạch ngang/gạch đứng
+    giống Khán Đài A / Vòng Cấm TV: 'HH:MM - DD/MM | Home VS Away | BLV ...',
+    đồng thời bỏ thẻ [geo]."""
+    m = _TIEULAM_TITLE_RE.match(title.strip())
+    if not m:
+        return re.sub(r'\s*\[geo\]\s*', '', title, flags=re.IGNORECASE).strip()
+    time_str = m.group("time")
+    date_str = m.group("date")
+    home     = m.group("home").strip()
+    away     = m.group("away").strip()
+    blv      = (m.group("blv") or "").strip()
+    formatted = f"{time_str} - {date_str} | {home} VS {away}"
+    if blv:
+        formatted += f" | {blv}"
+    return formatted
+
 def _build_tieulam_lines_from_channels(channels: list) -> list:
     """Chuyển channel entries (đã lọc từ tinhlagi.pro) thành M3U lines."""
     lines: list = []
     for ch in channels:
-        title    = (ch.get("title") or "").strip()
-        url      = (ch.get("url") or "").strip()
-        if not title or not url:
+        raw_title = (ch.get("title") or "").strip()
+        url       = (ch.get("url") or "").strip()
+        if not raw_title or not url:
             continue
+        title    = _format_tieulam_title(raw_title)
         logo     = ch.get("logo") or ""
         referrer = ch.get("referrer") or ""
         lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="TieuLam TV",{title}')
