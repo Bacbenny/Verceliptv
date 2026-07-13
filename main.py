@@ -318,7 +318,7 @@ def _build_tieulam_lines_from_channels(channels: list) -> list:
         if not raw_title or not url:
             continue
         title    = _format_tieulam_title(raw_title)
-        logo     = ch.get("logo") or ""
+        logo     = _logo_from_text(title)
         referrer = ch.get("referrer") or ""
         lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="TieuLam TV",{title}')
         if referrer:
