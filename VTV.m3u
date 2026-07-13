@@ -773,21 +773,3 @@ http://cdn69630.sp-vpn-vad.com:80/at2sc0r6b4/kmmutt995q/1609304
 http://cdn69630.sp-vpn-vad.com:80/at2sc0r6b4/kmmutt995q/1609305
 #EXTINF:-1 tvg-name="Ligue 1+ 10 ʜᴅ" tvg-logo="https://cdn.broadbandtvnews.com/wp-content/uploads/2025/08/14122528/Ligue1-900x600.jpg" group-title="LIGUE PLUS LIVE",Ligue 1+ 10 ʜᴅ
 http://cdn69630.sp-vpn-vad.com:80/at2sc0r6b4/kmmutt995q/1609306
-#EXTINF:-1 tvg-name="VOV1" tvg-logo="https://i.imgur.com/jFOE43P.png" group-title="KÊNH VOV",VOV1
-https://audio-lss.vov.vn/han/live/vov1/audio/haudio-eng.m3u8
-#EXTINF:-1 tvg-name="VOV2" tvg-logo="https://i.imgur.com/LW3Va45.png" group-title="KÊNH VOV",VOV2
-https://audio-lss.vov.vn/han/live/vov2/audio/haudio-eng.m3u8
-#EXTINF:-1 tvg-name="VOV3" tvg-logo="https://i.imgur.com/O0jiqYa.png" group-title="KÊNH VOV",VOV3
-https://audio-lss.vov.vn/han/live/vov3/audio/haudio-eng.m3u8
-#EXTINF:-1 tvg-name="VOV5" tvg-logo="https://i.imgur.com/wd9CDkT.png" group-title="KÊNH VOV",VOV5
-https://media-audio.vov.vn/vov5.sdp_aac/chunklist.m3u8
-#EXTINF:-1 tvg-name="VOV ENGLISH 24/7" tvg-logo="https://i.imgur.com/OgdY02B.png" group-title="KÊNH VOV",VOV ENGLISH 24/7
-https://audio-lss.vov.vn/han/live/vov24_7/audio/haudio-eng.m3u8
-#EXTINF:-1 tvg-name="VOV GIAO THÔNG HÀ NỘI" tvg-logo="https://i.imgur.com/Wu8zN9H.png" group-title="KÊNH VOV",VOV GIAO THÔNG HÀ NỘI
-https://play.vovgiaothong.vn/live/gthn/playlist.m3u8
-#EXTINF:-1 tvg-name="VOV GIAO THÔNG TP.HCM" tvg-logo="https://i.imgur.com/Wu8zN9H.png" group-title="KÊNH VOV",VOV GIAO THÔNG TP.HCM
-https://play.vovgiaothong.vn/live/gthcm/playlist.m3u8
-#EXTINF:-1 tvg-name="VOV GIAO THÔNG MÊ KÔNG" tvg-logo="https://i.imgur.com/2tMmok6.png" group-title="KÊNH VOV",VOV GIAO THÔNG MÊ KÔNG
-https://play.vovgiaothong.vn/live/mekong/playlist.m3u8
-#EXTINF:-1 tvg-name="VOV GIAO THÔNG DUYÊN HẢI" tvg-logo="https://i.postimg.cc/t43J2yhN/Duyenhai.png" group-title="KÊNH VOV",VOV GIAO THÔNG DUYÊN HẢI
-https://play.vovgiaothong.vn/live/duyenhai/playlist.m3u8
