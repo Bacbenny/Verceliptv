@@ -689,11 +689,36 @@ http://assarao4k.com:80/play/live.php?mac=00:1A:79:75:D7:5E&stream=485843&extens
 http://assarao4k.com:80/play/live.php?mac=00:1A:79:75:D7:5E&stream=485855&extension=ts
 #EXTINF:-1 tvg-name="CANAL+ FOOT 4K." tvg-logo="http://138.199.27.237:8080/FRANCE/CANAL+FOOT.png" group-title="CANAL+ SPORT",CANAL+ FOOT 4K
 http://assarao4k.com:80/play/live.php?mac=00:1A:79:59:C0:0B&stream=394814&extension=ts
-#EXTINF:-1 tvg-name="CANAL+ SPORT 360 ᵁᴴᴰ" tvg-logo="http://138.199.27.237:8080/EUROPE/FRANCE/Canal+Sport_360(1).png" group-title="CANAL+ SPORT",CANAL+ SPORT 360 ᵁᴴᴰ
+#EXTINF:-1 tvg-name="CANAL+ SPORT 360" tvg-logo="http://138.199.27.237:8080/EUROPE/FRANCE/Canal+Sport_360(1).png" group-title="CANAL+ SPORT",CANAL+ SPORT 360
 http://cdn69630.sp-vpn-vad.com:80/at2sc0r6b4/kmmutt995q/256628
 #EXTINF:-1 tvg-name="CANAL+ SPORT" tvg-logo="http://138.199.27.237:8080/0tv_logo/5028.png" group-title="CANAL+ SPORT",CANAL+ SPORT
 http://assarao4k.com:80/play/live.php?mac=00:1A:79:59:C0:0B&stream=599983&extension=ts
-#EXTINF:-1 tvg-name="CANAL+ PREMIER LEAGUE ᵁᴴᴰ" tvg-logo="https://static.wikia.nocookie.net/logopedia/images/2/28/Canal_PremierLeague.svg/revision/latest/scale-to-width-down/340?cb=20200906183946" group-title="CANAL+ SPORT",CANAL+ PREMIER LEAGUE ᵁᴴᴰ
+#EXTINF:-1 tvg-id="1853401" tvg-name="CANAL+ SPORT 1" tvg-logo="http://51.158.145.100/picons/logos/AFRICANEW/CANALSPORT1.png" group-title="CANAL+ SPORT" tvg-chno="38913",CANAL+ SPORT 1
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:AD:C0:2A; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 8EFF323E7BE9CB75DDA05EED224E9C56
+http://paid32945.wd.business-cdn-8k.com:80/play/live.php?mac=00:1A:79:AD:C0:2A&stream=1853401&extension=ts&play_token=eYrGlWXvOd
+#EXTINF:-1 tvg-id="1853400" tvg-name="CANAL+ SPORT 2" tvg-logo="http://51.158.145.100/picons/logos/AFRICANEW/CANALPLUSSPORT2.png" group-title="CANAL+ SPORT" tvg-chno="38914",CANAL+ SPORT 2
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:AD:C0:2A; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 8EFF323E7BE9CB75DDA05EED224E9C56
+http://paid32945.wd.business-cdn-8k.com:80/play/live.php?mac=00:1A:79:AD:C0:2A&stream=1853400&extension=ts&play_token=tmWGbFcuPj
+#EXTINF:-1 tvg-id="1853399" tvg-name="CANAL+ SPORT 3" tvg-logo="http://51.158.145.100/picons/logos/AFRICANEW/CANALPLUSSPORT3.png" group-title="CANAL+ SPORT" tvg-chno="38915",CANAL+ SPORT 3
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:AD:C0:2A; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 8EFF323E7BE9CB75DDA05EED224E9C56
+http://paid32945.wd.business-cdn-8k.com:80/play/live.php?mac=00:1A:79:AD:C0:2A&stream=1853399&extension=ts&play_token=IU5hnc3TV6
+#EXTINF:-1 tvg-id="1853398" tvg-name="CANAL+ SPORT 4" tvg-logo="http://51.158.145.100/picons/logos/AFRICANEW/CANALPLUSSPORT4.png" group-title="CANAL+ SPORT" tvg-chno="38916",CANAL+ SPORT 4
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:AD:C0:2A; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 8EFF323E7BE9CB75DDA05EED224E9C56
+http://paid32945.wd.business-cdn-8k.com:80/play/live.php?mac=00:1A:79:AD:C0:2A&stream=1853398&extension=ts&play_token=g8NuBMtuiU
+#EXTINF:-1 tvg-id="1853397" tvg-name="CANAL+ SPORT 5" tvg-logo="http://51.158.145.100/picons/logos/AFRICANEW/CANALPLUSSPORT5.png" group-title="CANAL+ SPORT" tvg-chno="38917",CANAL+ SPORT 5
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:AD:C0:2A; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 8EFF323E7BE9CB75DDA05EED224E9C56
+http://paid32945.wd.business-cdn-8k.com:80/play/live.php?mac=00:1A:79:AD:C0:2A&stream=1853397&extension=ts&play_token=Iw628DCwTA
+#EXTINF:-1 tvg-name="CANAL+ PREMIER LEAGUE" tvg-logo="https://static.wikia.nocookie.net/logopedia/images/2/28/Canal_PremierLeague.svg/revision/latest/scale-to-width-down/340?cb=20200906183946" group-title="CANAL+ SPORT",CANAL+ PREMIER LEAGUE
 http://cdn69630.sp-vpn-vad.com:80/at2sc0r6b4/kmmutt995q/115870
 #EXTINF:-1 tvg-id="" group-title="CANAL+ SPORT" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Logo_Canal%2B_1995.svg/1920px-Logo_Canal%2B_1995.svg.png",Canal + Live 1 FHD
 http://assarao4k.com:80/play/live.php?mac=00:1A:79:59:C0:0B&stream=1170885&extension=ts
