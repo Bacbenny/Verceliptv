@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784020105,
-  "fetched_at_utc": "2026-07-14T09:08:25.775645+00:00",
+  "fetched_at": 1784027311,
+  "fetched_at_utc": "2026-07-14T11:08:31.767477+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "16:00 14/07 Ha Noi IIWomen vs Than KSVN Women (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F424ac25c370b644caebd91d8ba01df34.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F424ac25c370b644caebd91d8ba01df34.png&time=16%3A00+14%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/41024fb77b6f4136a1912e2c1013289b/index.m3u8"
-    },
     {
       "title": "16:30 14/07 APIA Leichhardt Tigers vs Peninsula Power (BLV TRẠNG TÍ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5e7f98b3e6dba2955758797b84e94868.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5e7f98b3e6dba2955758797b84e94868.png&time=16%3A30+14%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fj9rxqbYg-QejfEqBU.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fj9rxqbYg-QejfEqBU.png&time=20%3A00+15%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/bbc4442f3b17469ca6f96051befef847/index.m3u8"
+    },
+    {
+      "title": "21:30 15/07 Ukraine vs Iran (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fva0cEUGG-8KJ0tcMR.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fva0cEUGG-8KJ0tcMR.png&time=21%3A30+15%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/e1d821d4176242c791666c31a68f1581/index.m3u8"
     }
   ]
 }
