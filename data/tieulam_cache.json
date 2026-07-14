@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784033332,
-  "fetched_at_utc": "2026-07-14T12:48:52.710090+00:00",
+  "fetched_at": 1784041057,
+  "fetched_at_utc": "2026-07-14T14:57:37.860749+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "18:00 14/07 Thai Nguyen T&T Women vs Hồ Chí Minh City Women (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F761b47aa242b8e4a5bf183da184304d7.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F761b47aa242b8e4a5bf183da184304d7.png&time=18%3A00+14%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/275d93e37cba42bd9e985d41a8d07360/index.m3u8"
-    },
     {
       "title": "22:00 14/07 KuPs vs FC Vardar Skopje (BLV TRẠNG BỊP) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F1fced0158de1169e9bc3209f4ab98e84.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F1fced0158de1169e9bc3209f4ab98e84.png&time=22%3A00+14%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F56445b7fccea061fbee0ac71cbd53a83.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F56445b7fccea061fbee0ac71cbd53a83.png&time=22%3A00+15%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/c2be34f96e0d496595fb7ba1041fd617/index.m3u8"
+    },
+    {
+      "title": "00:00 16/07 Bulgaria vs Poland (BLV TRẠNG BỊP) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fr7q7GrzB-6ys9CWQj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fr7q7GrzB-6ys9CWQj.png&time=00%3A00+16%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/0b1cdf5349c64e84a0419331d92ec740/index.m3u8"
     }
   ]
 }
