@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1783990691,
-  "fetched_at_utc": "2026-07-14T00:58:11.927797+00:00",
+  "fetched_at": 1784002250,
+  "fetched_at_utc": "2026-07-14T04:10:50.625494+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "06:30 14/07 Ceara vs Athletic Club (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Faf8774ff48aa426f5516ba6d507c5381.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Faf8774ff48aa426f5516ba6d507c5381.png&time=06%3A30+14%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/72ef379d259145b8b6343373822c8323/index.m3u8"
-    },
-    {
-      "title": "08:30 14/07 Cavalry FC vs Vancouver Whitecaps (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fb19bd906560a2ff7e4339e37a5ce109d.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fb19bd906560a2ff7e4339e37a5ce109d.png&time=08%3A30+14%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/fe44166983794e8c8621834ea25856bd/index.m3u8"
-    },
     {
       "title": "16:00 14/07 Ha Noi IIWomen vs Than KSVN Women (BLV TRẠNG TÈO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F424ac25c370b644caebd91d8ba01df34.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F424ac25c370b644caebd91d8ba01df34.png&time=16%3A00+14%2F07",
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FhjKM6ZCr-6ys9CWQj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FhjKM6ZCr-6ys9CWQj.png&time=18%3A00+15%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/bcf9ff08109445d08665b2e064342ca6/index.m3u8"
+    },
+    {
+      "title": "20:00 15/07 Salzburg vs Gamba Osaka (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fj9rxqbYg-QejfEqBU.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fj9rxqbYg-QejfEqBU.png&time=20%3A00+15%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/bbc4442f3b17469ca6f96051befef847/index.m3u8"
+    },
+    {
+      "title": "21:30 15/07 Ukraine vs Iran (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fva0cEUGG-8KJ0tcMR.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fva0cEUGG-8KJ0tcMR.png&time=21%3A30+15%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/e1d821d4176242c791666c31a68f1581/index.m3u8"
     }
   ]
 }
