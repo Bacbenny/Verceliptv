@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784041057,
-  "fetched_at_utc": "2026-07-14T14:57:37.860749+00:00",
+  "fetched_at": 1784046148,
+  "fetched_at_utc": "2026-07-14T16:22:28.233991+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "22:00 14/07 KuPs vs FC Vardar Skopje (BLV TRẠNG BỊP) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F1fced0158de1169e9bc3209f4ab98e84.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F1fced0158de1169e9bc3209f4ab98e84.png&time=22%3A00+14%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/c5246a757f244a149a246c3e6fcb94ec/index.m3u8"
-    },
     {
       "title": "23:00 14/07 Inter Club Escaldes vs Lincoln Red Imps FC (BLV TRẠNG TÍ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F808a63c4e021d1ee40dd6d9d07d3baa3.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F808a63c4e021d1ee40dd6d9d07d3baa3.png&time=23%3A00+14%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fr7q7GrzB-6ys9CWQj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fr7q7GrzB-6ys9CWQj.png&time=00%3A00+16%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/0b1cdf5349c64e84a0419331d92ec740/index.m3u8"
+    },
+    {
+      "title": "02:00 16/07 England vs Argentina (BLV TRẠNG PỜM) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtCG9KQYA-Iyld3bDd.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtCG9KQYA-Iyld3bDd.png&time=02%3A00+16%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/d631c838d0f94598afd8ffad7a33c14d/index.m3u8"
     }
   ]
 }
