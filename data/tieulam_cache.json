@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784027311,
-  "fetched_at_utc": "2026-07-14T11:08:31.767477+00:00",
+  "fetched_at": 1784033332,
+  "fetched_at_utc": "2026-07-14T12:48:52.710090+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "16:30 14/07 APIA Leichhardt Tigers vs Peninsula Power (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5e7f98b3e6dba2955758797b84e94868.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5e7f98b3e6dba2955758797b84e94868.png&time=16%3A30+14%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/c7ef52a7291a4a15b1040b8f7d0bb9a6/index.m3u8"
-    },
     {
       "title": "18:00 14/07 Thai Nguyen T&T Women vs Hồ Chí Minh City Women (BLV TRẠNG TỒ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F761b47aa242b8e4a5bf183da184304d7.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F761b47aa242b8e4a5bf183da184304d7.png&time=18%3A00+14%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fva0cEUGG-8KJ0tcMR.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fva0cEUGG-8KJ0tcMR.png&time=21%3A30+15%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/e1d821d4176242c791666c31a68f1581/index.m3u8"
+    },
+    {
+      "title": "22:00 15/07 Ordabasy vs Altay FK (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F56445b7fccea061fbee0ac71cbd53a83.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F56445b7fccea061fbee0ac71cbd53a83.png&time=22%3A00+15%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/c2be34f96e0d496595fb7ba1041fd617/index.m3u8"
     }
   ]
 }
