@@ -740,8 +740,8 @@ http://assarao4k.com:80/play/live.php?mac=00:1A:79:59:C0:0B&stream=1170878&exten
 http://assarao4k.com:80/play/live.php?mac=00:1A:79:59:C0:0B&stream=1170877&extension=ts
 #EXTINF:-1 tvg-id="" group-title="CANAL+ SPORT" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Logo_Canal%2B_1995.svg/1920px-Logo_Canal%2B_1995.svg.png",Canal + Live 10 FHD
 http://assarao4k.com:80/play/live.php?mac=00:1A:79:59:C0:0B&stream=1170876&extension=ts
-#EXTINF:-1 tvg-name="TNT SPORTS ULTIMATE 4K" tvg-logo="http://51.158.145.100/picons/logos/UK/1905819.png" group-title="TNT / ZIGGO SPORT",TNT SPORTS ULTIMATE 4K
-EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTINF:-1 tvg-id="1290338" tvg-name="TNT SPORTS ULTIMATE ⁴ᵏ" tvg-logo="http://photo-tmdb.com/stalker_portal/misc/logos/320/1070.png?81674" group-title="TNT / ZIGGO SPORT" tvg-chno="25383",TNT SPORTS ULTIMATE ⁴ᵏ 
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
 #EXTVLCOPT:http-cookie=mac=00:1A:79:AD:C0:2A; stb_lang=en; timezone=GMT
 #EXTVLCOPT:http-header=Authorization: Bearer 8EFF323E7BE9CB75DDA05EED224E9C56
 http://paid32945.wd.business-cdn-8k.com:80/play/live.php?mac=00:1A:79:AD:C0:2A&stream=1290338&extension=ts&play_token=6PeoS2iv65
