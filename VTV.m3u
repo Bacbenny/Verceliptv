@@ -64,7 +64,7 @@ https://freem3u.xyz/api/live/play.m3u8?vid=180
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=https://236d6686-7a24-47bb-b918-19e8b0538de7-00-8dgsyhl5kmjs.pike.replit.dev/api-server/api/clearkey
+#KODIPROP:inputstream.adaptive.license_key=https://236d6686-7a24-47bb-b918-19e8b0538de7-00-8dgsyhl5kmjs.pike.replit.dev/api/clearkey
 #EXTVLCOPT:adaptive-variant=max
 #EXTVLCOPT:network-caching=5000
 https://livevlisctcdnw.seenow.vn/mean/BONGDA_HD/manifest.mpd
@@ -72,7 +72,7 @@ https://livevlisctcdnw.seenow.vn/mean/BONGDA_HD/manifest.mpd
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=https://236d6686-7a24-47bb-b918-19e8b0538de7-00-8dgsyhl5kmjs.pike.replit.dev/api-server/api/clearkey
+#KODIPROP:inputstream.adaptive.license_key=https://236d6686-7a24-47bb-b918-19e8b0538de7-00-8dgsyhl5kmjs.pike.replit.dev/api/clearkey
 #EXTVLCOPT:adaptive-variant=max
 #EXTVLCOPT:network-caching=5000
 https://livebytsct.vtvprime.vn/livesnv2/THETHAO_HD/manifest.mpd
@@ -80,7 +80,7 @@ https://livebytsct.vtvprime.vn/livesnv2/THETHAO_HD/manifest.mpd
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=https://236d6686-7a24-47bb-b918-19e8b0538de7-00-8dgsyhl5kmjs.pike.replit.dev/api-server/api/clearkey
+#KODIPROP:inputstream.adaptive.license_key=https://236d6686-7a24-47bb-b918-19e8b0538de7-00-8dgsyhl5kmjs.pike.replit.dev/api/clearkey
 #EXTVLCOPT:adaptive-variant=max
 #EXTVLCOPT:network-caching=5000
 https://livevlisctcdnw.seenow.vn/livesnv2/HAY_TV/manifest.mpd
@@ -88,7 +88,7 @@ https://livevlisctcdnw.seenow.vn/livesnv2/HAY_TV/manifest.mpd
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=https://236d6686-7a24-47bb-b918-19e8b0538de7-00-8dgsyhl5kmjs.pike.replit.dev/api-server/api/clearkey
+#KODIPROP:inputstream.adaptive.license_key=https://236d6686-7a24-47bb-b918-19e8b0538de7-00-8dgsyhl5kmjs.pike.replit.dev/api/clearkey
 #EXTVLCOPT:adaptive-variant=max
 #EXTVLCOPT:network-caching=5000
 https://livevlisctcdnw.seenow.vn/mean/THETHAO_TINTUC_HD/manifest.mpd
