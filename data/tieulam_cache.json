@@ -1,8 +1,8 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784139155,
-  "fetched_at_utc": "2026-07-15T18:12:35.131464+00:00",
+  "fetched_at": 1784144767,
+  "fetched_at_utc": "2026-07-15T19:46:07.079814+00:00",
   "count": 20,
   "channels": [
     {
@@ -30,13 +30,13 @@
       "url": "https://pull.asynccdn.com/live/4de068a3a9414ead9077ea08b92ce078/index.m3u8"
     },
     {
-      "title": "02:00 16/07 England vs Argentina (BLV TRẠNG TÈO) [geo]",
+      "title": "02:00 16/07 England vs Argentina (BLV TRẠNG TÈO ( Fan Anh )) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtCG9KQYA-Iyld3bDd.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtCG9KQYA-Iyld3bDd.png&time=02%3A00+16%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/5bac1481b8c745098ed0950b0cdd32e0/index.m3u8"
     },
     {
-      "title": "02:00 16/07 England vs Argentina (BLV TRẠNG TÍ) [geo]",
+      "title": "02:00 16/07 England vs Argentina (BLV TRẠNG TÍ ( Fan Tam Sư )) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtCG9KQYA-Iyld3bDd.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtCG9KQYA-Iyld3bDd.png&time=02%3A00+16%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/7780aa98841348c5928354702c6348c1/index.m3u8"
