@@ -1,28 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784088547,
-  "fetched_at_utc": "2026-07-15T04:09:07.339531+00:00",
+  "fetched_at": 1784106740,
+  "fetched_at_utc": "2026-07-15T09:12:20.551873+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "10:00 15/07 Canada vs Argentina (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fx8ugZxyS-QBQPB0xP.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fx8ugZxyS-QBQPB0xP.png&time=10%3A00+15%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/75312237f9d34fdfb764732713474f84/index.m3u8"
-    },
-    {
-      "title": "13:00 15/07 Việt Nam vs Thái Lan (BLV TRẠNG BỊP) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fssl.gstatic.com%2Fonebox%2Fmedia%2Fsports%2Flogos%2Foptimized%2FIUYV_ZAMxDdabQPzSpTJtg_96x96.png&away=https%3A%2F%2Fssl.gstatic.com%2Fonebox%2Fmedia%2Fsports%2Flogos%2Foptimized%2FIUYV_ZAMxDdabQPzSpTJtg_96x96.png&time=13%3A00+15%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/d660f051bf0c47d4951596f062b68ac8/index.m3u8"
-    },
-    {
-      "title": "13:30 15/07 Belgium vs Cuba (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F6kfviue5-6ys9CWQj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F6kfviue5-6ys9CWQj.png&time=13%3A30+15%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/c63e51d60dbb46559542092ea2e49e7b/index.m3u8"
-    },
     {
       "title": "16:30 15/07 Marlin Coast Rangers vs Brunswick Juventus (BLV TRẠNG BÉO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fe731daef830fadf0adaa6be047d6dabe.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fe731daef830fadf0adaa6be047d6dabe.png&time=16%3A30+15%2F07",
@@ -124,6 +106,24 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fssl.gstatic.com%2Fonebox%2Fmedia%2Fsports%2Flogos%2Foptimized%2Ft98aSVGr2t2lVldT4S_H2A_96x96.png&away=https%3A%2F%2Fssl.gstatic.com%2Fonebox%2Fmedia%2Fsports%2Flogos%2Foptimized%2Ft98aSVGr2t2lVldT4S_H2A_96x96.png&time=13%3A00+16%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/2cdff17d28ac4d1b80ce25f972120c68/index.m3u8"
+    },
+    {
+      "title": "13:30 16/07 Belgium vs Italy (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F6kfviue5-6ys9CWQj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F6kfviue5-6ys9CWQj.png&time=13%3A30+16%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/a04faea8d75c4d9391afec50f1c4ab93/index.m3u8"
+    },
+    {
+      "title": "15:45 16/07 Indonesia Women vs Cambodia Women (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F8838b764fed0d75323e2db1b3098b775.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F8838b764fed0d75323e2db1b3098b775.png&time=15%3A45+16%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/e3608aee75074a20b603d5c473e5640b/index.m3u8"
+    },
+    {
+      "title": "15:45 16/07 Malaysia Women vs Singapore Women (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fda17b06c369d20a3d0912853d4698e4c.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fda17b06c369d20a3d0912853d4698e4c.png&time=15%3A45+16%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/0df7faf01edb45b682ea378a4bfd0ef7/index.m3u8"
     }
   ]
 }
