@@ -1,8 +1,8 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784127415,
-  "fetched_at_utc": "2026-07-15T14:56:55.221329+00:00",
+  "fetched_at": 1784133599,
+  "fetched_at_utc": "2026-07-15T16:39:59.792856+00:00",
   "count": 20,
   "channels": [
     {
@@ -16,12 +16,6 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F56445b7fccea061fbee0ac71cbd53a83.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F56445b7fccea061fbee0ac71cbd53a83.png&time=22%3A00+15%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/c2be34f96e0d496595fb7ba1041fd617/index.m3u8"
-    },
-    {
-      "title": "00:00 16/07 Bulgaria vs Poland (BLV TRẠNG BỊP) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fr7q7GrzB-6ys9CWQj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fr7q7GrzB-6ys9CWQj.png&time=00%3A00+16%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/0b1cdf5349c64e84a0419331d92ec740/index.m3u8"
     },
     {
       "title": "02:00 16/07 England vs Argentina (BLV TRẠNG PỜM) [geo]",
@@ -60,12 +54,6 @@
       "url": "https://pull.asynccdn.com/live/7780aa98841348c5928354702c6348c1/index.m3u8"
     },
     {
-      "title": "02:00 16/07 England vs Argentina (BLV TRẠNG BỊP) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtCG9KQYA-Iyld3bDd.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtCG9KQYA-Iyld3bDd.png&time=02%3A00+16%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/c81e325785014a429b61e7c7ead85af4/index.m3u8"
-    },
-    {
       "title": "02:00 16/07 England vs Argentina (BLV TRẠNG QUỶ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtCG9KQYA-Iyld3bDd.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtCG9KQYA-Iyld3bDd.png&time=02%3A00+16%2F07",
       "referrer": "https://sv2.tieulam2.info/",
@@ -78,7 +66,7 @@
       "url": "https://pull.asynccdn.com/live/d97b91adea444904a964ebcb727c6903/index.m3u8"
     },
     {
-      "title": "13:00 16/07 Myanma vs Việt Nam (BLV TRẠNG BỊP) [geo]",
+      "title": "13:00 16/07 Myanma vs Việt Nam (BLV TRẠNG NGỐ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fssl.gstatic.com%2Fonebox%2Fmedia%2Fsports%2Flogos%2Foptimized%2Ft98aSVGr2t2lVldT4S_H2A_96x96.png&away=https%3A%2F%2Fssl.gstatic.com%2Fonebox%2Fmedia%2Fsports%2Flogos%2Foptimized%2Ft98aSVGr2t2lVldT4S_H2A_96x96.png&time=13%3A00+16%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/2cdff17d28ac4d1b80ce25f972120c68/index.m3u8"
@@ -96,7 +84,7 @@
       "url": "https://pull.asynccdn.com/live/e3608aee75074a20b603d5c473e5640b/index.m3u8"
     },
     {
-      "title": "15:45 16/07 Malaysia Women vs Singapore Women (BLV TRẠNG NGỐ) [geo]",
+      "title": "15:45 16/07 Malaysia Women vs Singapore Women (BLV TRẠNG BÉO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fda17b06c369d20a3d0912853d4698e4c.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fda17b06c369d20a3d0912853d4698e4c.png&time=15%3A45+16%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/0df7faf01edb45b682ea378a4bfd0ef7/index.m3u8"
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff5c65dd4fb1d02530ca6578fca939d2c.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff5c65dd4fb1d02530ca6578fca939d2c.jpg&time=20%3A00+16%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/95a6dbe424674fd08008c88362bb244d/index.m3u8"
+    },
+    {
+      "title": "21:30 16/07 Iran vs Germany (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fxt3pVREa-tWhhL1yr.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fxt3pVREa-tWhhL1yr.png&time=21%3A30+16%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/dd10f1962a7a4098af559bdeea04e7ae/index.m3u8"
+    },
+    {
+      "title": "23:00 16/07 Ilves Tampere vs FC Differdange 03 (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff6526b5434c06d7a6da4a9193fdac95e.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff6526b5434c06d7a6da4a9193fdac95e.png&time=23%3A00+16%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/64b696b35de447eea6fd0d791bceecc9/index.m3u8"
     }
   ]
 }
