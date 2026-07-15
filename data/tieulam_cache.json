@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784133599,
-  "fetched_at_utc": "2026-07-15T16:39:59.792856+00:00",
+  "fetched_at": 1784139155,
+  "fetched_at_utc": "2026-07-15T18:12:35.131464+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "21:30 15/07 Ukraine vs Iran (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fva0cEUGG-8KJ0tcMR.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fva0cEUGG-8KJ0tcMR.png&time=21%3A30+15%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/e1d821d4176242c791666c31a68f1581/index.m3u8"
-    },
-    {
-      "title": "22:00 15/07 Ordabasy vs Altay FK (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F56445b7fccea061fbee0ac71cbd53a83.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F56445b7fccea061fbee0ac71cbd53a83.png&time=22%3A00+15%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/c2be34f96e0d496595fb7ba1041fd617/index.m3u8"
-    },
     {
       "title": "02:00 16/07 England vs Argentina (BLV TRẠNG PỜM) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtCG9KQYA-Iyld3bDd.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FtCG9KQYA-Iyld3bDd.png&time=02%3A00+16%2F07",
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff6526b5434c06d7a6da4a9193fdac95e.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff6526b5434c06d7a6da4a9193fdac95e.png&time=23%3A00+16%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/64b696b35de447eea6fd0d791bceecc9/index.m3u8"
+    },
+    {
+      "title": "00:30 17/07 Derry City vs CSKA Sofia (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F1fdb25b1b1cf8b92138ba7c5c9fff621.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F1fdb25b1b1cf8b92138ba7c5c9fff621.png&time=00%3A30+17%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/bde7ce9700d74c7b95cf413be8d0b55c/index.m3u8"
+    },
+    {
+      "title": "01:30 17/07 MSK Zilina vs Hajduk Split (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F818b4d75f99723aea6d04340664f7e72.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F818b4d75f99723aea6d04340664f7e72.png&time=01%3A30+17%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/541a142b70de4032a1d4b616c4aced0f/index.m3u8"
     }
   ]
 }
