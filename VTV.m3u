@@ -64,7 +64,7 @@ https://freem3u.xyz/api/live/play.m3u8?vid=180
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=https://236d6686-7a24-47bb-b918-19e8b0538de7-00-8dgsyhl5kmjs.pike.replit.dev/api/clearkey
+#KODIPROP:inputstream.adaptive.license_key=https://verceliptv.vercel.app/api/clearkey
 #EXTVLCOPT:adaptive-variant=max
 #EXTVLCOPT:network-caching=5000
 https://livevlisctcdnw.seenow.vn/mean/BONGDA_HD/manifest.mpd
@@ -72,7 +72,7 @@ https://livevlisctcdnw.seenow.vn/mean/BONGDA_HD/manifest.mpd
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=https://236d6686-7a24-47bb-b918-19e8b0538de7-00-8dgsyhl5kmjs.pike.replit.dev/api/clearkey
+#KODIPROP:inputstream.adaptive.license_key=https://verceliptv.vercel.app/api/clearkey
 #EXTVLCOPT:adaptive-variant=max
 #EXTVLCOPT:network-caching=5000
 https://livebytsct.vtvprime.vn/livesnv2/THETHAO_HD/manifest.mpd
@@ -80,7 +80,7 @@ https://livebytsct.vtvprime.vn/livesnv2/THETHAO_HD/manifest.mpd
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=https://236d6686-7a24-47bb-b918-19e8b0538de7-00-8dgsyhl5kmjs.pike.replit.dev/api/clearkey
+#KODIPROP:inputstream.adaptive.license_key=https://verceliptv.vercel.app/api/clearkey
 #EXTVLCOPT:adaptive-variant=max
 #EXTVLCOPT:network-caching=5000
 https://livevlisctcdnw.seenow.vn/livesnv2/HAY_TV/manifest.mpd
@@ -88,7 +88,7 @@ https://livevlisctcdnw.seenow.vn/livesnv2/HAY_TV/manifest.mpd
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=https://236d6686-7a24-47bb-b918-19e8b0538de7-00-8dgsyhl5kmjs.pike.replit.dev/api/clearkey
+#KODIPROP:inputstream.adaptive.license_key=https://verceliptv.vercel.app/api/clearkey
 #EXTVLCOPT:adaptive-variant=max
 #EXTVLCOPT:network-caching=5000
 https://livevlisctcdnw.seenow.vn/mean/THETHAO_TINTUC_HD/manifest.mpd
@@ -154,7 +154,7 @@ https://vmttv.dpdns.org/VTVGo/?sctv14
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
+#KODIPROP:inputstream.adaptive.license_key=https://verceliptv.vercel.app/api/clearkey
 https://livevlisctcdnw.seenow.vn/mean/SCTV15HD/manifest.mpd
 #EXTINF:-1 tvg-id="sctv16hd" group-title="SCTV" tvg-logo="https://i.ibb.co/1KsLhCz/logo26072108-sctv16-hd.png",SCTV16
 https://vmttv.dpdns.org/VTVGo/?sctv16
@@ -162,7 +162,7 @@ https://vmttv.dpdns.org/VTVGo/?sctv16
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=a7c942778e874d43be92b8d0a0cd11b4:6d54358306571658ffdb952c6560688b
+#KODIPROP:inputstream.adaptive.license_key=https://verceliptv.vercel.app/api/clearkey
 https://livevlisctcdnw.seenow.vn/mean/SCTV17/manifest.mpd
 #EXTINF:-1 tvg-id="sctv18hd" group-title="SCTV" tvg-logo="https://i.ibb.co/LY0CW6H/logo26072108-sctv18-hd.png",SCTV18
 https://vmttv.dpdns.org/VTVGo/?sctv18
@@ -173,7 +173,11 @@ https://vmttv.dpdns.org/VTVGo/?sctv20
 #EXTINF:-1 tvg-id="sctv21hd" group-title="SCTV" tvg-logo="https://i.ibb.co/nmxNkPG/s21-hd.jpg",SCTV21
 https://freem3u.xyz/api/live/play.m3u8?tid=sctv21
 #EXTINF:-1 tvg-id="sctv22hd" group-title="SCTV" tvg-logo="https://i.ibb.co/JK0TF38/sctv22-hd.png",SCTV22
-https://vmttv.dpdns.org/VTVGo/?sctv22
+#EXTVLCOPT:http-user-agent=Dalvik/2.1.0
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=https://verceliptv.vercel.app/api/clearkey
+https://liveatmvng.vtvprime.vn/live/data8/SCTV22/Live_DASHDRM/SCTV22.mpd
 #EXTINF:-1 tvg-id="sctvhdpth" group-title="SCTV" tvg-logo="https://i.ibb.co/G2XQD3X/logo26072108-sctv-phim-THHD.png",SCTV Phim tổng hợp
 https://vmttv.dpdns.org/VTVGo/?sctvphim
 #EXTINF:-1 tvg-id="htv1hd" tvg-name="HTV1 HD" tvg-logo="https://static.wikia.nocookie.net/logos/images/9/9f/HTV1_30-12-2024.png/revision/latest?cb=20260414043039&path-prefix=vi" group-title="HTV/HTVC",HTV1 HD
