@@ -1025,57 +1025,51 @@ def tieulam_relay():
         return Response(f"Error: {e}", status=500, mimetype="text/plain")
 
 
-
-    @app.route("/api/clearkey", methods=["POST", "OPTIONS"])
-    def clearkey_license():
-      """ClearKey license server cho TiviMate/ExoPlayer.
-      ExoPlayer POST: {"kids":["<base64url_kid>"],"type":"temporary"}
-      Response: {"keys":[{"kty":"oct","k":"<base64url_key>","kid":"<base64url_kid>"}],"type":"temporary"}
-      Nguon key: Get Out APK decrypt.dat (leeshin5757/getout)
-      """
-      from flask import jsonify
-
-      KEY_DB = {
-          "89c7OpuJRi6_eREATqOzuQ": "LlR6gf-QqgJkjLnj955zOQ",   # ON Sport common (f3d73b...)
-          "UYQWLjATSkSvodWR_8LnNg": "CbINX5u_Qf2405FsQJRwqA",   # ON Football (5184162e...)
-          "vFww_J9-Q-WIh6LYp3iKOA": "Vb1mmQ-3Rf2JXxqnE5PoHw",   # ON Sports (bc5c30fc...)
-          "TmGcW1RJR2KxMfZfw0qIWw": "Z22fWijUCdfWAVFLqhR8nQ",   # ON Sports+ (4e619c5b...)
-          "yvtuYMFQTfyFj9Pd3G_SDA": "kgYf_rE_R8TYh5MW28lSHQ",   # ON Sports News (cafb6e60...)
-          "p8lCd46HTUO-krjQoM0RtA": "bVQ1gwZXFlj_25UsZWBoiw",   # SCTV15, SCTV17 (a7c942...)
-          "iD_jfmklTw2xqciQjlq1bw": "jwdi3mL4SQOUILUTBorKQA",   # SCTV22 (883fe37e...)
-          "7G8HLHElN3qbwK5hWYCV9A": "HVOI4HgUFevOyZFPWtdYdQ",   # ec6f072c...
-          "PCAWZmCpOnWsd9uBVnOJ9w": "PMGt1Drszj_jHJxqKluMIQ",   # 3c201666...
-          "U7JvkErgOiC1ZHfPucXcog": "DGTM-5eOc5C9MzRAdUkq7A",   # 53b26f90...
-          "7nkVVk10OdCb01Vv_MyHpA": "s14Sp1pCpvkYRyOpD_QtnA",   # ee791556...
-          "Cd3-PWOGPK-ut50FRrCYqw": "PeDzjc8BSCff1b7Dh0PGog",   # 09ddfe3d...
-          "CG0JpAv_OgCqbdTbr5wTsg": "NPGQjP4uBe4GAEbUDxSuyQ",   # 086d09a4...
-          "nSn4fv3sPJ-rNo9ySmKtDg": "bxwJwDXqs2Mj1g0UVNs9IA",   # 9d29f87e...
-          "rLTCNHEGMyetxzLig8CEfw": "6YaPX0c9D9hpnt5I1THCsA",   # acb4c234...
-      }
-
-      if request.method == "OPTIONS":
-          resp = Response("", status=204)
-          resp.headers["Access-Control-Allow-Origin"] = "*"
-          resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
-          resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
-          return resp
-
-      try:
-          body = request.get_json(force=True, silent=True) or {}
-          requested_kids = body.get("kids", [])
-          if requested_kids:
-              matched = [{"kty": "oct", "k": KEY_DB[kid], "kid": kid}
-                         for kid in requested_kids if kid in KEY_DB]
-          else:
-              matched = [{"kty": "oct", "k": v, "kid": k} for k, v in KEY_DB.items()]
-          resp = jsonify({"keys": matched, "type": "temporary"})
-          resp.headers["Access-Control-Allow-Origin"] = "*"
-          return resp
-      except Exception as e:
-          return Response(f"Error: {e}", status=500, mimetype="text/plain")
+@app.route("/api/clearkey", methods=["POST", "OPTIONS"])
+def clearkey_license():
+    """ClearKey license server cho TiviMate/ExoPlayer (W3C ClearKey protocol).
+    Client POST: {"kids":["<base64url_kid>"],"type":"temporary"}
+    Response:    {"keys":[{"kty":"oct","k":"<key>","kid":"<kid>"}],"type":"temporary"}
+    Keys extracted from Get Out APK decrypt.dat (leeshin5757/getout, AES-256-CBC).
+    """
+    from flask import jsonify
+    KEY_DB = {
+        "89c7OpuJRi6_eREATqOzuQ": "LlR6gf-QqgJkjLnj955zOQ",
+        "UYQWLjATSkSvodWR_8LnNg": "CbINX5u_Qf2405FsQJRwqA",
+        "vFww_J9-Q-WIh6LYp3iKOA": "Vb1mmQ-3Rf2JXxqnE5PoHw",
+        "TmGcW1RJR2KxMfZfw0qIWw": "Z22fWijUCdfWAVFLqhR8nQ",
+        "yvtuYMFQTfyFj9Pd3G_SDA": "kgYf_rE_R8TYh5MW28lSHQ",
+        "p8lCd46HTUO-krjQoM0RtA": "bVQ1gwZXFlj_25UsZWBoiw",
+        "iD_jfmklTw2xqciQjlq1bw": "jwdi3mL4SQOUILUTBorKQA",
+        "7G8HLHElN3qbwK5hWYCV9A": "HVOI4HgUFevOyZFPWtdYdQ",
+        "PCAWZmCpOnWsd9uBVnOJ9w": "PMGt1Drszj_jHJxqKluMIQ",
+        "U7JvkErgOiC1ZHfPucXcog": "DGTM-5eOc5C9MzRAdUkq7A",
+        "7nkVVk10OdCb01Vv_MyHpA": "s14Sp1pCpvkYRyOpD_QtnA",
+        "Cd3-PWOGPK-ut50FRrCYqw": "PeDzjc8BSCff1b7Dh0PGog",
+        "CG0JpAv_OgCqbdTbr5wTsg": "NPGQjP4uBe4GAEbUDxSuyQ",
+        "nSn4fv3sPJ-rNo9ySmKtDg": "bxwJwDXqs2Mj1g0UVNs9IA",
+        "rLTCNHEGMyetxzLig8CEfw": "6YaPX0c9D9hpnt5I1THCsA",
+    }
+    if request.method == "OPTIONS":
+        resp = Response("", status=204)
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        return resp
+    try:
+        body = request.get_json(force=True, silent=True) or {}
+        kids = body.get("kids", [])
+        matched = ([{"kty": "oct", "k": KEY_DB[k], "kid": k} for k in kids if k in KEY_DB]
+                   if kids else
+                   [{"kty": "oct", "k": v, "kid": k} for k, v in KEY_DB.items()])
+        resp = jsonify({"keys": matched, "type": "temporary"})
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        return resp
+    except Exception as e:
+        return Response(f"Error: {e}", status=500, mimetype="text/plain")
 
 
-    @app.route("/api/debug")
+@app.route("/api/debug")
 def debug_status():
     """Kiểm tra live trạng thái từng nguồn — hữu ích khi debug trên Vercel."""
     import sys
