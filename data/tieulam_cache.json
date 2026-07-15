@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784113829,
-  "fetched_at_utc": "2026-07-15T11:10:29.996515+00:00",
+  "fetched_at": 1784120002,
+  "fetched_at_utc": "2026-07-15T12:53:22.814486+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "16:30 15/07 Marlin Coast Rangers vs Brunswick Juventus (BLV TRẠNG BÉO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fe731daef830fadf0adaa6be047d6dabe.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fe731daef830fadf0adaa6be047d6dabe.png&time=16%3A30+15%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/218ca400256449da8826c0995885b31a/index.m3u8"
-    },
     {
       "title": "17:20 15/07 Japan vs Italy (BLV TRẠNG NGỐ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Ff552VMEa-E1YhvyqD.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Ff552VMEa-E1YhvyqD.png&time=17%3A20+15%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fda17b06c369d20a3d0912853d4698e4c.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fda17b06c369d20a3d0912853d4698e4c.png&time=15%3A45+16%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/0df7faf01edb45b682ea378a4bfd0ef7/index.m3u8"
+    },
+    {
+      "title": "16:45 16/07 Fulham United FC vs Cumberland United FC (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F899ba75d0f7074295237f2011bc2d3b2.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F899ba75d0f7074295237f2011bc2d3b2.png&time=16%3A45+16%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/0e5f494bec044385b1df2ba6075bc78a/index.m3u8"
     }
   ]
 }
