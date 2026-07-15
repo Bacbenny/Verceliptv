@@ -1036,11 +1036,21 @@ def tieulam_relay():
       from flask import jsonify
 
       KEY_DB = {
-          "89c7OpuJRi6_eREATqOzuQ": "LlR6gf-QqgJkjLnj955zOQ",
-          "UYQWLjATSkSvodWR_8LnNg": "CbINX5u_Qf2405FsQJRwqA",
-          "vFww_J9-Q-WIh6LYp3iKOA": "Vb1mmQ-3Rf2JXxqnE5PoHw",
-          "TmGcW1RJR2KxMfZfw0qIWw": "Z22fWijUCdfWAVFLqhR8nQ",
-          "yvtuYMFQTfyFj9Pd3G_SDA": "kgYf_rE_R8TYh5MW28lSHQ",
+          "89c7OpuJRi6_eREATqOzuQ": "LlR6gf-QqgJkjLnj955zOQ",   # ON Sport common (f3d73b...)
+          "UYQWLjATSkSvodWR_8LnNg": "CbINX5u_Qf2405FsQJRwqA",   # ON Football (5184162e...)
+          "vFww_J9-Q-WIh6LYp3iKOA": "Vb1mmQ-3Rf2JXxqnE5PoHw",   # ON Sports (bc5c30fc...)
+          "TmGcW1RJR2KxMfZfw0qIWw": "Z22fWijUCdfWAVFLqhR8nQ",   # ON Sports+ (4e619c5b...)
+          "yvtuYMFQTfyFj9Pd3G_SDA": "kgYf_rE_R8TYh5MW28lSHQ",   # ON Sports News (cafb6e60...)
+          "p8lCd46HTUO-krjQoM0RtA": "bVQ1gwZXFlj_25UsZWBoiw",   # SCTV15, SCTV17 (a7c942...)
+          "iD_jfmklTw2xqciQjlq1bw": "jwdi3mL4SQOUILUTBorKQA",   # SCTV22 (883fe37e...)
+          "7G8HLHElN3qbwK5hWYCV9A": "HVOI4HgUFevOyZFPWtdYdQ",   # ec6f072c...
+          "PCAWZmCpOnWsd9uBVnOJ9w": "PMGt1Drszj_jHJxqKluMIQ",   # 3c201666...
+          "U7JvkErgOiC1ZHfPucXcog": "DGTM-5eOc5C9MzRAdUkq7A",   # 53b26f90...
+          "7nkVVk10OdCb01Vv_MyHpA": "s14Sp1pCpvkYRyOpD_QtnA",   # ee791556...
+          "Cd3-PWOGPK-ut50FRrCYqw": "PeDzjc8BSCff1b7Dh0PGog",   # 09ddfe3d...
+          "CG0JpAv_OgCqbdTbr5wTsg": "NPGQjP4uBe4GAEbUDxSuyQ",   # 086d09a4...
+          "nSn4fv3sPJ-rNo9ySmKtDg": "bxwJwDXqs2Mj1g0UVNs9IA",   # 9d29f87e...
+          "rLTCNHEGMyetxzLig8CEfw": "6YaPX0c9D9hpnt5I1THCsA",   # acb4c234...
       }
 
       if request.method == "OPTIONS":
