@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784191311,
-  "fetched_at_utc": "2026-07-16T08:41:51.263640+00:00",
+  "fetched_at": 1784199872,
+  "fetched_at_utc": "2026-07-16T11:04:32.557676+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "15:45 16/07 Indonesia Women vs Cambodia Women (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F8838b764fed0d75323e2db1b3098b775.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F8838b764fed0d75323e2db1b3098b775.png&time=15%3A45+16%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/e3608aee75074a20b603d5c473e5640b/index.m3u8"
-    },
-    {
-      "title": "15:45 16/07 Malaysia Women vs Singapore Women (BLV TRẠNG BÉO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fda17b06c369d20a3d0912853d4698e4c.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fda17b06c369d20a3d0912853d4698e4c.png&time=15%3A45+16%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/0df7faf01edb45b682ea378a4bfd0ef7/index.m3u8"
-    },
     {
       "title": "16:45 16/07 Fulham United FC vs Cumberland United FC (BLV TRẠNG TÈO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F899ba75d0f7074295237f2011bc2d3b2.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F899ba75d0f7074295237f2011bc2d3b2.png&time=16%3A45+16%2F07",
@@ -30,13 +18,13 @@
       "url": "https://pull.asynccdn.com/live/295f65f8334c458686735b3ae1305def/index.m3u8"
     },
     {
-      "title": "19:00 16/07 Ekibastuzets vs FC Shakhtyor Karagandy (BLV TRẠNG TÍ) [geo]",
+      "title": "19:00 16/07 Ekibastuzets vs FC Shakhtyor Karagandy (BLV TRẠNG BÉO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fd8baf3ab5d39bcdab1d636a69e0e8086.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fd8baf3ab5d39bcdab1d636a69e0e8086.png&time=19%3A00+16%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/5f0c6604629a4b65aa1e37f5c3c48fb8/index.m3u8"
     },
     {
-      "title": "20:00 16/07 Al-Yarmok Rawda vs Al Ahli Sanaa (BLV TRẠNG BÉO) [geo]",
+      "title": "20:00 16/07 Al-Yarmok Rawda vs Al Ahli Sanaa (BLV TRẠNG TÍ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff5c65dd4fb1d02530ca6578fca939d2c.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff5c65dd4fb1d02530ca6578fca939d2c.jpg&time=20%3A00+16%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/95a6dbe424674fd08008c88362bb244d/index.m3u8"
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FvsMYAAyB-djLqtupg.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FvsMYAAyB-djLqtupg.png&time=21%3A30+17%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/961a632c4ac1480da1a11ee43dc7ba4e/index.m3u8"
+    },
+    {
+      "title": "22:30 17/07 FC Voluntari vs FC Botosani (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff105da768299b0eece32a15bb3c30574.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff105da768299b0eece32a15bb3c30574.png&time=22%3A30+17%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/275192cab40548ab920265f38232ec33/index.m3u8"
+    },
+    {
+      "title": "00:15 18/07 Bodo Glimt vs Fredrikstad (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F98854ab97eadf3d2c7c6d657ad99df96.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F98854ab97eadf3d2c7c6d657ad99df96.png&time=00%3A15+18%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/5ba0f0fea5194ef08f29779705572f41/index.m3u8"
     }
   ]
 }
