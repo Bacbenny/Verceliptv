@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784199872,
-  "fetched_at_utc": "2026-07-16T11:04:32.557676+00:00",
+  "fetched_at": 1784206950,
+  "fetched_at_utc": "2026-07-16T13:02:30.992384+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "16:45 16/07 Fulham United FC vs Cumberland United FC (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F899ba75d0f7074295237f2011bc2d3b2.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F899ba75d0f7074295237f2011bc2d3b2.png&time=16%3A45+16%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/0e5f494bec044385b1df2ba6075bc78a/index.m3u8"
-    },
     {
       "title": "17:20 16/07 Japan vs Canada (BLV TRẠNG TỒ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Ff552VMEa-E1YhvyqD.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Ff552VMEa-E1YhvyqD.png&time=17%3A20+16%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F98854ab97eadf3d2c7c6d657ad99df96.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F98854ab97eadf3d2c7c6d657ad99df96.png&time=00%3A15+18%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/5ba0f0fea5194ef08f29779705572f41/index.m3u8"
+    },
+    {
+      "title": "01:00 18/07 Iran vs Slovenia (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fxt3pVREa-tWhhL1yr.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fxt3pVREa-tWhhL1yr.png&time=01%3A00+18%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/050e3a2236324a99827633082cc1f0ed/index.m3u8"
     }
   ]
 }
