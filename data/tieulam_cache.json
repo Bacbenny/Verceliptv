@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784183015,
-  "fetched_at_utc": "2026-07-16T06:23:35.416537+00:00",
+  "fetched_at": 1784191311,
+  "fetched_at_utc": "2026-07-16T08:41:51.263640+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "13:00 16/07 Myanma vs Việt Nam (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fssl.gstatic.com%2Fonebox%2Fmedia%2Fsports%2Flogos%2Foptimized%2Ft98aSVGr2t2lVldT4S_H2A_96x96.png&away=https%3A%2F%2Fssl.gstatic.com%2Fonebox%2Fmedia%2Fsports%2Flogos%2Foptimized%2Ft98aSVGr2t2lVldT4S_H2A_96x96.png&time=13%3A00+16%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/2cdff17d28ac4d1b80ce25f972120c68/index.m3u8"
-    },
-    {
-      "title": "13:30 16/07 Belgium vs Italy (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F6kfviue5-6ys9CWQj.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F6kfviue5-6ys9CWQj.png&time=13%3A30+16%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/a04faea8d75c4d9391afec50f1c4ab93/index.m3u8"
-    },
     {
       "title": "15:45 16/07 Indonesia Women vs Cambodia Women (BLV TRẠNG TÍ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F8838b764fed0d75323e2db1b3098b775.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F8838b764fed0d75323e2db1b3098b775.png&time=15%3A45+16%2F07",
@@ -90,7 +78,19 @@
       "url": "https://pull.asynccdn.com/live/8ffe67be58bf46979204f44a7620fa1e/index.m3u8"
     },
     {
-      "title": "16:30 17/07 Sydney FC Youth vs Manly United (BLV TRẠNG TÈO) [geo]",
+      "title": "10:10 17/07 Club Tijuana vs Tigres UANL (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F6090f28bfc40d2169607b23256e5a151.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F6090f28bfc40d2169607b23256e5a151.png&time=10%3A10+17%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/37df377e5e0f41d094b1c1e3874294a0/index.m3u8"
+    },
+    {
+      "title": "13:00 17/07 Myanmar vs Việt Nam (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fpd29lpeM-8xwT7BCP.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fpd29lpeM-8xwT7BCP.png&time=13%3A00+17%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/92194a9ed53c4046b6fa6591aa2bff05/index.m3u8"
+    },
+    {
+      "title": "16:30 17/07 Sydney FC Youth vs Manly United (BLV TRẠNG TÍ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F6fb81e8272c1a862f2afe6e9858391af.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F6fb81e8272c1a862f2afe6e9858391af.png&time=16%3A30+17%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/f423f283a896485da46e4c48129260e2/index.m3u8"
