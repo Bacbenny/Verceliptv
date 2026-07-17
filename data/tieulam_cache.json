@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784313336,
-  "fetched_at_utc": "2026-07-17T18:35:36.529117+00:00",
+  "fetched_at": 1784318989,
+  "fetched_at_utc": "2026-07-17T20:09:49.504436+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "00:15 18/07 Bodo Glimt vs Fredrikstad (BLV TRẠNG BÉO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F98854ab97eadf3d2c7c6d657ad99df96.png&time=00%3A15+18%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/5ba0f0fea5194ef08f29779705572f41/index.m3u8"
-    },
-    {
-      "title": "01:00 18/07 Iran vs Slovenia (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fxt3pVREa-tWhhL1yr.png&time=01%3A00+18%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/050e3a2236324a99827633082cc1f0ed/index.m3u8"
-    },
     {
       "title": "08:00 18/07 Atletico San Luis vs Cruz Azul (BLV TRẠNG TÈO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff6c489e1e71d37e301b30df37a43b8a4.png&time=08%3A00+18%2F07",
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=04%3A00+19%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/f162b61225a64649b4a0db5e8e7c4628/index.m3u8"
+    },
+    {
+      "title": "04:00 19/07 France vs England (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=04%3A00+19%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/4b11b32d41cc4313a08e754b081d1620/index.m3u8"
+    },
+    {
+      "title": "04:00 19/07 France vs England (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=04%3A00+19%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/965ed6d369fa47bb9f02d2795b9ceefe/index.m3u8"
     }
   ]
 }
