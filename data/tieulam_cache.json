@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784290458,
-  "fetched_at_utc": "2026-07-17T12:14:18.607004+00:00",
-  "count": 18,
+  "fetched_at": 1784297588,
+  "fetched_at_utc": "2026-07-17T14:13:08.150678+00:00",
+  "count": 16,
   "channels": [
-    {
-      "title": "18:00 17/07 Qingdao West Coast vs Chengdu Rongcheng (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F383d42e0d0843463b538bc3367d0c4c9.png&time=18%3A00+17%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/59411ce3907d45c68e61a32321d3a707/index.m3u8"
-    },
-    {
-      "title": "18:35 17/07 Beijing Guoan vs Liaoning Tieren (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fe7af298237651113dfeafc32ff734a24.png&time=18%3A35+17%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/2bdd7024dff74973818566b801593d7e/index.m3u8"
-    },
     {
       "title": "21:00 17/07 Astana B vs Jaiyq (BLV TRẠNG BÉO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Feea48912dacd0411ebfd9749ac55cba9.png&time=21%3A00+17%2F07",
