@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784303846,
-  "fetched_at_utc": "2026-07-17T15:57:26.273796+00:00",
+  "fetched_at": 1784308773,
+  "fetched_at_utc": "2026-07-17T17:19:33.323279+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "21:00 17/07 Astana B vs Jaiyq (BLV TRẠNG BÉO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Feea48912dacd0411ebfd9749ac55cba9.png&time=21%3A00+17%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/5bc1214e8b55496ab0fa7f2faa0d5441/index.m3u8"
-    },
     {
       "title": "21:30 17/07 Turkey vs Ukraine (BLV TRẠNG NGỐ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FvsMYAAyB-djLqtupg.png&time=21%3A30+17%2F07",
@@ -90,13 +84,13 @@
       "url": "https://pull.asynccdn.com/live/6badb5cdba6b4beb8af2556668e9bed5/index.m3u8"
     },
     {
-      "title": "19:00 18/07 VIệt Nam vs Myanmar (BLV TRẠNG QUỶ) [geo]",
+      "title": "19:00 18/07 VIệt Nam vs Myanmar (BLV TRẠNG TÈO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fssl.gstatic.com%2Fonebox%2Fmedia%2Fsports%2Flogos%2Foptimized%2FIUYV_ZAMxDdabQPzSpTJtg_96x96.png&time=19%3A00+18%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/ae230e22b92a45948fd55962e3489077/index.m3u8"
     },
     {
-      "title": "19:00 18/07 VIệt Nam vs Myanmar (BLV TRẠNG PỜM) [geo]",
+      "title": "19:00 18/07 VIệt Nam vs Myanmar (BLV TRẠNG QUỶ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fssl.gstatic.com%2Fonebox%2Fmedia%2Fsports%2Flogos%2Foptimized%2FIUYV_ZAMxDdabQPzSpTJtg_96x96.png&time=19%3A00+18%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/780bb04a275c4182ac3dae29c4210ee0/index.m3u8"
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=04%3A00+19%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/f9147f4b37ca434fb4f8549b09c44fc1/index.m3u8"
+    },
+    {
+      "title": "04:00 19/07 France vs England (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=04%3A00+19%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/75b7071295904a1f80966f5deada72b2/index.m3u8"
     }
   ]
 }
