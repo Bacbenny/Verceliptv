@@ -1,52 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784206950,
-  "fetched_at_utc": "2026-07-16T13:02:30.992384+00:00",
+  "fetched_at": 1784246540,
+  "fetched_at_utc": "2026-07-17T00:02:20.751470+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "17:20 16/07 Japan vs Canada (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Ff552VMEa-E1YhvyqD.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Ff552VMEa-E1YhvyqD.png&time=17%3A20+16%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/295f65f8334c458686735b3ae1305def/index.m3u8"
-    },
-    {
-      "title": "19:00 16/07 Ekibastuzets vs FC Shakhtyor Karagandy (BLV TRẠNG BÉO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fd8baf3ab5d39bcdab1d636a69e0e8086.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fd8baf3ab5d39bcdab1d636a69e0e8086.png&time=19%3A00+16%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/5f0c6604629a4b65aa1e37f5c3c48fb8/index.m3u8"
-    },
-    {
-      "title": "20:00 16/07 Al-Yarmok Rawda vs Al Ahli Sanaa (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff5c65dd4fb1d02530ca6578fca939d2c.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff5c65dd4fb1d02530ca6578fca939d2c.jpg&time=20%3A00+16%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/95a6dbe424674fd08008c88362bb244d/index.m3u8"
-    },
-    {
-      "title": "21:30 16/07 Iran vs Germany (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fxt3pVREa-tWhhL1yr.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fxt3pVREa-tWhhL1yr.png&time=21%3A30+16%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/dd10f1962a7a4098af559bdeea04e7ae/index.m3u8"
-    },
-    {
-      "title": "23:00 16/07 Ilves Tampere vs FC Differdange 03 (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff6526b5434c06d7a6da4a9193fdac95e.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff6526b5434c06d7a6da4a9193fdac95e.png&time=23%3A00+16%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/64b696b35de447eea6fd0d791bceecc9/index.m3u8"
-    },
-    {
-      "title": "00:30 17/07 Derry City vs CSKA Sofia (BLV TRẠNG BÉO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F1fdb25b1b1cf8b92138ba7c5c9fff621.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F1fdb25b1b1cf8b92138ba7c5c9fff621.png&time=00%3A30+17%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/bde7ce9700d74c7b95cf413be8d0b55c/index.m3u8"
-    },
-    {
-      "title": "01:30 17/07 MSK Zilina vs Hajduk Split (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F818b4d75f99723aea6d04340664f7e72.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F818b4d75f99723aea6d04340664f7e72.png&time=01%3A30+17%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/541a142b70de4032a1d4b616c4aced0f/index.m3u8"
-    },
     {
       "title": "06:30 17/07 Montreal Impact vs Toronto FC (BLV TRẠNG TÈO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fabd87a03b9befd43df6c45c9b17e9a79.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fabd87a03b9befd43df6c45c9b17e9a79.png&time=06%3A30+17%2F07",
@@ -90,6 +48,12 @@
       "url": "https://pull.asynccdn.com/live/d1378cf6cf44488b84f8be9ae19f5356/index.m3u8"
     },
     {
+      "title": "18:00 17/07 Qingdao West Coast vs Chengdu Rongcheng (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F383d42e0d0843463b538bc3367d0c4c9.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F383d42e0d0843463b538bc3367d0c4c9.png&time=18%3A00+17%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/59411ce3907d45c68e61a32321d3a707/index.m3u8"
+    },
+    {
       "title": "18:35 17/07 Beijing Guoan vs Liaoning Tieren (BLV TRẠNG TÍ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fe7af298237651113dfeafc32ff734a24.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fe7af298237651113dfeafc32ff734a24.png&time=18%3A35+17%2F07",
       "referrer": "https://sv2.tieulam2.info/",
@@ -124,6 +88,42 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fxt3pVREa-tWhhL1yr.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fxt3pVREa-tWhhL1yr.png&time=01%3A00+18%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/050e3a2236324a99827633082cc1f0ed/index.m3u8"
+    },
+    {
+      "title": "08:00 18/07 Atletico San Luis vs Cruz Azul (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff6c489e1e71d37e301b30df37a43b8a4.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff6c489e1e71d37e301b30df37a43b8a4.png&time=08%3A00+18%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/d886748df13c431e95f378d808353eb5/index.m3u8"
+    },
+    {
+      "title": "08:00 18/07 Brazil vs Poland (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FOM8Y9ODa-vBKZiE2j.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FOM8Y9ODa-vBKZiE2j.png&time=08%3A00+18%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/20bfdb65ae4d4992a5e8644dac0ae0a8/index.m3u8"
+    },
+    {
+      "title": "11:00 18/07 Canada vs Cuba (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fx8ugZxyS-QBQPB0xP.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fx8ugZxyS-QBQPB0xP.png&time=11%3A00+18%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/32d2fc91a8e6463db5f7247b8d66a407/index.m3u8"
+    },
+    {
+      "title": "14:00 18/07 Rochedale Rovers vs Brisbane City (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F030a377635b3ac3fe5cbb49221594110.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F030a377635b3ac3fe5cbb49221594110.png&time=14%3A00+18%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/f32fb105862046a598e5404310e3afcb/index.m3u8"
+    },
+    {
+      "title": "15:30 18/07 St George Saints vs Rockdale City Suns (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F8467022e5f2d8204773bddb6cb7d8182.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F8467022e5f2d8204773bddb6cb7d8182.png&time=15%3A30+18%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/3a32d4e49e1d403fb818a78187dffdb5/index.m3u8"
+    },
+    {
+      "title": "17:20 18/07 Argentina vs Italy (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FUDtAW5e5-nBWCl0De.png&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FUDtAW5e5-nBWCl0De.png&time=17%3A20+18%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/92fd008e35be4244bb71f06834fe0db3/index.m3u8"
     }
   ]
 }
