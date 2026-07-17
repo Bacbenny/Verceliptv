@@ -1,13 +1,13 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784246540,
-  "fetched_at_utc": "2026-07-17T00:02:20.751470+00:00",
+  "fetched_at": 1784247064,
+  "fetched_at_utc": "2026-07-17T00:11:04.472137+00:00",
   "count": 20,
   "channels": [
     {
-      "title": "06:30 17/07 Montreal Impact vs Toronto FC (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fabd87a03b9befd43df6c45c9b17e9a79.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fabd87a03b9befd43df6c45c9b17e9a79.png&time=06%3A30+17%2F07",
+      "title": "06:40 17/07 Montreal Impact vs Toronto FC (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fabd87a03b9befd43df6c45c9b17e9a79.png&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fabd87a03b9befd43df6c45c9b17e9a79.png&time=06%3A40+17%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/4543b11d2941484ea298d3ed978d1744/index.m3u8"
     },
