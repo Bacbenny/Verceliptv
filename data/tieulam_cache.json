@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784269329,
-  "fetched_at_utc": "2026-07-17T06:22:09.995503+00:00",
+  "fetched_at": 1784277383,
+  "fetched_at_utc": "2026-07-17T08:36:23.472119+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "13:00 17/07 Myanmar vs Việt Nam (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fpd29lpeM-8xwT7BCP.png&time=13%3A00+17%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/92194a9ed53c4046b6fa6591aa2bff05/index.m3u8"
-    },
     {
       "title": "16:30 17/07 Sydney FC Youth vs Manly United (BLV TRẠNG TÍ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F6fb81e8272c1a862f2afe6e9858391af.png&time=16%3A30+17%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fssl.gstatic.com%2Fonebox%2Fmedia%2Fsports%2Flogos%2Foptimized%2FIUYV_ZAMxDdabQPzSpTJtg_96x96.png&time=19%3A00+18%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/780bb04a275c4182ac3dae29c4210ee0/index.m3u8"
+    },
+    {
+      "title": "20:00 18/07 Zhenis Astana vs Ulytau Zhezkazgan (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F16ccfd6042d1f791302c69eec646e081.png&time=20%3A00+18%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/85bdecd4992e40bd9cedbbe5a6663a5d/index.m3u8"
     }
   ]
 }
