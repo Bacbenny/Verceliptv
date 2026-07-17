@@ -1,8 +1,8 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784277383,
-  "fetched_at_utc": "2026-07-17T08:36:23.472119+00:00",
+  "fetched_at": 1784285514,
+  "fetched_at_utc": "2026-07-17T10:51:54.741359+00:00",
   "count": 20,
   "channels": [
     {
@@ -16,12 +16,6 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Ff552VMEa-E1YhvyqD.png&time=17%3A20+17%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/5ba9c7adb77c4169b3ecad08a80a8c05/index.m3u8"
-    },
-    {
-      "title": "17:30 17/07 Melbourne Knights vs Brunswick City (BLV TRẠNG BÉO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F99fb201f1b3949c2f36e9d87a48f3c7e.png&time=17%3A30+17%2F07",
-      "referrer": "https://sv2.tieulam2.info/",
-      "url": "https://pull.asynccdn.com/live/d1378cf6cf44488b84f8be9ae19f5356/index.m3u8"
     },
     {
       "title": "18:00 17/07 Qingdao West Coast vs Chengdu Rongcheng (BLV TRẠNG TÍ) [geo]",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F16ccfd6042d1f791302c69eec646e081.png&time=20%3A00+18%2F07",
       "referrer": "https://sv2.tieulam2.info/",
       "url": "https://pull.asynccdn.com/live/85bdecd4992e40bd9cedbbe5a6663a5d/index.m3u8"
+    },
+    {
+      "title": "23:00 18/07 Viking vs Sandefjord (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F2fa0840e0cb77fd66f104fa932302a72.png&time=23%3A00+18%2F07",
+      "referrer": "https://sv2.tieulam2.info/",
+      "url": "https://pull.asynccdn.com/live/6125f3c9b82041e78361c0e41fcb4b1c/index.m3u8"
     }
   ]
 }
