@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784356149,
-  "fetched_at_utc": "2026-07-18T06:29:09.587448+00:00",
+  "fetched_at": 1784363081,
+  "fetched_at_utc": "2026-07-18T08:24:41.252800+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "11:00 18/07 Canada vs Cuba (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fx8ugZxyS-QBQPB0xP.png&time=11%3A00+18%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/32d2fc91a8e6463db5f7247b8d66a407/index.m3u8"
-    },
     {
       "title": "14:00 18/07 Rochedale Rovers vs Brisbane City (BLV TRẠNG TÍ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F030a377635b3ac3fe5cbb49221594110.png&time=14%3A00+18%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F74eb06ea57f32cb35dcc025665caa97e.png&time=10%3A10+19%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/5579d4de6d2c471ebad2fc6194010cc6/index.m3u8"
+    },
+    {
+      "title": "13:30 19/07 Cuba vs Italy (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FAmSqkKjl-hIzfuNSD.png&time=13%3A30+19%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/64cf9932efc5468ba26b0dc55153aff1/index.m3u8"
     }
   ]
 }
