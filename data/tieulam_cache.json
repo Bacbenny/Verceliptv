@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784399338,
-  "fetched_at_utc": "2026-07-18T18:28:58.116162+00:00",
+  "fetched_at": 1784403958,
+  "fetched_at_utc": "2026-07-18T19:45:58.276188+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "23:30 18/07 Zenit St. Petersburg vs Spartak Moscow (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F19d5361bfdffa4bfc2f936cbb65fd317.png&time=23%3A30+18%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/18bead83225d4438a321094615f1dfbc/index.m3u8"
-    },
     {
       "title": "04:00 19/07 France vs England (BLV TRẠNG PỜM) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=04%3A00+19%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FOd7JGXZA-0E8Iihe1.png&time=02%3A00+20%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/a0c7bb104cc943338690f3fe601d78e2/index.m3u8"
+    },
+    {
+      "title": "02:00 20/07 Spain vs Argentina (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FOd7JGXZA-0E8Iihe1.png&time=02%3A00+20%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/09a6631f121c4dbd9ab22c06f95001b7/index.m3u8"
     }
   ]
 }
