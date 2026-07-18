@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784336377,
-  "fetched_at_utc": "2026-07-18T00:59:37.805366+00:00",
+  "fetched_at": 1784347753,
+  "fetched_at_utc": "2026-07-18T04:09:13.345374+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "08:00 18/07 Atletico San Luis vs Cruz Azul (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff6c489e1e71d37e301b30df37a43b8a4.png&time=08%3A00+18%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/d886748df13c431e95f378d808353eb5/index.m3u8"
-    },
-    {
-      "title": "08:00 18/07 Brazil vs Poland (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FOM8Y9ODa-vBKZiE2j.png&time=08%3A00+18%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/20bfdb65ae4d4992a5e8644dac0ae0a8/index.m3u8"
-    },
     {
       "title": "11:00 18/07 Canada vs Cuba (BLV TRẠNG TỒ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2Fx8ugZxyS-QBQPB0xP.png&time=11%3A00+18%2F07",
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=04%3A00+19%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/965ed6d369fa47bb9f02d2795b9ceefe/index.m3u8"
+    },
+    {
+      "title": "08:05 19/07 Monterrey vs Santos Laguna (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5c3f819a35454f424d85df5757650f8b.png&time=08%3A05+19%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/cc5d515b96244437a9fc0d037894bb14/index.m3u8"
+    },
+    {
+      "title": "10:10 19/07 Queretaro FC vs Club America (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F74eb06ea57f32cb35dcc025665caa97e.png&time=10%3A10+19%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/5579d4de6d2c471ebad2fc6194010cc6/index.m3u8"
     }
   ]
 }
