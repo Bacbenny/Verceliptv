@@ -1,8 +1,8 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784403958,
-  "fetched_at_utc": "2026-07-18T19:45:58.276188+00:00",
+  "fetched_at": 1784408206,
+  "fetched_at_utc": "2026-07-18T20:56:46.414387+00:00",
   "count": 20,
   "channels": [
     {
@@ -24,7 +24,7 @@
       "url": "https://pull.asynccdn.com/live/63b7e5a1199042a7931ea48687fc5491/index.m3u8"
     },
     {
-      "title": "04:00 19/07 France vs England (BLV TRẠNG TÍ) [geo]",
+      "title": "04:00 19/07 France vs England (BLV TRẠNG TÍ ( Fan Tam Sư )) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FI5PqTkcM-U3HPIwDq.png&time=04%3A00+19%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/f162b61225a64649b4a0db5e8e7c4628/index.m3u8"
