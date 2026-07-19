@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784469809,
-  "fetched_at_utc": "2026-07-19T14:03:29.556868+00:00",
-  "count": 19,
+  "fetched_at": 1784475109,
+  "fetched_at_utc": "2026-07-19T15:31:49.325769+00:00",
+  "count": 18,
   "channels": [
-    {
-      "title": "19:00 19/07 Altay FK vs FK Aktobe Lento (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F96717524f82fb5d1366bd0d22c485956.png&time=19%3A00+19%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/28c0554b42bf42f2afdcdedc28543bbc/index.m3u8"
-    },
     {
       "title": "21:00 19/07 FC Universitatea Cluj vs Farul Constanta (BLV TRẠNG BÉO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F74c37787bcf9656e1372913981f69859.png&time=21%3A00+19%2F07",
