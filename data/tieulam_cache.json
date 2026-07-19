@@ -1,34 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784462572,
-  "fetched_at_utc": "2026-07-19T12:02:52.869026+00:00",
-  "count": 20,
+  "fetched_at": 1784469809,
+  "fetched_at_utc": "2026-07-19T14:03:29.556868+00:00",
+  "count": 19,
   "channels": [
-    {
-      "title": "16:30 19/07 Indonesia vs Campuchia (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FYkKZmUDa-463LAvlB.png&time=16%3A30+19%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/446747a7b81b4f97b85f30c8ec0943eb/index.m3u8"
-    },
-    {
-      "title": "17:20 19/07 Japan vs Argentina (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F8G7efUAr-vX32SaDf.png&time=17%3A20+19%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/7504f4cf34374bcc94a11535d51cc9b9/index.m3u8"
-    },
-    {
-      "title": "17:30 19/07 Bucheon FC 1995 vs Football Club Seoul (BLV TRẠNG BÉO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F640f8c62cb294e1cc308a44ed2a62891.png&time=17%3A30+19%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/6c4f0cb3e2dc4f1d9493f844f7dffe38/index.m3u8"
-    },
-    {
-      "title": "18:00 19/07 Thai Nguyen T&T Women vs Ho Chi Minh City B Women (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F761b47aa242b8e4a5bf183da184304d7.png&time=18%3A00+19%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/46ef85144ff747e28d8a0d0067174588/index.m3u8"
-    },
     {
       "title": "19:00 19/07 Altay FK vs FK Aktobe Lento (BLV TRẠNG NGỐ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F96717524f82fb5d1366bd0d22c485956.png&time=19%3A00+19%2F07",
@@ -124,6 +100,24 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F7774a1be5a0fb551d44ba25244760edd.png&time=00%3A00+21%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/fa11c184210e481f8370cdf05182c709/index.m3u8"
+    },
+    {
+      "title": "01:30 21/07 FC Rapid 1923 vs Sepsi OSK Sfantul Gheorghe (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F6bb1babe89fffc1f77f25a47db40c847.png&time=01%3A30+21%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/ef51e3167dc242e2941a7e6a618616b7/index.m3u8"
+    },
+    {
+      "title": "02:15 21/07 Keflavik vs Akranes (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F3b6758ec26101bf8ba64b101a401520f.png&time=02%3A15+21%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/167767fd58be4f2b84cba7cd74e6705c/index.m3u8"
+    },
+    {
+      "title": "07:30 21/07 Central Norte Salta vs Deportivo Moron (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F0009f3e2b129f49e77cffd1d5800f5cc.png&time=07%3A30+21%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/e5344bf3546346e7bf745e53b4b4bafa/index.m3u8"
     }
   ]
 }
