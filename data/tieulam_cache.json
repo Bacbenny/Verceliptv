@@ -1,15 +1,15 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784433862,
-  "fetched_at_utc": "2026-07-19T04:04:22.229162+00:00",
+  "fetched_at": 1784444776,
+  "fetched_at_utc": "2026-07-19T07:06:16.974278+00:00",
   "count": 20,
   "channels": [
     {
-      "title": "10:10 19/07 Queretaro FC vs Club America (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F74eb06ea57f32cb35dcc025665caa97e.png&time=10%3A10+19%2F07",
+      "title": "13:00 19/07 Việt Nam vs Thái Lan (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fssl.gstatic.com%2Fonebox%2Fmedia%2Fsports%2Flogos%2Foptimized%2FIUYV_ZAMxDdabQPzSpTJtg_96x96.png&time=13%3A00+19%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/5579d4de6d2c471ebad2fc6194010cc6/index.m3u8"
+      "url": "https://pull.asynccdn.com/live/0c775459b81c4f52bd3d260e37fb6c50/index.m3u8"
     },
     {
       "title": "13:30 19/07 Cuba vs Italy (BLV TRẠNG TỒ) [geo]",
@@ -22,6 +22,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fb196a9a7e627dc15cfa96268035c454e.png&time=16%3A00+19%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/9a27b283b1564169a558ccec3483c4e4/index.m3u8"
+    },
+    {
+      "title": "16:30 19/07 Indonesia vs Campuchia (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FYkKZmUDa-463LAvlB.png&time=16%3A30+19%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/446747a7b81b4f97b85f30c8ec0943eb/index.m3u8"
     },
     {
       "title": "17:20 19/07 Japan vs Argentina (BLV TRẠNG TÍ) [geo]",
@@ -118,12 +124,6 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff3aa37eff0023279c42b6e99eecc31d0.png&time=22%3A00+20%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/0d7b8ca66f824aadae2a8fc4d2b54a27/index.m3u8"
-    },
-    {
-      "title": "22:30 20/07 Corvinul Hunedoara vs FK Csikszereda Miercurea Ciuc (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F0d34b3c5bdf01947c5d8e3e36cc82962.png&time=22%3A30+20%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/f7df758c1131441186d016639606f5c6/index.m3u8"
     }
   ]
 }
