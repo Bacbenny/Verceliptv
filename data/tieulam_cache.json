@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784419338,
-  "fetched_at_utc": "2026-07-19T00:02:18.610470+00:00",
+  "fetched_at": 1784433862,
+  "fetched_at_utc": "2026-07-19T04:04:22.229162+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "08:05 19/07 Monterrey vs Santos Laguna (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5c3f819a35454f424d85df5757650f8b.png&time=08%3A05+19%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/cc5d515b96244437a9fc0d037894bb14/index.m3u8"
-    },
     {
       "title": "10:10 19/07 Queretaro FC vs Club America (BLV TRẠNG TÍ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F74eb06ea57f32cb35dcc025665caa97e.png&time=10%3A10+19%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff3aa37eff0023279c42b6e99eecc31d0.png&time=22%3A00+20%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/0d7b8ca66f824aadae2a8fc4d2b54a27/index.m3u8"
+    },
+    {
+      "title": "22:30 20/07 Corvinul Hunedoara vs FK Csikszereda Miercurea Ciuc (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F0d34b3c5bdf01947c5d8e3e36cc82962.png&time=22%3A30+20%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/f7df758c1131441186d016639606f5c6/index.m3u8"
     }
   ]
 }
