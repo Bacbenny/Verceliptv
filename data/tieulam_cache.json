@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784458566,
-  "fetched_at_utc": "2026-07-19T10:56:06.097048+00:00",
+  "fetched_at": 1784462572,
+  "fetched_at_utc": "2026-07-19T12:02:52.869026+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "16:00 19/07 Ha Noi Women vs Than KSVN Women (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fb196a9a7e627dc15cfa96268035c454e.png&time=16%3A00+19%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/9a27b283b1564169a558ccec3483c4e4/index.m3u8"
-    },
     {
       "title": "16:30 19/07 Indonesia vs Campuchia (BLV TRẠNG NGỐ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FYkKZmUDa-463LAvlB.png&time=16%3A30+19%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fe087c9b939975c0cb726253fc3c3e418.png&time=23%3A15+20%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/7c0fbbe2b4d347af9a9188410f6b2dd1/index.m3u8"
+    },
+    {
+      "title": "00:00 21/07 Kalmar vs Malmo FF (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F7774a1be5a0fb551d44ba25244760edd.png&time=00%3A00+21%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/fa11c184210e481f8370cdf05182c709/index.m3u8"
     }
   ]
 }
