@@ -1,8 +1,8 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784485758,
-  "fetched_at_utc": "2026-07-19T18:29:18.969472+00:00",
+  "fetched_at": 1784490407,
+  "fetched_at_utc": "2026-07-19T19:46:47.795259+00:00",
   "count": 16,
   "channels": [
     {
@@ -24,7 +24,7 @@
       "url": "https://pull.asynccdn.com/live/a0c7bb104cc943338690f3fe601d78e2/index.m3u8"
     },
     {
-      "title": "02:00 20/07 Spain vs Argentina (BLV TRẠNG TÍ) [geo]",
+      "title": "02:00 20/07 Spain vs Argentina (BLV TRẠNG TÍ ( Tôi Fan TBN )) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FOd7JGXZA-0E8Iihe1.png&time=02%3A00+20%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/09a6631f121c4dbd9ab22c06f95001b7/index.m3u8"
