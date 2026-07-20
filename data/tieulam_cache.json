@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784580544,
-  "fetched_at_utc": "2026-07-20T20:49:04.616663+00:00",
-  "count": 18,
+  "fetched_at": 1784590346,
+  "fetched_at_utc": "2026-07-20T23:32:26.798607+00:00",
+  "count": 16,
   "channels": [
-    {
-      "title": "01:30 21/07 FC Rapid 1923 vs Sepsi OSK Sfantul Gheorghe (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F6bb1babe89fffc1f77f25a47db40c847.png&time=01%3A30+21%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/ef51e3167dc242e2941a7e6a618616b7/index.m3u8"
-    },
-    {
-      "title": "02:15 21/07 Keflavik vs Akranes (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F3b6758ec26101bf8ba64b101a401520f.png&time=02%3A15+21%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/167767fd58be4f2b84cba7cd74e6705c/index.m3u8"
-    },
     {
       "title": "07:30 21/07 Central Norte Salta vs Deportivo Moron (BLV TRẠNG TÈO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F0009f3e2b129f49e77cffd1d5800f5cc.png&time=07%3A30+21%2F07",
