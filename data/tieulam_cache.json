@@ -1,8 +1,8 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784530378,
-  "fetched_at_utc": "2026-07-20T06:52:58.240853+00:00",
+  "fetched_at": 1784542609,
+  "fetched_at_utc": "2026-07-20T10:16:49.427409+00:00",
   "count": 20,
   "channels": [
     {
@@ -48,7 +48,7 @@
       "url": "https://pull.asynccdn.com/live/ef51e3167dc242e2941a7e6a618616b7/index.m3u8"
     },
     {
-      "title": "02:15 21/07 Keflavik vs Akranes (BLV TRẠNG TÍ) [geo]",
+      "title": "02:15 21/07 Keflavik vs Akranes (BLV TRẠNG TỒ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F3b6758ec26101bf8ba64b101a401520f.png&time=02%3A15+21%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/167767fd58be4f2b84cba7cd74e6705c/index.m3u8"
@@ -66,12 +66,6 @@
       "url": "https://pull.asynccdn.com/live/888385724a224bc1aa52efb2ee0b773a/index.m3u8"
     },
     {
-      "title": "17:30 21/07 Bayswater City vs Sydney FC (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F15809b305455c1e964ccd454cc180e51.png&time=17%3A30+21%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/80d75a42273a4bbc8dd75fb17ca93f44/index.m3u8"
-    },
-    {
       "title": "18:35 21/07 Chongqing Tonglianglong vs Qingdao West Coast (BLV TRẠNG NGỐ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5be93c1a6628d27de6d39fde9ea94b7a.png&time=18%3A35+21%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
@@ -84,7 +78,7 @@
       "url": "https://pull.asynccdn.com/live/75c4f695c7b742c4860dfb7ea58ff1eb/index.m3u8"
     },
     {
-      "title": "22:00 21/07 Sogdiana Jizak vs Neftchi Fergana (BLV TRẠNG TỒ) [geo]",
+      "title": "22:00 21/07 Sogdiana Jizak vs Neftchi Fergana (BLV TRẠNG TÍ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F0eff3f54d4407ac2e90783bc6654e657.png&time=22%3A00+21%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/a6f177ae955d4bad88a11b2eeb281c68/index.m3u8"
@@ -112,6 +106,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F15534c86dc2747cd8bc55c8b2d7d4608.png&time=02%3A00+22%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/48f6929125b146c1b65aad154d9faeeb/index.m3u8"
+    },
+    {
+      "title": "08:00 22/07 Cruz Azul vs Puebla (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F2addd50487c8f61276d5fff8714f6a5c.png&time=08%3A00+22%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/f1d30394e40a4bc7817f06734a8a2f9d/index.m3u8"
     },
     {
       "title": "15:00 22/07 Italy Women vs Netherlands Women (BLV TRẠNG TÈO) [geo]",
