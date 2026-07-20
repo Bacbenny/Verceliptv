@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784550788,
-  "fetched_at_utc": "2026-07-20T12:33:08.468603+00:00",
+  "fetched_at": 1784560469,
+  "fetched_at_utc": "2026-07-20T15:14:29.370976+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "18:00 20/07 Altai Women vs Zhenis Astana Women (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FUqR74Of5-YXmbWLZR.png&time=18%3A00+20%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/42a1652de6984b759d9d889b9dd8fc4e/index.m3u8"
-    },
-    {
-      "title": "20:00 20/07 Kyzylzhar Women vs Yelimay Semey Women (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FOv8ybLAr-69Y2HH67.png&time=20%3A00+20%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/97af014469f14cb49989e90ecd85628d/index.m3u8"
-    },
     {
       "title": "22:00 20/07 TPS Turku vs Ilves Tampere (BLV TRẠNG BÉO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff3aa37eff0023279c42b6e99eecc31d0.png&time=22%3A00+20%2F07",
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fe929e8c047ce3b503112d3132c1aa88f.png&time=16%3A30+22%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/bc9b5a7238dc466c92429110a7a8f71f/index.m3u8"
+    },
+    {
+      "title": "17:30 22/07 Football Club Seoul vs Pohang Steelers (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad010af729c420626d1865ad744168d3.png&time=17%3A30+22%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/cb0028d28f6940fb8e484bc4f9694d77/index.m3u8"
+    },
+    {
+      "title": "18:30 22/07 Brazil Women vs Japan Women (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FWG7ZbYdM-dlhXsxTS.png&time=18%3A30+22%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/6e533ff745e34dd6b9f67b78833d4fae/index.m3u8"
     }
   ]
 }
