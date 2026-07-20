@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784574034,
-  "fetched_at_utc": "2026-07-20T19:00:34.230449+00:00",
-  "count": 19,
+  "fetched_at": 1784580544,
+  "fetched_at_utc": "2026-07-20T20:49:04.616663+00:00",
+  "count": 18,
   "channels": [
-    {
-      "title": "00:00 21/07 Kalmar vs Malmo FF (BLV TRẠNG BÉO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F7774a1be5a0fb551d44ba25244760edd.png&time=00%3A00+21%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/fa11c184210e481f8370cdf05182c709/index.m3u8"
-    },
     {
       "title": "01:30 21/07 FC Rapid 1923 vs Sepsi OSK Sfantul Gheorghe (BLV TRẠNG NGỐ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F6bb1babe89fffc1f77f25a47db40c847.png&time=01%3A30+21%2F07",
