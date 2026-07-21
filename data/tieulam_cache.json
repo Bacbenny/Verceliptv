@@ -1,8 +1,8 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784614339,
-  "fetched_at_utc": "2026-07-21T06:12:19.613061+00:00",
+  "fetched_at": 1784625085,
+  "fetched_at_utc": "2026-07-21T09:11:25.488293+00:00",
   "count": 20,
   "channels": [
     {
@@ -90,8 +90,8 @@
       "url": "https://pull.asynccdn.com/live/48a091435a8c4878af6beda5fccf5f3d/index.m3u8"
     },
     {
-      "title": "22:00 22/07 Tottenham Hotspur vs Milton Keynes Dons (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F8b22ab4041e666b996a2d96f20dea707.png&time=22%3A00+22%2F07",
+      "title": "23:00 22/07 Tottenham Hotspur vs Milton Keynes Dons (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F8b22ab4041e666b996a2d96f20dea707.png&time=23%3A00+22%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/64672d3a9a74495fa8cc9b2c89104d0c/index.m3u8"
     },
