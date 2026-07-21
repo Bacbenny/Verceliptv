@@ -1,27 +1,15 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784658010,
-  "fetched_at_utc": "2026-07-21T18:20:10.195845+00:00",
+  "fetched_at": 1784664114,
+  "fetched_at_utc": "2026-07-21T20:01:54.714471+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "00:00 22/07 Aarhus AGF vs Lech Poznan (BLV TRẠNG TÍ ( Giáo Sư )) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fa0da10be11be5910b71c5ca79af53350.png&time=00%3A00+22%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/442b3130c5d94b919e99894458dc3250/index.m3u8"
-    },
     {
       "title": "01:00 22/07 Fenerbahce vs Gornik Zabrze (BLV TRẠNG NGỐ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fdff00f1fd4a7dd2feac000b462416867.png&time=01%3A00+22%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/a9858a2abe3044d7b6da6c991063be1f/index.m3u8"
-    },
-    {
-      "title": "01:00 22/07 Ebbsfleet United vs West Ham United (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fdb57e1deb45381d4ae94ecaa24b4bb7b.png&time=01%3A00+22%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/12b1d1b04bbe4fdb90e2721e11f6ac43/index.m3u8"
     },
     {
       "title": "02:00 22/07 Larne FC vs Crvena Zvezda (BLV TRẠNG TỒ) [geo]",
@@ -66,8 +54,8 @@
       "url": "https://pull.asynccdn.com/live/48a091435a8c4878af6beda5fccf5f3d/index.m3u8"
     },
     {
-      "title": "23:00 22/07 Tottenham Hotspur vs Milton Keynes Dons (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F8b22ab4041e666b996a2d96f20dea707.png&time=23%3A00+22%2F07",
+      "title": "22:00 22/07 Tottenham Hotspur vs Milton Keynes Dons (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F8b22ab4041e666b996a2d96f20dea707.png&time=22%3A00+22%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/64672d3a9a74495fa8cc9b2c89104d0c/index.m3u8"
     },
@@ -82,6 +70,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad7e2b5b42eb9b7b69a325b12e9d0d7b.png&time=01%3A30+23%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/7032c6c629e64e9d9de6a05b09ef67c5/index.m3u8"
+    },
+    {
+      "title": "01:45 23/07 Ebbsfleet United vs West Ham United (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fdb57e1deb45381d4ae94ecaa24b4bb7b.png&time=01%3A45+23%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/547083357e294c86b1146b4d86fac361/index.m3u8"
     },
     {
       "title": "06:30 23/07 Inter Miami CF vs Chicago Fire (BLV TRẠNG TÈO) [geo]",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ffd1a9c51505300dec9c26e5847114851.png&time=23%3A00+23%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/cb9825cfb0ad4a88b796c71839adaf99/index.m3u8"
+    },
+    {
+      "title": "00:00 24/07 Tromso IL vs FC Hradec Králové (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F16a410c5355aed84a9ca41b15073db49.png&time=00%3A00+24%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/1191939a770f435086f9cad139ed37b9/index.m3u8"
     }
   ]
 }
