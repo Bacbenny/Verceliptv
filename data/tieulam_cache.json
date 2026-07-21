@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784633055,
-  "fetched_at_utc": "2026-07-21T11:24:15.408324+00:00",
+  "fetched_at": 1784638578,
+  "fetched_at_utc": "2026-07-21T12:56:18.027871+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "16:30 21/07 Preston Lions vs Newcastle Jets (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F6dff2291fe2e822de2e8068a182c4759.jpg&time=16%3A30+21%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/888385724a224bc1aa52efb2ee0b773a/index.m3u8"
-    },
     {
       "title": "18:35 21/07 Chongqing Tonglianglong vs Qingdao West Coast (BLV TRẠNG NGỐ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5be93c1a6628d27de6d39fde9ea94b7a.png&time=18%3A35+21%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FbyFAJXzS-vBKZiE2j.png&time=15%3A00+23%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/1c985af0f7ee42fda2eee02b6f2620de/index.m3u8"
+    },
+    {
+      "title": "18:30 23/07 USA W vs China W (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FIoeNdfwS-MPdHoKT3.png&time=18%3A30+23%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/c536908d35d1447fb0a08f6b1813fe53/index.m3u8"
     }
   ]
 }
