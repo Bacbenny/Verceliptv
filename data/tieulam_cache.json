@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784664114,
-  "fetched_at_utc": "2026-07-21T20:01:54.714471+00:00",
+  "fetched_at": 1784670045,
+  "fetched_at_utc": "2026-07-21T21:40:45.890943+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "01:00 22/07 Fenerbahce vs Gornik Zabrze (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fdff00f1fd4a7dd2feac000b462416867.png&time=01%3A00+22%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/a9858a2abe3044d7b6da6c991063be1f/index.m3u8"
-    },
-    {
-      "title": "02:00 22/07 Larne FC vs Crvena Zvezda (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F15534c86dc2747cd8bc55c8b2d7d4608.png&time=02%3A00+22%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/48f6929125b146c1b65aad154d9faeeb/index.m3u8"
-    },
     {
       "title": "08:00 22/07 Cruz Azul vs Puebla (BLV TRẠNG TÈO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F2addd50487c8f61276d5fff8714f6a5c.png&time=08%3A00+22%2F07",
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F16a410c5355aed84a9ca41b15073db49.png&time=00%3A00+24%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/1191939a770f435086f9cad139ed37b9/index.m3u8"
+    },
+    {
+      "title": "01:00 24/07 Besiktas JK vs Midtjylland (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F83ba0474d144e49f060789cfa904e226.png&time=01%3A00+24%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/a8979f4788664b72b672e6e0298161e2/index.m3u8"
+    },
+    {
+      "title": "02:00 24/07 Cordoba vs Sevilla FC (BLV TRẠNG QUỶ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fcd6fd11fd9ca07c46747cb03b87f4dbb.png&time=02%3A00+24%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/ac40a9ed9434454e8eba50169bdaf9b3/index.m3u8"
     }
   ]
 }
