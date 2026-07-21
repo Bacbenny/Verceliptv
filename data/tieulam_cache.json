@@ -1,24 +1,12 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784652988,
-  "fetched_at_utc": "2026-07-21T16:56:28.384427+00:00",
+  "fetched_at": 1784658010,
+  "fetched_at_utc": "2026-07-21T18:20:10.195845+00:00",
   "count": 20,
   "channels": [
     {
-      "title": "22:00 21/07 Sogdiana Jizak vs Neftchi Fergana (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F0eff3f54d4407ac2e90783bc6654e657.png&time=22%3A00+21%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/a6f177ae955d4bad88a11b2eeb281c68/index.m3u8"
-    },
-    {
-      "title": "23:00 21/07 FC Iberia 1999 Tbilisi vs Slovan Bratislava (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fe80d49b16e8a1ea6b6d38643e1d429b0.png&time=23%3A00+21%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/39fd2b7354bd4c9e8c26f5c2420b81e9/index.m3u8"
-    },
-    {
-      "title": "00:00 22/07 Aarhus AGF vs Lech Poznan (BLV TRẠNG TÍ) [geo]",
+      "title": "00:00 22/07 Aarhus AGF vs Lech Poznan (BLV TRẠNG TÍ ( Giáo Sư )) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fa0da10be11be5910b71c5ca79af53350.png&time=00%3A00+22%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/442b3130c5d94b919e99894458dc3250/index.m3u8"
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5866a054076a612b1cc7cefd7241aecc.png&time=21%3A30+23%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/4eb1464e024b4b5585042aac4939efc2/index.m3u8"
+    },
+    {
+      "title": "22:00 23/07 Navbahor Namangan vs Qizilqum Zarafshon (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F38282bbb6c7407024187ae929dab2274.png&time=22%3A00+23%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/869cbb84d70246c8b191f562896bba2d/index.m3u8"
+    },
+    {
+      "title": "23:00 23/07 HJK Helsinki vs Coleraine (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ffd1a9c51505300dec9c26e5847114851.png&time=23%3A00+23%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/cb9825cfb0ad4a88b796c71839adaf99/index.m3u8"
     }
   ]
 }
