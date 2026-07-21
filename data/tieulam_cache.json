@@ -1,8 +1,8 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784646616,
-  "fetched_at_utc": "2026-07-21T15:10:16.540520+00:00",
+  "fetched_at": 1784652988,
+  "fetched_at_utc": "2026-07-21T16:56:28.384427+00:00",
   "count": 20,
   "channels": [
     {
@@ -28,6 +28,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fdff00f1fd4a7dd2feac000b462416867.png&time=01%3A00+22%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/a9858a2abe3044d7b6da6c991063be1f/index.m3u8"
+    },
+    {
+      "title": "01:00 22/07 Ebbsfleet United vs West Ham United (BLV TRẠNG NGỐ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fdb57e1deb45381d4ae94ecaa24b4bb7b.png&time=01%3A00+22%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/12b1d1b04bbe4fdb90e2721e11f6ac43/index.m3u8"
     },
     {
       "title": "02:00 22/07 Larne FC vs Crvena Zvezda (BLV TRẠNG TỒ) [geo]",
@@ -88,12 +94,6 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad7e2b5b42eb9b7b69a325b12e9d0d7b.png&time=01%3A30+23%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/7032c6c629e64e9d9de6a05b09ef67c5/index.m3u8"
-    },
-    {
-      "title": "01:45 23/07 Ebbsfleet United vs West Ham United (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fdb57e1deb45381d4ae94ecaa24b4bb7b.png&time=01%3A45+23%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/12b1d1b04bbe4fdb90e2721e11f6ac43/index.m3u8"
     },
     {
       "title": "06:30 23/07 Inter Miami CF vs Chicago Fire (BLV TRẠNG TÈO) [geo]",
