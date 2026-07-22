@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784681806,
-  "fetched_at_utc": "2026-07-22T00:56:46.178922+00:00",
+  "fetched_at": 1784694225,
+  "fetched_at_utc": "2026-07-22T04:23:45.464306+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "08:00 22/07 Cruz Azul vs Puebla (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F2addd50487c8f61276d5fff8714f6a5c.png&time=08%3A00+22%2F07",
-      "referrer": "https://sv2.tieulamwc.com/",
-      "url": "https://pull.asynccdn.com/live/f1d30394e40a4bc7817f06734a8a2f9d/index.m3u8"
-    },
     {
       "title": "15:00 22/07 Italy Women vs Netherlands Women (BLV TRẠNG TÈO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F0IAL5Rkl-xCsenx2O.png&time=15%3A00+22%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fcd6fd11fd9ca07c46747cb03b87f4dbb.png&time=02%3A00+24%2F07",
       "referrer": "https://sv2.tieulamwc.com/",
       "url": "https://pull.asynccdn.com/live/ac40a9ed9434454e8eba50169bdaf9b3/index.m3u8"
+    },
+    {
+      "title": "16:00 24/07 Phong Phu Ha Nam Women vs Thai Nguyen T&T Women (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F2ee0214c45e742b6ae9a1107593918d5.png&time=16%3A00+24%2F07",
+      "referrer": "https://sv2.tieulamwc.com/",
+      "url": "https://pull.asynccdn.com/live/0c3c19b4e2d64d41ac6c8fb66bc66f56/index.m3u8"
     }
   ]
 }
