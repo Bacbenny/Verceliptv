@@ -1,33 +1,15 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784742582,
-  "fetched_at_utc": "2026-07-22T17:49:42.913171+00:00",
+  "fetched_at": 1784748869,
+  "fetched_at_utc": "2026-07-22T19:34:29.999632+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "23:00 22/07 Tottenham Hotspur vs Milton Keynes Dons (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F8b22ab4041e666b996a2d96f20dea707.png&time=23%3A00+22%2F07",
-      "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/64672d3a9a74495fa8cc9b2c89104d0c/index.m3u8"
-    },
-    {
-      "title": "00:00 23/07 Fiorentina vs Gubbio (BLV TRẠNG TÍ ( Đẹp Zai 18cm )) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F858d87ded0cce014bae0c9681af48524.png&time=00%3A00+23%2F07",
-      "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/950443e2915a42cc84f5ad499baa56b4/index.m3u8"
-    },
     {
       "title": "01:30 23/07 Maidenhead United vs Wolverhampton Wanderers (BLV TRẠNG TỒ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad7e2b5b42eb9b7b69a325b12e9d0d7b.png&time=01%3A30+23%2F07",
       "referrer": "https://sv2.tieulamwc1.net/",
       "url": "https://pull.asynccdn.com/live/7032c6c629e64e9d9de6a05b09ef67c5/index.m3u8"
-    },
-    {
-      "title": "01:45 23/07 Ebbsfleet United vs West Ham United (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fdb57e1deb45381d4ae94ecaa24b4bb7b.png&time=01%3A45+23%2F07",
-      "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/547083357e294c86b1146b4d86fac361/index.m3u8"
     },
     {
       "title": "06:30 23/07 Inter Miami CF vs Chicago Fire (BLV TRẠNG TÈO) [geo]",
@@ -124,6 +106,24 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fa75d59f539fdc236e0c1928120985295.png&time=20%3A30+24%2F07",
       "referrer": "https://sv2.tieulamwc1.net/",
       "url": "https://pull.asynccdn.com/live/e275a956b24c4fc0bde0bbc9f4da471a/index.m3u8"
+    },
+    {
+      "title": "21:00 24/07 Bournemouth AFC vs FC St. Pauli (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F240b30d333c97d293752ab7afd77ccd6.png&time=21%3A00+24%2F07",
+      "referrer": "https://sv2.tieulamwc1.net/",
+      "url": "https://pull.asynccdn.com/live/bc42c96ebdd84694bf7a338b7aa19655/index.m3u8"
+    },
+    {
+      "title": "23:00 24/07 Rosenborg vs Manchester United (BLV TRẠNG QUỶ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F7a2eadc57b3a330eda4b7189352ce344.png&time=23%3A00+24%2F07",
+      "referrer": "https://sv2.tieulamwc1.net/",
+      "url": "https://pull.asynccdn.com/live/c5e27303e51146878b723a765837fe68/index.m3u8"
+    },
+    {
+      "title": "23:00 24/07 Rosenborg vs Manchester United (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F7a2eadc57b3a330eda4b7189352ce344.png&time=23%3A00+24%2F07",
+      "referrer": "https://sv2.tieulamwc1.net/",
+      "url": "https://pull.asynccdn.com/live/96e56f6e6eb94142ad877025bbd36542/index.m3u8"
     }
   ]
 }
