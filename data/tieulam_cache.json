@@ -1,8 +1,8 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784737426,
-  "fetched_at_utc": "2026-07-22T16:23:46.448223+00:00",
+  "fetched_at": 1784742582,
+  "fetched_at_utc": "2026-07-22T17:49:42.913171+00:00",
   "count": 20,
   "channels": [
     {
@@ -12,7 +12,7 @@
       "url": "https://pull.asynccdn.com/live/64672d3a9a74495fa8cc9b2c89104d0c/index.m3u8"
     },
     {
-      "title": "00:00 23/07 Fiorentina vs Gubbio (BLV TRẠNG TÍ) [geo]",
+      "title": "00:00 23/07 Fiorentina vs Gubbio (BLV TRẠNG TÍ ( Đẹp Zai 18cm )) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F858d87ded0cce014bae0c9681af48524.png&time=00%3A00+23%2F07",
       "referrer": "https://sv2.tieulamwc1.net/",
       "url": "https://pull.asynccdn.com/live/950443e2915a42cc84f5ad499baa56b4/index.m3u8"
