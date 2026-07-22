@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784748869,
-  "fetched_at_utc": "2026-07-22T19:34:29.999632+00:00",
+  "fetched_at": 1784754865,
+  "fetched_at_utc": "2026-07-22T21:14:25.697981+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "01:30 23/07 Maidenhead United vs Wolverhampton Wanderers (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad7e2b5b42eb9b7b69a325b12e9d0d7b.png&time=01%3A30+23%2F07",
-      "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/7032c6c629e64e9d9de6a05b09ef67c5/index.m3u8"
-    },
     {
       "title": "06:30 23/07 Inter Miami CF vs Chicago Fire (BLV TRẠNG TÈO) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F976fe1d29c112f4baeb844cdda2f04cb.png&time=06%3A30+23%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F7a2eadc57b3a330eda4b7189352ce344.png&time=23%3A00+24%2F07",
       "referrer": "https://sv2.tieulamwc1.net/",
       "url": "https://pull.asynccdn.com/live/96e56f6e6eb94142ad877025bbd36542/index.m3u8"
+    },
+    {
+      "title": "00:00 25/07 CSKA Moscow vs Baltika Kaliningrad (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F1eae81e51945df5660e24dc6f0ea353c.png&time=00%3A00+25%2F07",
+      "referrer": "https://sv2.tieulamwc1.net/",
+      "url": "https://pull.asynccdn.com/live/c3ecd4a8d0c946889ae8499434d9687c/index.m3u8"
     }
   ]
 }
