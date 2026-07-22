@@ -1,28 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784722352,
-  "fetched_at_utc": "2026-07-22T12:12:32.276071+00:00",
+  "fetched_at": 1784730906,
+  "fetched_at_utc": "2026-07-22T14:35:06.939484+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "17:30 22/07 Football Club Seoul vs Pohang Steelers (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad010af729c420626d1865ad744168d3.png&time=17%3A30+22%2F07",
-      "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/cb0028d28f6940fb8e484bc4f9694d77/index.m3u8"
-    },
-    {
-      "title": "18:30 22/07 Brazil Women vs Japan Women (BLV TRẠNG NGỐ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FWG7ZbYdM-dlhXsxTS.png&time=18%3A30+22%2F07",
-      "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/6e533ff745e34dd6b9f67b78833d4fae/index.m3u8"
-    },
-    {
-      "title": "20:00 22/07 Al-Yarmok Rawda vs Tdamn Hadramawt (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff5c65dd4fb1d02530ca6578fca939d2c.jpg&time=20%3A00+22%2F07",
-      "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/48a091435a8c4878af6beda5fccf5f3d/index.m3u8"
-    },
     {
       "title": "22:00 22/07 Tottenham Hotspur vs Milton Keynes Dons (BLV TRẠNG TỒ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F8b22ab4041e666b996a2d96f20dea707.png&time=22%3A00+22%2F07",
@@ -124,6 +106,24 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F6dff2291fe2e822de2e8068a182c4759.jpg&time=17%3A30+24%2F07",
       "referrer": "https://sv2.tieulamwc1.net/",
       "url": "https://pull.asynccdn.com/live/c01764b7681c4601af750270e1950f50/index.m3u8"
+    },
+    {
+      "title": "19:00 24/07 Barcelona vs CE Europa (BLV TRẠNG TỒ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2F8dhw5vxS-fcDVLdrL.png&time=19%3A00+24%2F07",
+      "referrer": "https://sv2.tieulamwc1.net/",
+      "url": "https://pull.asynccdn.com/live/8f068afb97a54fb4a3bddcc9d3122b5f/index.m3u8"
+    },
+    {
+      "title": "19:00 24/07 Timor Leste vs Vietnam (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fa75d59f539fdc236e0c1928120985295.png&time=19%3A00+24%2F07",
+      "referrer": "https://sv2.tieulamwc1.net/",
+      "url": "https://pull.asynccdn.com/live/e532e492da3a4d1ea375bdb650ff44e0/index.m3u8"
+    },
+    {
+      "title": "20:30 24/07 Timor Leste vs Vietnam (BLV TRẠNG QUỶ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fa75d59f539fdc236e0c1928120985295.png&time=20%3A30+24%2F07",
+      "referrer": "https://sv2.tieulamwc1.net/",
+      "url": "https://pull.asynccdn.com/live/e275a956b24c4fc0bde0bbc9f4da471a/index.m3u8"
     }
   ]
 }
