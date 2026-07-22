@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784714457,
-  "fetched_at_utc": "2026-07-22T10:00:57.387149+00:00",
+  "fetched_at": 1784722352,
+  "fetched_at_utc": "2026-07-22T12:12:32.276071+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "16:30 22/07 Cooma Tigers vs Western Sydney (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fe929e8c047ce3b503112d3132c1aa88f.png&time=16%3A30+22%2F07",
-      "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/bc9b5a7238dc466c92429110a7a8f71f/index.m3u8"
-    },
     {
       "title": "17:30 22/07 Football Club Seoul vs Pohang Steelers (BLV TRẠNG TỒ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fad010af729c420626d1865ad744168d3.png&time=17%3A30+22%2F07",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F0c6ea7bc3792dac98ed3378cd2865c0a.png&time=16%3A30+24%2F07",
       "referrer": "https://sv2.tieulamwc1.net/",
       "url": "https://pull.asynccdn.com/live/de5a893a33804b9d82769d5f21b7f5c3/index.m3u8"
+    },
+    {
+      "title": "17:30 24/07 Preston Lions vs Bentleigh greens (BLV TRẠNG TÍ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F6dff2291fe2e822de2e8068a182c4759.jpg&time=17%3A30+24%2F07",
+      "referrer": "https://sv2.tieulamwc1.net/",
+      "url": "https://pull.asynccdn.com/live/c01764b7681c4601af750270e1950f50/index.m3u8"
     }
   ]
 }
