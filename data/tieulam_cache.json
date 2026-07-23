@@ -1,8 +1,8 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784806016,
-  "fetched_at_utc": "2026-07-23T11:26:56.045145+00:00",
+  "fetched_at": 1784811997,
+  "fetched_at_utc": "2026-07-23T13:06:37.954797+00:00",
   "count": 20,
   "channels": [
     {
@@ -10,12 +10,6 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FIoeNdfwS-MPdHoKT3.png&time=18%3A30+23%2F07",
       "referrer": "https://sv2.tieulamwc1.net/",
       "url": "https://pull.asynccdn.com/live/c536908d35d1447fb0a08f6b1813fe53/index.m3u8"
-    },
-    {
-      "title": "19:00 23/07 Akademiya Ontustik vs Astana B (BLV TRẠNG BÉO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F9fd252984e0e48f24d736e43fec2cd2d.png&time=19%3A00+23%2F07",
-      "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/179e4bfcbcd84f2fb20e59fa68e5fb57/index.m3u8"
     },
     {
       "title": "21:30 23/07 FK Gazalkent vs Metallurg Bekobod (BLV TRẠNG TỒ) [geo]",
@@ -124,6 +118,12 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fb997a2811a0caed43ff38b631a708420.png&time=08%3A15+25%2F07",
       "referrer": "https://sv2.tieulamwc1.net/",
       "url": "https://pull.asynccdn.com/live/ed5cfcdb1ddf4fafb67716e04610661d/index.m3u8"
+    },
+    {
+      "title": "16:30 25/07 Qingdao Hainiu vs Tianjin Jinmen Tiger (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc1bc80f45a0bf86310ec6e56980c1757.png&time=16%3A30+25%2F07",
+      "referrer": "https://sv2.tieulamwc1.net/",
+      "url": "https://pull.asynccdn.com/live/507eb5964e3443f98529d936b5c2db72/index.m3u8"
     }
   ]
 }
