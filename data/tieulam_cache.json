@@ -1,22 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784765076,
-  "fetched_at_utc": "2026-07-23T00:04:36.012412+00:00",
+  "fetched_at": 1784778927,
+  "fetched_at_utc": "2026-07-23T03:55:27.942512+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "06:30 23/07 Inter Miami CF vs Chicago Fire (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F976fe1d29c112f4baeb844cdda2f04cb.png&time=06%3A30+23%2F07",
-      "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/53b70eb783d146bf8868878bd554e08a/index.m3u8"
-    },
-    {
-      "title": "15:00 23/07 Turkey Women vs Canada Women (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FbyFAJXzS-vBKZiE2j.png&time=15%3A00+23%2F07",
-      "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/1c985af0f7ee42fda2eee02b6f2620de/index.m3u8"
-    },
     {
       "title": "18:30 23/07 USA W vs China W (BLV TRẠNG TÍ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FIoeNdfwS-MPdHoKT3.png&time=18%3A30+23%2F07",
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F1eae81e51945df5660e24dc6f0ea353c.png&time=00%3A00+25%2F07",
       "referrer": "https://sv2.tieulamwc1.net/",
       "url": "https://pull.asynccdn.com/live/c3ecd4a8d0c946889ae8499434d9687c/index.m3u8"
+    },
+    {
+      "title": "01:30 25/07 Arges vs Petrolul Ploiesti (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff5d0b3f174168088f64f65b47af718fa.png&time=01%3A30+25%2F07",
+      "referrer": "https://sv2.tieulamwc1.net/",
+      "url": "https://pull.asynccdn.com/live/de44468c188c493492b65ab5bccd9d1e/index.m3u8"
+    },
+    {
+      "title": "08:15 25/07 Deportivo Cali vs Jaguares de Cordoba (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fb997a2811a0caed43ff38b631a708420.png&time=08%3A15+25%2F07",
+      "referrer": "https://sv2.tieulamwc1.net/",
+      "url": "https://pull.asynccdn.com/live/ed5cfcdb1ddf4fafb67716e04610661d/index.m3u8"
     }
   ]
 }
