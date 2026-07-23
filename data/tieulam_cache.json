@@ -1,10 +1,16 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784788485,
-  "fetched_at_utc": "2026-07-23T06:34:45.676747+00:00",
+  "fetched_at": 1784798870,
+  "fetched_at_utc": "2026-07-23T09:27:50.423363+00:00",
   "count": 20,
   "channels": [
+    {
+      "title": "15:00 23/07 Turkey Women vs Canada Women (BLV TRẠNG TÈO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FbyFAJXzS-vBKZiE2j.png&time=15%3A00+23%2F07",
+      "referrer": "https://sv2.tieulamwc1.net/",
+      "url": "https://pull.asynccdn.com/live/0c3fd0956db04a9a90362ef579bb91a7/index.m3u8"
+    },
     {
       "title": "18:30 23/07 USA W vs China W (BLV TRẠNG TÍ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FIoeNdfwS-MPdHoKT3.png&time=18%3A30+23%2F07",
@@ -118,12 +124,6 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Ff5d0b3f174168088f64f65b47af718fa.png&time=01%3A30+25%2F07",
       "referrer": "https://sv2.tieulamwc1.net/",
       "url": "https://pull.asynccdn.com/live/de44468c188c493492b65ab5bccd9d1e/index.m3u8"
-    },
-    {
-      "title": "08:15 25/07 Deportivo Cali vs Jaguares de Cordoba (BLV TRẠNG TÈO) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fb997a2811a0caed43ff38b631a708420.png&time=08%3A15+25%2F07",
-      "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/ed5cfcdb1ddf4fafb67716e04610661d/index.m3u8"
     }
   ]
 }
