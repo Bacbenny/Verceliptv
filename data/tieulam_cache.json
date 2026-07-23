@@ -1,16 +1,10 @@
 {
   "source": "tinhlagi",
   "source_url": "https://tinhlagi.pro/s.m3u",
-  "fetched_at": 1784811997,
-  "fetched_at_utc": "2026-07-23T13:06:37.954797+00:00",
+  "fetched_at": 1784820777,
+  "fetched_at_utc": "2026-07-23T15:32:57.685755+00:00",
   "count": 20,
   "channels": [
-    {
-      "title": "18:30 23/07 USA W vs China W (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fstatic.flashscore.com%2Fres%2Fimage%2Fdata%2FIoeNdfwS-MPdHoKT3.png&time=18%3A30+23%2F07",
-      "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/c536908d35d1447fb0a08f6b1813fe53/index.m3u8"
-    },
     {
       "title": "21:30 23/07 FK Gazalkent vs Metallurg Bekobod (BLV TRẠNG TỒ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F5866a054076a612b1cc7cefd7241aecc.png&time=21%3A30+23%2F07",
@@ -30,19 +24,13 @@
       "url": "https://pull.asynccdn.com/live/cb9825cfb0ad4a88b796c71839adaf99/index.m3u8"
     },
     {
-      "title": "00:00 24/07 Tromso IL vs FC Hradec Králové (BLV TRẠNG TÍ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F16a410c5355aed84a9ca41b15073db49.png&time=00%3A00+24%2F07",
+      "title": "01:00 24/07 St. Gallen vs Benfica (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F7fe3c683e5051a531125ab8b9a47b00e.png&time=01%3A00+24%2F07",
       "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/1191939a770f435086f9cad139ed37b9/index.m3u8"
+      "url": "https://pull.asynccdn.com/live/0f23890ec646408682a53d56fae45106/index.m3u8"
     },
     {
-      "title": "01:00 24/07 Besiktas JK vs Midtjylland (BLV TRẠNG TỒ) [geo]",
-      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F83ba0474d144e49f060789cfa904e226.png&time=01%3A00+24%2F07",
-      "referrer": "https://sv2.tieulamwc1.net/",
-      "url": "https://pull.asynccdn.com/live/a8979f4788664b72b672e6e0298161e2/index.m3u8"
-    },
-    {
-      "title": "02:00 24/07 Cordoba vs Sevilla FC (BLV TRẠNG QUỶ) [geo]",
+      "title": "02:00 24/07 Cordoba vs Sevilla FC (BLV TRẠNG TỒ) [geo]",
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fcd6fd11fd9ca07c46747cb03b87f4dbb.png&time=02%3A00+24%2F07",
       "referrer": "https://sv2.tieulamwc1.net/",
       "url": "https://pull.asynccdn.com/live/ac40a9ed9434454e8eba50169bdaf9b3/index.m3u8"
@@ -124,6 +112,18 @@
       "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2Fc1bc80f45a0bf86310ec6e56980c1757.png&time=16%3A30+25%2F07",
       "referrer": "https://sv2.tieulamwc1.net/",
       "url": "https://pull.asynccdn.com/live/507eb5964e3443f98529d936b5c2db72/index.m3u8"
+    },
+    {
+      "title": "17:00 25/07 Myanmar vs Malaysia (BLV TRẠNG QUỶ) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F309e44d58ce1c55c1f9055a24b6cf7f2.png&time=17%3A00+25%2F07",
+      "referrer": "https://sv2.tieulamwc1.net/",
+      "url": "https://pull.asynccdn.com/live/7825fa4a4dc448c5a08bdb27240ad426/index.m3u8"
+    },
+    {
+      "title": "17:30 25/07 Pohang Steelers vs Jeonbuk Hyundai Motors (BLV TRẠNG BÉO) [geo]",
+      "logo": "https://tinhlagi.pro/merge_logos.php?home=https%3A%2F%2Ftinhlagi.pro%2Flogo.jpg&away=https%3A%2F%2Fimg.sports-data.online%2Ffootball%2Fteam%2F6f05c460789939ac83282bd0686446f1.png&time=17%3A30+25%2F07",
+      "referrer": "https://sv2.tieulamwc1.net/",
+      "url": "https://pull.asynccdn.com/live/fd96b2c48a594f8690759cc23488ff6f/index.m3u8"
     }
   ]
 }
