@@ -317,6 +317,61 @@ https://live.fptplay53.net/fnxsd1/thainguyen_hls.smil/chunklist_b2500000.m3u8
 https://truyenhinh.vnptvas.vn/live.m3u8?c=vstv525&q=sd&pkg=pkg12.hni
 #EXTINF:-1 tvg-id="tuyenquang" tvg-name="TTV | Báo và Phát thanh – Truyền hình Tuyên Quang" tvg-logo="https://static.wikia.nocookie.net/logos/images/6/66/TTV_Tuy%C3%AAn_Quang.png/revision/latest/scale-to-width-down/1000?cb=20220731123650&path-prefix=vi" group-title="Địa phương",TTV | Báo và Phát thanh – Truyền hình Tuyên Quang
 https://live.fptplay53.net/fnxsd1/tuyenquang_hls.smil/chunklist_b2500000.m3u8
+#EXTINF:-1 tvg-id="483974" tvg-name="V SPORT ᵁᴴᴰ" tvg-logo="http://photo-tmdb.com/stalker_portal/misc/logos/320/12976.jpg?20070" group-title="4K" tvg-chno="2289",V SPORT ᵁᴴᴰ
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=483974&extension=ts&play_token=qjxFJDBCUg
+#EXTINF:-1 tvg-id="1544301" tvg-name="ELEVEN SPORTS ᴾᴸ ᵁᴴᴰ" tvg-logo="http://photo-tmdb.com/stalker_portal/misc/logos/320/8262.jpg?38736" group-title="4K" tvg-chno="2292",ELEVEN SPORTS ᴾᴸ ᵁᴴᴰ
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1544301&extension=ts&play_token=DQRPuKlhx1
+#EXTINF:-1 tvg-id="483972" tvg-name="YES SPORT 5 ᵁᴴᴰ" tvg-logo="http://photo-tmdb.com/stalker_portal/misc/logos/320/12426.png?39125" group-title="4K" tvg-chno="2294",YES SPORT 5 ᵁᴴᴰ
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=483972&extension=ts&play_token=Vvcvt3tOix
+#EXTINF:-1 tvg-id="1544247" tvg-name="TNT SPORTS ᵁᴴᴰ" tvg-logo="http://photo-tmdb.com/stalker_portal/misc/logos/320/2270.jpg?52664" group-title="4K" tvg-chno="2295",TNT SPORTS ᵁᴴᴰ
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1544247&extension=ts&play_token=LZMQutpd93
+#EXTINF:-1 tvg-id="1544244" tvg-name="SKY SPORTS DARTS ᵁᴴᴰ" tvg-logo="http://photo-tmdb.com/stalker_portal/misc/logos/320/12415.jpg?72519" group-title="4K" tvg-chno="2297",SKY SPORTS DARTS ᵁᴴᴰ
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1544244&extension=ts&play_token=CgcxL3mT64
+#EXTINF:-1 tvg-id="1544243" tvg-name="SKY SPORTS F1 ᵁᴴᴰ" tvg-logo="http://photo-tmdb.com/stalker_portal/misc/logos/320/6461.jpg?33420" group-title="4K" tvg-chno="2298",SKY SPORTS F1 ᵁᴴᴰ
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1544243&extension=ts&play_token=uMhYasI97t
+#EXTINF:-1 tvg-id="1544240" tvg-name="SKY SPORTS ᵁᴴᴰ" tvg-logo="http://photo-tmdb.com/stalker_portal/misc/logos/320/6454.png?92315" group-title="4K" tvg-chno="2299",SKY SPORTS ᵁᴴᴰ (EVENT)
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1544240&extension=ts&play_token=bWZi5LV3B8
+#EXTINF:-1 tvg-id="1544238" tvg-name="SKY SPORT ᵁᴴᴰ" tvg-logo="http://photo-tmdb.com/stalker_portal/misc/logos/320/6441.png?22930" group-title="4K" tvg-chno="2300",SKY SPORT ᵁᴴᴰ (LIVE-EVENT)
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1544238&extension=ts&play_token=3VJKwy0Ygy
+#EXTINF:-1 tvg-id="1544239" tvg-name="SKY SPORTS MAIN EVENTS ᵁᴴᴰ" tvg-logo="http://photo-tmdb.com/stalker_portal/misc/logos/320/12232.jpg?51579" group-title="4K" tvg-chno="2301",SKY SPORTS MAIN EVENTS ᵁᴴᴰ
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1544239&extension=ts&play_token=lneI5VKkIW
+#EXTINF:-1 tvg-id="1556135" tvg-name="NOW SPORTS PREMIER LEAGUE ᵁᴴᴰ" tvg-logo="http://photo-tmdb.com/stalker_portal/misc/logos/320/14436.jpg?30348" group-title="4K" tvg-chno="2302",NOW SPORTS PREMIER LEAGUE ᵁᴴᴰ
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1556135&extension=ts&play_token=SSEbaX4rpO
+#EXTINF:-1 tvg-id="1544258" tvg-name="TF1 ᵁᴴᴰ" tvg-logo="http://photo-tmdb.com/stalker_portal/misc/logos/320/6235.png?33467" group-title="4K" tvg-chno="2329",TF1 ᵁᴴᴰ
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1544258&extension=ts&play_token=ukfeIpHIFk
 #EXTINF:-1 tvg-name="ABC Australia" tvg-logo="https://i.imgur.com/qQ33TVM.png" group-title="Quốc Tế",ABC Australia
 https://s935.cdn.mytvnet.vn/pkg20/live_dzones/aplus.smil/manifest.mpd
 #EXTINF:-1 tvg-name="Animal Planet" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png" group-title="Quốc Tế",Animal Planet
