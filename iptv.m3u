@@ -128,3 +128,26 @@ http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1562587&exte
 #EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
 #EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
 http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1562586&extension=ts&play_token=xVB5nRiMzR
+#EXTINF:-1 tvg-name="Diema Sport HD" tvg-logo="http://51.158.145.100/picons/logos/logos/154827.png" group-title="Thể thao quốc tế",Diema Sport 1
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1562903&extension=ts&play_token=P39oJDdHXB
+#EXTINF:-1 tvg-name="Diema Sport 2 HD" tvg-logo="http://photo-tmdb.com/stalker_portal/logos/diemasport2hd.png" group-title="Thể thao quốc tế",Diema Sport 2
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1562902&extension=ts&play_token=Yb4llqYu1C
+#EXTINF:-1 tvg-name="Diema Sport 3 HD" tvg-logo="http://51.158.145.100/picons/logos/logos/1457953.png" group-title="Thể thao quốc tế",Diema Sport 3
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG200 stbapp ver: 2 rev: 250 Safari/533.3
+#EXTVLCOPT:http-cookie=mac=00:1A:79:C1:AF:02; stb_lang=en; timezone=GMT
+#EXTVLCOPT:http-header=Authorization: Bearer 71A8164DEF77336477A332C505001E8E
+http://204.52.191.254:80/play/live.php?mac=00:1A:79:C1:AF:02&stream=1562901&extension=ts&play_token=htjUFgoXc2
+#EXTINF:-1 tvg-name="TNT SPORTS 1" tvg-logo="https://logo.m3uassets.com/tntsports1.png" group-title="Thể thao quốc tế",TNT SPORTS 1
+http://line.tvdsz.cc:80/play/live.php?mac=00:1B:79:41:2E:83&stream=894977&extension=ts
+#EXTINF:-1 tvg-name="TNT SPORTS 2" tvg-logo="https://logo.m3uassets.com/tntsports2.png" group-title="Thể thao quốc tế",TNT SPORTS 2
+http://line.tvdsz.cc:80/play/live.php?mac=00:1B:79:41:2E:83&stream=894978&extension=ts
+#EXTINF:-1 tvg-name="TNT SPORTS 3" tvg-logo="https://logo.m3uassets.com/tntsports3.png" group-title="Thể thao quốc tế",TNT SPORTS 3
+http://line.tvdsz.cc:80/play/live.php?mac=00:1B:79:41:2E:83&stream=894979&extension=ts
+#EXTINF:-1 tvg-name="TNT SPORTS 4" tvg-logo="https://logo.m3uassets.com/tntsports4.png" group-title="Thể thao quốc tế",TNT SPORTS 4
+http://line.tvdsz.cc:80/play/live.php?mac=00:1B:79:41:2E:83&stream=894980&extension=ts
