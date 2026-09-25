@@ -1040,8 +1040,18 @@ def _m3u_response(key: str, filename: str) -> Response:
         entry = _get_entry(key)
 
     etag = entry["etag"]
+    cache_control = "no-store, no-cache, must-revalidate, max-age=0"
+
     if request.headers.get("If-None-Match") == etag:
-        return Response(status=304)
+        resp = Response(status=304)
+        resp.headers["ETag"] = etag
+        resp.headers["Cache-Control"] = cache_control
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        resp.headers["Surrogate-Control"] = "no-store"
+        resp.headers["CDN-Cache-Control"] = "no-store"
+        resp.headers["Vary"] = "Accept-Encoding"
+        return resp
 
     accept_enc = request.headers.get("Accept-Encoding", "")
     use_gzip   = "gzip" in accept_enc and entry["gz"] is not None
@@ -1050,7 +1060,11 @@ def _m3u_response(key: str, filename: str) -> Response:
 
     resp = Response(body, mimetype="application/x-mpegurl")
     resp.headers["ETag"]                = etag
-    resp.headers["Cache-Control"]       = f"public, max-age={PREFETCH_INTERVAL}"
+    resp.headers["Cache-Control"]       = cache_control
+    resp.headers["Pragma"]              = "no-cache"
+    resp.headers["Expires"]             = "0"
+    resp.headers["Surrogate-Control"]   = "no-store"
+    resp.headers["CDN-Cache-Control"]   = "no-store"
     resp.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
     resp.headers["Vary"]                = "Accept-Encoding"
     if use_gzip:
