@@ -1159,7 +1159,7 @@ def _m3u_response(key: str, filename: str) -> Response:
     body = entry["gz"] if use_gzip else entry["content"]
 
     resp = Response(body, mimetype="application/x-mpegurl")
-    resp.headers["ETag"]                = etag
+    # Do not emit ETag: some Vercel/IPTV clients turn it into a stale 304 response.
     resp.headers["Cache-Control"]       = cache_control
     resp.headers["Pragma"]              = "no-cache"
     resp.headers["Expires"]             = "0"
