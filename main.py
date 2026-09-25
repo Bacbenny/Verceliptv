@@ -15,6 +15,20 @@ from flask import Flask, Response, request, redirect
 
 app = Flask(__name__)
 
+_PLAYLIST_CACHE_CONTROL = "no-store, no-cache, must-revalidate, max-age=0, private"
+
+
+@app.after_request
+def _disable_playlist_caching(response):
+    """Prevent browsers, IPTV clients, and edge caches from reusing playlists."""
+    if request.path.endswith((".m3u", ".json")):
+        response.headers["Cache-Control"] = _PLAYLIST_CACHE_CONTROL
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        response.headers["Surrogate-Control"] = "no-store"
+        response.headers["CDN-Cache-Control"] = "no-store"
+    return response
+
 # ─── Shared HTTP sessions (connection reuse) ───────────────────────────────────
 # Reusing TCP+TLS connections across calls to the same host saves
 # 200-500ms per request under load.
@@ -267,6 +281,18 @@ def _fetch_colatv_matches() -> dict:
         resp.raise_for_status()
     return resp.json().get("data", {})
 
+def _colatv_has_stream(match: dict) -> bool:
+    """Treat an available stream as live evidence when the schedule lags."""
+    anchors = match.get("anchorAppointmentVoList") or []
+    if any(
+        str(anchor.get("playStreamAddress2") or anchor.get("playStreamAddress") or "").strip()
+        for anchor in anchors
+        if isinstance(anchor, dict)
+    ):
+        return True
+    return bool(str(match.get("videoUrl") or "").strip())
+
+
 def _colatv_is_active(match: dict) -> bool:
     if match.get("matchStatus") in COLATV_FINISHED_STATUS_INT:
         return False
@@ -275,9 +301,11 @@ def _colatv_is_active(match: dict) -> bool:
             return False
     if match.get("isEnd") or match.get("isFinished"):
         return False
+
     match_time = match.get("matchTime", 0)
     is_live = bool(match.get("isLive") or match.get("living"))
-    if match_time and not is_live:
+    has_stream = _colatv_has_stream(match)
+    if match_time and not is_live and not has_stream:
         if (time.time() - match_time) > MATCH_MAX_AGE_SECONDS:
             return False
     return True
@@ -414,20 +442,35 @@ def _fetch_phaohoa_matches() -> list:
             unique[str(key)] = match
     return list(unique.values())
 
+def _phaohoa_has_stream(match: dict) -> bool:
+    """Keep a non-terminal match when any usable stream is still published."""
+    commentators = match.get("commentators") or []
+    if any(
+        str(commentator.get("stream_url") or commentator.get("streamUrl") or "").strip()
+        for commentator in commentators
+        if isinstance(commentator, dict)
+    ):
+        return True
+    return any(
+        str(match.get(field) or "").strip()
+        for field in ("primary_stream_url", "backup_stream_url")
+    )
+
+
 def _phaohoa_is_active(match: dict) -> bool:
     status = str(match.get("status") or "").lower().strip()
     if status in FINISHED_STATUS_STRINGS:
         return False
-    if status not in ("scheduled", "upcoming", ""):
-        start_str = match.get("start_time", "")
-        if start_str:
-            try:
-                dt      = datetime.fromisoformat(start_str)
-                elapsed = time.time() - dt.timestamp()
-                if elapsed > MATCH_MAX_AGE_SECONDS:
-                    return False
-            except Exception:
-                pass
+
+    start_str = match.get("start_time", "")
+    has_stream = _phaohoa_has_stream(match)
+    if status not in ("scheduled", "upcoming", "") and start_str and not has_stream:
+        try:
+            dt = datetime.fromisoformat(start_str)
+            if time.time() - dt.timestamp() > MATCH_MAX_AGE_SECONDS:
+                return False
+        except Exception:
+            pass
     return True
 
 def _pick_phaohoa_stream(match: dict) -> tuple:
@@ -1084,45 +1127,35 @@ def _get_entry(key: str):
 def _m3u_response(key: str, filename: str) -> Response:
     _ensure_background_tasks()
     entry = _get_entry(key)
+    refresh_error = ""
+    cache_age = time.time() - entry["built_at"] if entry["content"] is not None else None
+    needs_refresh = entry["content"] is None or cache_age >= PREFETCH_INTERVAL
 
-    if entry["content"] is None:
-        if key == "combined":
-            try:
-                if not _refresh_all_with_lock(blocking=False):
-                    with _refresh_lock:
-                        pass
-            except Exception as e:
-                return Response(f"Error: {e}", status=500, mimetype="text/plain")
-        else:
-            try:
+    if needs_refresh:
+        try:
+            if key == "combined":
+                _refresh_all_with_lock(blocking=True)
+            else:
                 _refresh_source_playlist(key)
-            except Exception as e:
-                return Response(f"Upstream error for {key}: {e}", status=502, mimetype="text/plain")
+        except Exception as e:
+            # Keep the last successful body, but expose the refresh failure in headers.
+            refresh_error = f"{type(e).__name__}: {e}"[:300]
         entry = _get_entry(key)
         if entry["content"] is None:
-            resp = Response(f"Playlist cache for {key} is not ready", status=503, mimetype="text/plain")
-            resp.headers["Retry-After"] = "3"
-            return resp
-
-
+            status = 500 if key == "combined" else 502
+            return Response(
+                f"Upstream error for {key}: {refresh_error or 'playlist cache is not ready'}",
+                status=status,
+                mimetype="text/plain",
+            )
 
     etag = entry["etag"]
-    cache_control = "no-store, no-cache, must-revalidate, max-age=0"
+    cache_control = _PLAYLIST_CACHE_CONTROL
 
-    if request.headers.get("If-None-Match") == etag:
-        resp = Response(status=304)
-        resp.headers["ETag"] = etag
-        resp.headers["Cache-Control"] = cache_control
-        resp.headers["Pragma"] = "no-cache"
-        resp.headers["Expires"] = "0"
-        resp.headers["Surrogate-Control"] = "no-store"
-        resp.headers["CDN-Cache-Control"] = "no-store"
-        resp.headers["Vary"] = "Accept-Encoding"
-        return resp
-
+    # Always send the current body. Some IPTV clients incorrectly reuse stale
+    # local content after a 304 response, even when the server says no-cache.
     accept_enc = request.headers.get("Accept-Encoding", "")
     use_gzip   = "gzip" in accept_enc and entry["gz"] is not None
-
     body = entry["gz"] if use_gzip else entry["content"]
 
     resp = Response(body, mimetype="application/x-mpegurl")
@@ -1134,6 +1167,10 @@ def _m3u_response(key: str, filename: str) -> Response:
     resp.headers["CDN-Cache-Control"]   = "no-store"
     resp.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
     resp.headers["Vary"]                = "Accept-Encoding"
+    resp.headers["X-Playlist-Built-At"]  = str(int(entry["built_at"]))
+    resp.headers["X-Playlist-Cache"]     = "stale-fallback" if refresh_error else ("refreshed" if needs_refresh else "memory")
+    if refresh_error:
+        resp.headers["X-Playlist-Refresh-Error"] = refresh_error
     if use_gzip:
         resp.headers["Content-Encoding"] = "gzip"
     return resp
