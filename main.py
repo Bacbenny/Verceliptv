@@ -993,10 +993,9 @@ def _refresh_source_playlist(key: str, skip_recent_seconds: int = 15) -> list:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _pack(text: str) -> dict:
-    raw  = text.encode("utf-8")
-    gz   = gzip.compress(raw, compresslevel=6)
-    etag = '"' + hashlib.md5(raw).hexdigest() + '"'
-    return {"content": raw, "gz": gz, "etag": etag, "built_at": time.time()}
+    raw = text.encode("utf-8")
+    gz = gzip.compress(raw, compresslevel=6)
+    return {"content": raw, "gz": gz, "built_at": time.time()}
 
 def _store(key: str, text: str):
     packed = _pack(text)
@@ -1159,7 +1158,6 @@ def _get_entry(key: str):
         return {
             "content": entry["content"],
             "gz": entry["gz"],
-            "etag": entry["etag"],
             "built_at": entry["built_at"],
         }
 
