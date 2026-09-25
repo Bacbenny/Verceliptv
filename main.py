@@ -1,5 +1,4 @@
 import gzip
-import hashlib
 import json
 import os
 import re
@@ -117,28 +116,27 @@ def _resolve_base_url(url: str, timeout: int = 8) -> str:
     return m.group(1) if m else url.rstrip("/")
 
 
+_frontend_resolve_lock = threading.Lock()
+_frontends_resolved = False
+
 def _resolve_all_frontends() -> None:
-    global PHAOHOA_FRONTEND_URL
-    sources = {
-        "Pháo Hoa TV": ("PHAOHOA", PHAOHOA_FRONTEND_URL),
-    }
-    with ThreadPoolExecutor(max_workers=1) as pool:
-        futures = {pool.submit(_resolve_base_url, cfg[1]): (name, cfg) for name, cfg in sources.items()}
-        for fut in as_completed(futures):
-            (name, (key, original)) = futures[fut]
-            try:
-                resolved = fut.result()
-            except Exception:
-                resolved = original
-            if resolved != original.rstrip("/"):
-                print(f"[domain-resolve] {name}: {original} → {resolved}", flush=True)
-            if key == "PHAOHOA":
-                PHAOHOA_FRONTEND_URL = resolved
+    global PHAOHOA_FRONTEND_URL, _frontends_resolved
+    if _frontends_resolved:
+        return
+    with _frontend_resolve_lock:
+        if _frontends_resolved:
+            return
+        original = PHAOHOA_FRONTEND_URL
+        resolved = _resolve_base_url(original)
+        if resolved != original.rstrip("/"):
+            print(f"[domain-resolve] Pháo Hoa TV: {original} → {resolved}", flush=True)
+        PHAOHOA_FRONTEND_URL = resolved
+        _frontends_resolved = True
 
 
 # ─── Playlist content cache ───────────────────────────────────────────────────
 def _empty_entry():
-    return {"content": None, "gz": None, "etag": None, "built_at": 0,
+    return {"content": None, "gz": None, "built_at": 0,
             "lock": threading.Lock()}
 
 _playlist_cache = {
@@ -160,6 +158,9 @@ _background_started = False
 
 _refresh_lock = threading.Lock()
 _refresh_in_progress = False
+
+_stale_refresh_lock = threading.Lock()
+_stale_refresh_keys = set()
 
 _source_refresh_locks = {
     key: threading.Lock()
@@ -183,7 +184,8 @@ def _ensure_background_tasks() -> None:
         if _background_started:
             return
         threading.Thread(target=_prefetch_loop, daemon=True, name="playlist-refresh").start()
-        threading.Thread(target=_self_ping, daemon=True, name="self-ping").start()
+        if _get_ping_url():
+            threading.Thread(target=_self_ping, daemon=True, name="self-ping").start()
         _background_started = True
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -318,7 +320,10 @@ def _colatv_is_active(match: dict) -> bool:
     if match.get("isEnd") or match.get("isFinished"):
         return False
 
-    match_time = match.get("matchTime", 0)
+    try:
+        match_time = float(match.get("matchTime") or 0)
+    except (TypeError, ValueError):
+        match_time = 0
     is_live = bool(match.get("isLive") or match.get("living"))
     has_stream = _colatv_has_stream(match)
     if match_time and not is_live and not has_stream:
@@ -336,7 +341,11 @@ def _build_colatv_lines(matches: dict) -> list:
         home        = match.get("homeTeamName", "Home")
         away        = match.get("awayTeamName", "Away")
         competition = match.get("competitionName", "")
-        dt          = datetime.fromtimestamp(match_time, tz=VN_TZ)
+        try:
+            match_timestamp = float(match.get("matchTime") or 0)
+            dt = datetime.fromtimestamp(match_timestamp, tz=VN_TZ)
+        except (TypeError, ValueError, OverflowError, OSError):
+            dt = datetime.now(tz=VN_TZ)
         time_str    = dt.strftime("%H:%M")
         date_str    = dt.strftime("%d/%m")
         anchors = match.get("anchorAppointmentVoList", [])
@@ -402,7 +411,7 @@ def _fetch_phaohoa_json(url: str) -> dict:
             proxy_resp = _http_session.get(
                 reader_url,
                 headers={"User-Agent": "Mozilla/5.0", "Accept": "text/plain"},
-                timeout=45,
+                timeout=20,
             )
             proxy_resp.raise_for_status()
             return _json_from_reader(proxy_resp.text)
@@ -1077,11 +1086,6 @@ def _refresh_all_playlists():
 
     epg_header = f'#EXTM3U url-tvg="{EPG_URL}" x-tvg-url="{EPG_URL}"'
 
-    _store("cola",      epg_header + "\n" + "\n".join(cola_lines))
-    _store("phaohoa",   epg_header + "\n" + "\n".join(phaohoa_lines))
-    _store("giovang",   epg_header + "\n" + "\n".join(giovang_lines))
-    _store("phalang",   epg_header + "\n" + "\n".join(phalang_lines))
-    _store("dekiki",    epg_header + "\n" + "\n".join(dekiki_lines))
 
     all_lines = (
         phalang_lines
@@ -1117,6 +1121,29 @@ def _refresh_all_with_lock(blocking: bool = True) -> bool:
         _refresh_in_progress = False
         _refresh_lock.release()
 
+def _trigger_async_refresh(key: str) -> bool:
+    """Refresh stale data in the background while serving the last good body."""
+    with _stale_refresh_lock:
+        if key in _stale_refresh_keys:
+            return False
+        _stale_refresh_keys.add(key)
+
+    def worker():
+        try:
+            if key == "combined":
+                _refresh_all_with_lock(blocking=False)
+            else:
+                _refresh_source_playlist(key)
+        except Exception as exc:
+            with _source_timing_lock:
+                _source_refresh_errors[key] = f"{type(exc).__name__}: {exc}"[:300]
+        finally:
+            with _stale_refresh_lock:
+                _stale_refresh_keys.discard(key)
+
+    threading.Thread(target=worker, daemon=True, name=f"refresh-{key}").start()
+    return True
+
 def _prefetch_loop():
     time.sleep(3)
     while True:
@@ -1144,17 +1171,20 @@ def _m3u_response(key: str, filename: str) -> Response:
     _ensure_background_tasks()
     entry = _get_entry(key)
     refresh_error = ""
+    refresh_scheduled = False
+    did_refresh = False
     cache_age = time.time() - entry["built_at"] if entry["content"] is not None else None
     needs_refresh = entry["content"] is None or cache_age >= PREFETCH_INTERVAL
 
-    if needs_refresh:
+    if needs_refresh and entry["content"] is None:
+        # There is no usable body yet, so the first request must populate it.
         try:
             if key == "combined":
                 _refresh_all_with_lock(blocking=True)
             else:
                 _refresh_source_playlist(key)
+            did_refresh = True
         except Exception as e:
-            # Keep the last successful body, but expose the refresh failure in headers.
             refresh_error = f"{type(e).__name__}: {e}"[:300]
         entry = _get_entry(key)
         if entry["content"] is None:
@@ -1164,27 +1194,31 @@ def _m3u_response(key: str, filename: str) -> Response:
                 status=status,
                 mimetype="text/plain",
             )
+    elif needs_refresh:
+        # Serve the last good playlist immediately; refresh it once in background.
+        refresh_scheduled = _trigger_async_refresh(key)
 
-    etag = entry["etag"]
-    cache_control = _PLAYLIST_CACHE_CONTROL
-
-    # Always send the current body. Some IPTV clients incorrectly reuse stale
-    # local content after a 304 response, even when the server says no-cache.
-    accept_enc = request.headers.get("Accept-Encoding", "")
-    use_gzip   = "gzip" in accept_enc and entry["gz"] is not None
+    entry = _get_entry(key)
+    use_gzip = "gzip" in request.headers.get("Accept-Encoding", "") and entry["gz"] is not None
     body = entry["gz"] if use_gzip else entry["content"]
-
     resp = Response(body, mimetype="application/x-mpegurl")
-    # Do not emit ETag: some Vercel/IPTV clients turn it into a stale 304 response.
-    resp.headers["Cache-Control"]       = cache_control
+    resp.headers["Cache-Control"]       = _PLAYLIST_CACHE_CONTROL
     resp.headers["Pragma"]              = "no-cache"
     resp.headers["Expires"]             = "0"
     resp.headers["Surrogate-Control"]   = "no-store"
     resp.headers["CDN-Cache-Control"]   = "no-store"
     resp.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
     resp.headers["Vary"]                = "Accept-Encoding"
-    resp.headers["X-Playlist-Built-At"]  = str(int(entry["built_at"]))
-    resp.headers["X-Playlist-Cache"]     = "stale-fallback" if refresh_error else ("refreshed" if needs_refresh else "memory")
+    resp.headers["X-Playlist-Built-At"] = str(int(entry["built_at"]))
+    if did_refresh:
+        cache_state = "refreshed"
+    elif refresh_scheduled:
+        cache_state = "stale-refreshing"
+    elif needs_refresh:
+        cache_state = "stale"
+    else:
+        cache_state = "memory"
+    resp.headers["X-Playlist-Cache"] = cache_state
     if refresh_error:
         resp.headers["X-Playlist-Refresh-Error"] = refresh_error
     if use_gzip:
@@ -1225,7 +1259,7 @@ def status_json():
         source_refresh_ms = dict(_source_refresh_ms)
         source_refresh_errors = dict(_source_refresh_errors)
     return jsonify({
-        "ok":           True,
+        "ok":           not bool(_last_counts.get("last_error")),
         "refreshed_at": ra_vn,
         "next_refresh_in_seconds": next_s,
         "last_error":   _last_counts.get("last_error", ""),
@@ -1332,7 +1366,7 @@ def index():
         f"{err_html}"
         "<h3>⚙️ Tối ưu băng thông</h3><ul>"
         "<li>Gzip nén tự động (giảm ~70% dữ liệu truyền)</li>"
-        "<li>ETag + HTTP 304 — client có cache không cần tải lại</li>"
+        "<li>Playlist luôn trả HTTP 200 mới, không dùng ETag để tránh client giữ dữ liệu cũ</li>"
         "<li>Cache-Control: no-store, no-cache, must-revalidate, max-age=0</li>"
         "<li>1 worker process + 16 threads — cache dùng chung, không fetch trùng lặp</li>"
         "<li>Các nguồn fetch song song (ThreadPoolExecutor)</li>"
@@ -1366,7 +1400,7 @@ def _get_ping_url() -> str:
     app_url = os.environ.get("APP_URL", "")
     if app_url:
         return app_url.rstrip("/") + "/"
-    return f"http://localhost:{os.environ.get('PORT', 5000)}/"
+    return ""
 
 def _self_ping():
     url = _get_ping_url()
