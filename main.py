@@ -14,14 +14,20 @@ from flask import Flask, Response, request, redirect
 
 app = Flask(__name__)
 
-_PLAYLIST_CACHE_CONTROL = "no-store, no-cache, must-revalidate, max-age=0, private"
+_PLAYLIST_CACHE_CONTROL = "public, max-age=0, s-maxage=30, stale-while-revalidate=120, must-revalidate"
+_PLAYLIST_EDGE_CONTROL = "public, s-maxage=30, stale-while-revalidate=120"
+_STATUS_CACHE_CONTROL = "no-store, no-cache, max-age=0, private"
 
 
 @app.after_request
 def _disable_playlist_caching(response):
     """Prevent browsers, IPTV clients, and edge caches from reusing playlists."""
-    if request.path.endswith((".m3u", ".json")):
+    if request.path.endswith(".m3u"):
         response.headers["Cache-Control"] = _PLAYLIST_CACHE_CONTROL
+        response.headers["Surrogate-Control"] = _PLAYLIST_EDGE_CONTROL
+        response.headers["CDN-Cache-Control"] = _PLAYLIST_EDGE_CONTROL
+    elif request.path.endswith(".json"):
+        response.headers["Cache-Control"] = _STATUS_CACHE_CONTROL
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
         response.headers["Surrogate-Control"] = "no-store"
@@ -275,12 +281,12 @@ def _fetch_colatv_matches() -> dict:
     api_url = _get_colatv_api_url(scraper)
     errors = []
 
-    # CoLa occasionally times out during a cold API connection. Retry the
-    # current URL before rediscovering it, so a transient timeout does not
-    # make the IPTV client fall back to an older local playlist.
+    # Keep retries bounded on Vercel. Re-discovering the frontend on every
+    # failed attempt adds another pair of slow network requests and makes a
+    # cold function wait unnecessarily long.
     for attempt in range(3):
         try:
-            resp = scraper.get(api_url, timeout=10)
+            resp = scraper.get(api_url, timeout=8)
             resp.raise_for_status()
             payload = resp.json()
             data = payload.get("data", {})
@@ -289,15 +295,11 @@ def _fetch_colatv_matches() -> dict:
             return data
         except Exception as exc:
             errors.append(f"attempt {attempt + 1}: {type(exc).__name__}: {exc}")
-            _colatv_api_cache["discovered_at"] = 0
             if attempt < 2:
-                try:
-                    api_url = _get_colatv_api_url(scraper)
-                except Exception:
-                    # Keep the last known URL for the next retry.
-                    pass
+                time.sleep(0.2)
 
-    raise RuntimeError("CoLa API failed after 3 attempts: " + " | ".join(errors)[-700:])
+    _colatv_api_cache["discovered_at"] = 0
+    raise RuntimeError("CoLa API failed after 3 bounded attempts: " + " | ".join(errors)[-700:])
 
 def _colatv_has_stream(match: dict) -> bool:
     """Treat an available stream as live evidence when the schedule lags."""
@@ -1374,7 +1376,7 @@ def index():
         "<h3>⚙️ Tối ưu băng thông</h3><ul>"
         "<li>Gzip nén tự động (giảm ~70% dữ liệu truyền)</li>"
         "<li>Playlist luôn trả HTTP 200 mới, không dùng ETag để tránh client giữ dữ liệu cũ</li>"
-        "<li>Cache-Control: no-store, no-cache, must-revalidate, max-age=0</li>"
+        "<li>Cache client max-age=0; Vercel CDN giữ tối đa 30 giây để tránh cold start</li>"
         "<li>1 worker process + 16 threads — cache dùng chung, không fetch trùng lặp</li>"
         "<li>Các nguồn fetch song song (ThreadPoolExecutor)</li>"
         f"<li>Làm mới cache mỗi <strong>{PREFETCH_INTERVAL // 60} phút</strong></li>"
