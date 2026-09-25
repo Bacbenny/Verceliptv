@@ -818,20 +818,10 @@ def _build_phalang_lines(matches: list) -> list:
         pass
 
     active = [m for m in matches if _phalang_is_active(m)]
-    stream_map = {
-        m.get("id", ""): str(m.get("source_live") or "").strip()
-        for m in active
-        if str(m.get("source_live") or "").strip()
-    }
-    # Scheduled matches without a stream use /upcoming/<id> at playback time.
-    # Resolve details eagerly only for live matches that have no source URL.
-    needs_detail = [
-        m for m in active
-        if bool(m.get("is_live")) and not str(m.get("source_live") or "").strip()
-    ]
-    if needs_detail:
-        with ThreadPoolExecutor(max_workers=min(8, len(needs_detail))) as pool:
-            futures = {pool.submit(_fetch_phalang_stream, m.get("id", "")): m for m in needs_detail}
+    stream_map = {}
+    if active:
+        with ThreadPoolExecutor(max_workers=min(8, len(active))) as pool:
+            futures = {pool.submit(_fetch_phalang_stream, m.get("id", "")): m for m in active}
             for future in as_completed(futures):
                 match = futures[future]
                 try:
@@ -844,8 +834,6 @@ def _build_phalang_lines(matches: list) -> list:
         mid = match.get("id", "")
         is_live = bool(match.get("is_live"))
         stream_url = stream_map.get(mid, "")
-        if not stream_url:
-            stream_url = str(match.get("source_live") or "").strip()
 
         home        = (match.get("team_1") or "Home").strip()
         away        = (match.get("team_2") or "Away").strip()
