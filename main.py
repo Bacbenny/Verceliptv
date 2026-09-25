@@ -52,16 +52,10 @@ DEKIKI_M3U_URL = os.environ.get(
 )
 EPG_URL = os.environ.get("EPG_URL", "https://lichphatsong.io.vn/epg.xml")
 
-# ─── Stalker2M3U (GitHub-hosted live schedule, deduplicated) ──────────────────
-STALKER_M3U_URL = os.environ.get(
-    "STALKER_M3U_URL",
-    "https://raw.githubusercontent.com/Love4vn/Stalker2M3U/refs/heads/1/live_schedule_Optimize.m3u",
-)
-
 # ─── Shared config ────────────────────────────────────────────────────────────
 VN_TZ                = timezone(timedelta(hours=7))
 SELF_PING_INTERVAL   = 240   # seconds
-PREFETCH_INTERVAL   = 300    # seconds — refresh cache every 5 minutes
+PREFETCH_INTERVAL    = 300   # seconds — refresh cache every 5 minutes
 API_DISCOVERY_TTL    = 3600  # seconds — re-discover API URL every 1 hour
 
 COLATV_FINISHED_STATUS_INT = {3}
@@ -98,9 +92,6 @@ _phalang_api_cache  = {"url": PHALANG_API_URL,   "discovered_at": 0}
 
 # ─── Auto domain resolution ───────────────────────────────────────────────────
 def _resolve_base_url(url: str, timeout: int = 8) -> str:
-    """Follow HTTP 3xx redirects và trả về scheme+host cuối cùng.
-    Tự động phát hiện khi domain đổi (vd: khandai3.link → khandai4.link).
-    """
     try:
         r = _http_session.get(
             url, timeout=timeout, allow_redirects=True,
@@ -113,7 +104,6 @@ def _resolve_base_url(url: str, timeout: int = 8) -> str:
 
 
 def _resolve_all_frontends() -> None:
-    """Tự động cập nhật PHAOHOA _FRONTEND_URL bằng cách follow redirect."""
     global PHAOHOA_FRONTEND_URL
     sources = {
         "Pháo Hoa TV": ("PHAOHOA", PHAOHOA_FRONTEND_URL),
@@ -132,16 +122,13 @@ def _resolve_all_frontends() -> None:
                 PHAOHOA_FRONTEND_URL = resolved
 
 
-
 # ─── Playlist content cache ───────────────────────────────────────────────────
-# Each entry stores: raw bytes, gzip bytes, md5 etag, and build timestamp.
 def _empty_entry():
     return {"content": None, "gz": None, "etag": None, "built_at": 0,
             "lock": threading.Lock()}
 
 _playlist_cache = {
     "combined": _empty_entry(),
-    "stalker":  _empty_entry(),
     "cola":     _empty_entry(),
     "phaohoa":  _empty_entry(),
     "giovang":  _empty_entry(),
@@ -150,26 +137,20 @@ _playlist_cache = {
 }
 
 _last_counts = {
-    "stalker": 0, "cola": 0, "phaohoa": 0, "giovang": 0, "phalang": 0, "dekiki": 0,
+    "cola": 0, "phaohoa": 0, "giovang": 0, "phalang": 0, "dekiki": 0,
     "refreshed_at": 0, "last_error": "",
 }
 
-# Gunicorn imports ``main:app`` instead of executing this module as __main__.
-# Keep one guarded starter so Render gets the same periodic refresh behavior as
-# local ``python main.py`` runs.
 _background_lock = threading.Lock()
 _background_started = False
 
-# Prevents thundering herd: when cache is cold, only one request triggers
-# _refresh_all_playlists(); the rest wait and then read the freshly-built cache.
 _refresh_lock = threading.Lock()
 _refresh_in_progress = False
 
-# Short-lived cache for /upcoming/<match_id> stream URLs so 1000 concurrent
-# viewers of the same upcoming match don't all hit the PhaLang API at once.
 _upcoming_cache: dict[str, dict] = {}
-_upcoming_cache_ttl = 60  # seconds
+_upcoming_cache_ttl = 60
 _upcoming_cache_lock = threading.Lock()
+_UPCOMING_CACHE_MAX = 200
 
 
 def _ensure_background_tasks() -> None:
@@ -327,11 +308,6 @@ def _build_colatv_lines(matches: dict) -> list:
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Pháo Hoa TV — fetch từ khandai3.link/api/matches (Django REST, không token)
-#  API  : https://khandai3.link/api/matches/?page=N
-#  Schema: {count, next, previous, results: [{id, sport_name, sport_icon_url,
-#            tournament_name, home_team_name, home_team_logo, away_team_name,
-#            away_team_logo, start_time, status, primary_stream_url,
-#            backup_stream_url, commentators}]}
 # ══════════════════════════════════════════════════════════════════════════════
 
 _PHAOHOA_HEADERS = {
@@ -345,7 +321,6 @@ _PHAOHOA_HEADERS = {
 
 
 def _json_from_reader(text: str) -> dict:
-    """Extract the first JSON object from the Reader response."""
     start = text.find("{")
     if start < 0:
         raise RuntimeError("Pháo Hoa proxy returned no JSON object")
@@ -359,13 +334,6 @@ def _json_from_reader(text: str) -> dict:
 
 
 def _fetch_phaohoa_json(url: str) -> dict:
-    """Fetch Pháo Hoa JSON directly, then through Reader if Render is blocked.
-
-    Render's outbound IP is currently rejected by khandai3.link with HTTP 403,
-    while the public API remains reachable from ordinary clients. The Reader
-    fallback is intentionally limited to failed direct requests so healthy
-    traffic stays direct and low-latency.
-    """
     try:
         resp = _http_session.get(url, headers=_PHAOHOA_HEADERS, timeout=15)
         resp.raise_for_status()
@@ -374,14 +342,7 @@ def _fetch_phaohoa_json(url: str) -> dict:
             raise RuntimeError("Pháo Hoa API returned a non-object response")
         return data
     except Exception as direct_error:
-        # r.jina.ai fetches the same public URL from a separate network and
-        # returns the JSON body inside a Reader document.
-        # Use the Reader's HTTP-target form; its HTTPS-target form is
-        # rejected by the Reader edge for this host.
         reader_target = url.replace("https://", "http://", 1) if url.startswith("https://") else url
-        # Ask for JSON to keep the response small and deterministic. Escape
-        # ampersands so they remain part of the target URL rather than becoming
-        # query parameters of the Reader endpoint itself.
         format_sep = "&" if "?" in reader_target else "?"
         reader_target += format_sep + "format=json"
         reader_url = "https://r.jina.ai/" + reader_target.replace("&", "%26")
@@ -399,36 +360,42 @@ def _fetch_phaohoa_json(url: str) -> dict:
             ) from proxy_error
 
 def _fetch_phaohoa_matches() -> list:
-    """Fetch Pháo Hoa matches from one fixed, ordered endpoint.
-
-    Fetching one page stream is faster than making separate live/scheduled
-    requests; active-match filtering remains local for compatibility.
-    The first page is fetched synchronously to discover the total page
-    count, then remaining pages are fetched in parallel.
-    """
+    """Fetch Pháo Hoa matches — first page synchronously, remaining pages in parallel."""
     url = PHAOHOA_FETCH_URL
     data = _fetch_phaohoa_json(url)
     page_results = data.get("results", [])
     if not isinstance(page_results, list):
         raise RuntimeError("Pháo Hoa API returned an invalid results list")
     results = [m for m in page_results if isinstance(m, dict)]
-    next_url = data.get("next")
 
-    # Fetch remaining pages in parallel (max 4 more = 5 total)
-    remaining_pages = []
-    while next_url and len(remaining_pages) < 4:
-        remaining_pages.append(next_url)
-        # We need to follow the chain, but we don't know the next URL until
-        # we fetch the current page.  Fetch them sequentially but with a
-        # shorter timeout — the first page already told us the chain exists.
-        try:
-            page_data = _fetch_phaohoa_json(next_url)
-            page_results = page_data.get("results", [])
-            if isinstance(page_results, list):
-                results.extend(m for m in page_results if isinstance(m, dict))
-            next_url = page_data.get("next")
-        except Exception:
+    # Collect remaining page URLs from the first page's "next" chain.
+    # The Django REST API exposes page numbers in the URL, so we can
+    # build all remaining URLs from the first "next" URL without fetching
+    # each page sequentially.
+    next_url = data.get("next")
+    remaining_urls = []
+    while next_url and len(remaining_urls) < 4:
+        remaining_urls.append(next_url)
+        # Derive next page URL by incrementing the page parameter
+        m = re.search(r'page=(\d+)', next_url)
+        if m:
+            next_page = int(m.group(1)) + 1
+            next_url = re.sub(r'page=\d+', f'page={next_page}', next_url)
+        else:
             break
+
+    # Fetch remaining pages in parallel
+    if remaining_urls:
+        with ThreadPoolExecutor(max_workers=min(4, len(remaining_urls))) as pool:
+            futures = {pool.submit(_fetch_phaohoa_json, u): u for u in remaining_urls}
+            for future in as_completed(futures):
+                try:
+                    page_data = future.result()
+                    page_results = page_data.get("results", [])
+                    if isinstance(page_results, list):
+                        results.extend(m for m in page_results if isinstance(m, dict))
+                except Exception:
+                    pass
 
     unique = {}
     for match in results:
@@ -440,13 +407,9 @@ def _fetch_phaohoa_matches() -> list:
     return list(unique.values())
 
 def _phaohoa_is_active(match: dict) -> bool:
-    """Trận hợp lệ nếu chưa kết thúc.
-    Chỉ hiển thị trận có stream URL trong dữ liệu fetch nền, giống CoLa."""
     status = str(match.get("status") or "").lower().strip()
     if status in FINISHED_STATUS_STRINGS:
         return False
-    # Chỉ áp dụng giới hạn tuổi cho trận đã bắt đầu (live/active),
-    # không cho scheduled sắp diễn ra trong tương lai.
     if status not in ("scheduled", "upcoming", ""):
         start_str = match.get("start_time", "")
         if start_str:
@@ -460,14 +423,11 @@ def _phaohoa_is_active(match: dict) -> bool:
     return True
 
 def _pick_phaohoa_stream(match: dict) -> tuple:
-    """Trả về (stream_url, commentator_name)."""
-    # Ưu tiên commentators trước
     for c in (match.get("commentators") or []):
         url = (c.get("stream_url") or c.get("streamUrl") or "").strip()
         name = (c.get("nickname") or c.get("name") or "").strip()
         if url:
             return url, name
-    # Fallback: primary rồi backup stream
     primary = (match.get("primary_stream_url") or "").strip()
     if primary:
         return primary, ""
@@ -477,7 +437,6 @@ def _pick_phaohoa_stream(match: dict) -> tuple:
     return "", ""
 
 def _phaohoa_logo(match: dict) -> str:
-    """Use the same sharp CDN logo set as CoLa, selected by sport."""
     parts = " ".join([
         match.get("sport_name", ""),
         match.get("sport_slug", ""),
@@ -486,7 +445,6 @@ def _phaohoa_logo(match: dict) -> str:
     return _logo_from_text(parts)
 
 def _get_server_base_url() -> str:
-    """Lấy base URL của server để tạo proxy URL tuyệt đối."""
     render_url = os.environ.get("RENDER_EXTERNAL_URL", "")
     if render_url:
         return render_url.rstrip("/")
@@ -499,11 +457,6 @@ def _get_server_base_url() -> str:
     return f"http://localhost:{os.environ.get('PORT', 5000)}"
 
 def _build_phaohoa_lines(matches: list) -> list:
-    """Build Pháo Hoa M3U with direct stream URLs, like CoLa.
-
-    Stream URLs are taken from the prefetched match data. Matches without a
-    currently available stream are omitted until the next background refresh.
-    """
     lines = []
     try:
         matches = sorted(matches, key=lambda m: m.get("start_time") or "")
@@ -559,7 +512,6 @@ GIOVANG_FINISHED_STATUS_CODES = {"FT", "FINISHED", "END", "ENDED", "COMPLETE", "
 
 
 def _discover_giovang_api_host() -> str:
-    """Read the live JSON host from Giờ Vàng's public frontend config."""
     try:
         resp = _http_session.get(
             GIOVANG_FRONTEND_URL,
@@ -610,7 +562,6 @@ def _giovang_is_active(match: dict) -> bool:
 
 
 def _fetch_giovang_matches() -> list:
-    """Fetch active fixtures, then enrich them with commentator stream URLs."""
     host = _get_giovang_api_host()
     try:
         with ThreadPoolExecutor(max_workers=2) as pool:
@@ -673,7 +624,6 @@ def _giovang_logo(match: dict) -> str:
 
 
 def _pick_giovang_streams(match: dict) -> list:
-    """Return one best stream per Giờ Vàng commentator."""
     streams = []
     seen_urls = set()
     commentators = match.get("blv") or []
@@ -748,10 +698,6 @@ def _build_giovang_lines(matches: list) -> list:
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  PhaLang TV — POST API at api.plapi202624081158.com/matches/graph
-#  Stream API:  GET /match/{id}/live → {hd_1, hd_2, source, sd_1, sd_2}
-#  hd_1 = nguồn HD tiếng Việt (chỉ có khi match có blv)
-#  source = nguồn SD gốc (không phải tiếng Việt)
-#  Chỉ lấy trận có bình luận viên tiếng Việt (blv), ưu tiên hd_1.
 # ══════════════════════════════════════════════════════════════════════════════
 
 PHALANG_LIVE_FRONTEND = os.environ.get("PHALANG_LIVE_FRONTEND", "https://phalang.live")
@@ -773,11 +719,6 @@ def _get_phalang_api_url() -> str:
 
 
 def _fetch_phalang_matches() -> list:
-    """Fetch live + hot matches from PhaLang API, merge and deduplicate.
-
-    Live query returns currently-streaming matches; hot query returns
-    featured/upcoming matches. We merge both to cover live and scheduled.
-    """
     api = _get_phalang_api_url()
     url = f"{api}/matches/graph"
 
@@ -821,7 +762,6 @@ def _fetch_phalang_matches() -> list:
 
 
 def _phalang_is_active(match: dict) -> bool:
-    """Trận hợp lệ nếu chưa kết thúc và có bình luận viên tiếng Việt (blv)."""
     blv = (match.get("blv") or "").strip()
     if not blv:
         return False
@@ -839,7 +779,6 @@ def _phalang_is_active(match: dict) -> bool:
 
 
 def _fetch_phalang_stream(match_id: str) -> str:
-    """GET /match/{id}/live → ưu tiên hd_1 (tiếng Việt HD), fallback source."""
     api = _get_phalang_api_url()
     try:
         resp = _http_session.get(f"{api}/match/{match_id}/live",
@@ -857,7 +796,6 @@ def _fetch_phalang_stream(match_id: str) -> str:
 
 
 def _phalang_logo(match: dict) -> str:
-    """Use the same sport-based logo style as Pháo Hoa and Giờ Vàng."""
     parts = " ".join([
         str(match.get("desc") or ""),
         str(match.get("league") or ""),
@@ -866,12 +804,6 @@ def _phalang_logo(match: dict) -> str:
 
 
 def _build_phalang_lines(matches: list) -> list:
-    """Build PhaLang M3U — hiển thị tất cả trận có blv (tiếng Việt).
-
-    Trận đang live: gọi GET /match/{id}/live để lấy nguồn hd_1 (HD tiếng Việt).
-    Trận sắp diễn ra: dùng source_live nếu có, không thì dùng URL placeholder
-    trên server để hiển thị lịch BLV mà không làm hỏng playlist.
-    """
     try:
         matches = sorted(matches, key=lambda m: m.get("start_date") or "")
     except Exception:
@@ -879,12 +811,9 @@ def _build_phalang_lines(matches: list) -> list:
 
     active = [m for m in matches if _phalang_is_active(m)]
 
-    # Pre-fetch stream URL for ALL active matches (not just live) so the
-    # stream is embedded directly in the playlist — user gets instant
-    # playback instead of a 5-second redirect delay through /upcoming.
     stream_map = {}
     if active:
-        with ThreadPoolExecutor(max_workers=8) as pool:
+        with ThreadPoolExecutor(max_workers=min(8, len(active))) as pool:
             futures = {pool.submit(_fetch_phalang_stream, m.get("id", "")): m for m in active}
             for future in futures:
                 match = futures[future]
@@ -933,77 +862,8 @@ def _build_phalang_lines(matches: list) -> list:
     return lines
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  Stalker2M3U — GitHub-hosted live schedule (deduplicated, 1 stream per program)
+#  Dekiki (GitHub-hosted static list)
 # ══════════════════════════════════════════════════════════════════════════════
-
-def _fetch_stalker_lines() -> list:
-    """Download the Stalker2M3U playlist, deduplicate by program name,
-    and keep only the first stream source for each unique program."""
-    resp = _http_session.get(STALKER_M3U_URL, timeout=20)
-    resp.raise_for_status()
-    raw_lines = resp.text.splitlines()
-
-    # Parse M3U into entries: each entry = (extinf_line, [extra directives], url)
-    entries = []
-    i = 0
-    while i < len(raw_lines):
-        line = raw_lines[i]
-        if line.startswith("#EXTINF"):
-            extinf_line = line
-            directives = []
-            url = ""
-            j = i + 1
-            while j < len(raw_lines) and not raw_lines[j].startswith("#EXTINF") and raw_lines[j].strip() != "":
-                l2 = raw_lines[j]
-                if l2.startswith("#"):
-                    directives.append(l2)
-                else:
-                    url = l2.strip()
-                j += 1
-            if url:
-                entries.append((extinf_line, directives, url))
-            i = j
-            continue
-        i += 1
-
-    # Deduplicate by normalized program name, keeping only the first stream
-    # source for each unique program. Normalization strips quality/source
-    # suffixes like (HD), (FHD), [Server 1], | BLV, etc. so that the same
-    # program coming from multiple sources only appears once.
-    seen_names = set()
-    lines = []
-    for extinf_line, directives, url in entries:
-        comma_idx = extinf_line.find(",")
-        raw_name = extinf_line[comma_idx + 1:].strip() if comma_idx >= 0 else extinf_line.strip()
-        normalized = _normalize_program_name(raw_name)
-        if normalized in seen_names:
-            continue
-        seen_names.add(normalized)
-        lines.append(extinf_line)
-        lines.extend(directives)
-        lines.append(url)
-    return lines
-
-
-def _normalize_program_name(name: str) -> str:
-    """Chu\u1ea9n ho\u00e1 t\u00ean ch\u01b0\u01a1ng tr\u00ecnh \u0111\u1ec3 so kh\u1edbp tr\u00f9ng l\u1eb7p.
-    B\u1ecf h\u1eadu t\u1ed1 ch\u1ea5t l\u01b0\u1ee3ng/ngu\u1ed3n: (HD), (FHD), (SD), [Server 1], | BLV Name,
-    d\u1ea5u g\u1ea1ch ngang ngu\u1ed3n, v.v. Chuy\u1ec3n v\u1ec1 ch\u1eef th\u01b0\u1eddng v\u00e0 b\u1ecf kho\u1ea3ng tr\u1eafng th\u1eeba."""
-    n = name.lower()
-    # B\u1ecf th\u1ebb trong ngo\u1eb7c vu\u00f4ng [...] (vd: [Server 1], [Ngu\u1ed3n 2])
-    n = re.sub(r'\s*\[[^\]]*\]\s*', ' ', n)
-    # B\u1ecf th\u1ebb trong ngo\u1eb7c \u0111\u01a1n [...] n\u1ebfu n\u1eb1m \u1edf cu\u1ed1i v\u00e0 l\u00e0 ch\u1ea5t l\u01b0\u1ee3ng/ngu\u1ed3n
-    n = re.sub(r'\s*\((?:hd|fhd|sd|4k|1080p|720p|server\s*\d+|ngu\u1ed3n\s*\d+)\)\s*$', '', n, flags=re.IGNORECASE)
-    # B\u1ecf ph\u1ea7n sau d\u1ea5u | (vd: | BLV Name, | Server 1)
-    n = re.sub(r'\s*\|\s*.*$', '', n)
-    # B\u1ecf ph\u1ea7n sau d\u1ea5u g\u1ea1ch ngang k\u00e9p -- (vd: -- Server 1)
-    n = re.sub(r'\s*--\s*.*$', '', n)
-    # B\u1ecf c\u00e1c h\u1eadu t\u1ed1 ngu\u1ed3n ki\u1ec3u " - Server 1", " - Ngu\u1ed3n 2" \u1edf cu\u1ed1i
-    n = re.sub(r'\s*-\s*(?:server\s*\d+|ngu\u1ed3n\s*\d+)\s*$', '', n, flags=re.IGNORECASE)
-    # Chu\u1ea9n ho\u00e1 kho\u1ea3ng tr\u1eafng
-    n = re.sub(r'\s+', ' ', n).strip()
-    return n
-
 
 def _fetch_dekiki_lines() -> list:
     """Download the GitHub-hosted M3U, strip its header, return raw lines."""
@@ -1015,76 +875,6 @@ def _fetch_dekiki_lines() -> list:
         if not stripped or stripped.startswith("#EXTM3U"):
             continue
         lines.append(stripped)
-    return lines
-
-# ══════════════════════════════════════════════════════════════════════════════
-#  Shared fixture helpers  (Cola TV)
-# ══════════════════════════════════════════════════════════════════════════════
-
-def _fixture_is_active(fixture: dict) -> bool:
-    status = str(fixture.get("status") or "").lower().strip()
-    if status in FINISHED_STATUS_STRINGS:
-        return False
-    if fixture.get("isFinished") or fixture.get("isEnd"):
-        return False
-    is_live        = bool(fixture.get("isLive"))
-    start_time_str = fixture.get("startTime", "")
-    if start_time_str and not is_live:
-        try:
-            dt      = datetime.fromisoformat(start_time_str.replace("Z", "+00:00"))
-            elapsed = time.time() - dt.timestamp()
-            if elapsed > MATCH_MAX_AGE_SECONDS:
-                return False
-            if status == "active" and elapsed > 5400:
-                return False
-        except Exception:
-            pass
-    return True
-
-def _pick_best_stream(streams: list) -> str:
-    for quality in ("fhd", "hd", "sd"):
-        for s in streams:
-            if s.get("name", "").lower() == quality:
-                url = s.get("sourceUrl", "")
-                if url:
-                    return url
-    for s in streams:
-        url = s.get("sourceUrl", "")
-        if url:
-            return url
-    return ""
-
-def _build_fixture_lines(fixtures: list, group_title: str) -> list:
-    try:
-        fixtures = sorted(fixtures, key=lambda f: f.get("startTime") or "")
-    except Exception:
-        pass
-    lines = []
-    for fixture in fixtures:
-        if not _fixture_is_active(fixture):
-            continue
-        logo      = _hq_kda_logo(fixture)
-        start_str = fixture.get("startTime", "")
-        home      = fixture.get("homeTeam", {}).get("name", "Home").strip()
-        away      = fixture.get("awayTeam", {}).get("name", "Away").strip()
-        league    = fixture.get("league", {}).get("name", "")
-        try:
-            dt      = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
-            dt_vn   = dt.astimezone(VN_TZ)
-            time_str = dt_vn.strftime("%H:%M")
-            date_str = dt_vn.strftime("%d/%m")
-        except Exception:
-            time_str = "--:--"
-            date_str = "--/--"
-        for entry in fixture.get("fixtureCommentators", []):
-            commentator_obj = entry.get("commentator", {})
-            name = (commentator_obj.get("nickname") or commentator_obj.get("name") or "").strip()
-            stream_url = _pick_best_stream(commentator_obj.get("streams", []))
-            if not stream_url:
-                continue
-            display = f"{time_str} - {date_str} | {home} VS {away} ({league}) | {name}"
-            lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="{group_title}",{display}')
-            lines.append(stream_url)
     return lines
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1109,12 +899,8 @@ def _store(key: str, text: str):
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _refresh_all_playlists():
-    # Tự động follow redirect để cập nhật domain thực tế
     _resolve_all_frontends()
     errors = []
-
-    def fetch_stalker():
-        return _fetch_stalker_lines()
 
     def fetch_cola():
         return _build_colatv_lines(_fetch_colatv_matches())
@@ -1131,9 +917,8 @@ def _refresh_all_playlists():
     def fetch_dekiki():
         return _fetch_dekiki_lines()
 
-    with ThreadPoolExecutor(max_workers=6) as ex:
+    with ThreadPoolExecutor(max_workers=5) as ex:
         futures = {
-            ex.submit(fetch_stalker):  "stalker",
             ex.submit(fetch_cola):     "cola",
             ex.submit(fetch_phaohoa):  "phaohoa",
             ex.submit(fetch_giovang):  "giovang",
@@ -1149,15 +934,12 @@ def _refresh_all_playlists():
                 results[key] = []
                 errors.append(f"{key}: {e}")
 
-    stalker_lines   = results.get("stalker",   [])
     cola_lines      = results.get("cola",      [])
     phaohoa_lines   = results.get("phaohoa",   [])
     giovang_lines   = results.get("giovang",   [])
     phalang_lines   = results.get("phalang",   [])
     dekiki_lines    = results.get("dekiki",    [])
 
-    # Do not erase a working Pháo Hoa group because of one upstream timeout.
-    # The next refresh will replace it when the API is healthy again.
     if not phaohoa_lines and any(error.startswith("phaohoa:") for error in errors):
         previous = _get_entry("phaohoa")
         if previous.get("content"):
@@ -1184,25 +966,20 @@ def _refresh_all_playlists():
     def count(lines):
         return sum(1 for l in lines if l.startswith("#EXTINF"))
 
-    # EPG header — shared across all playlists
     epg_header = f'#EXTM3U url-tvg="{EPG_URL}" x-tvg-url="{EPG_URL}"'
 
-    # Build + store individual playlists
-    _store("stalker",   epg_header + "\n" + "\n".join(stalker_lines))
     _store("cola",      epg_header + "\n" + "\n".join(cola_lines))
     _store("phaohoa",   epg_header + "\n" + "\n".join(phaohoa_lines))
     _store("giovang",   epg_header + "\n" + "\n".join(giovang_lines))
     _store("phalang",   epg_header + "\n" + "\n".join(phalang_lines))
     _store("dekiki",    epg_header + "\n" + "\n".join(dekiki_lines))
 
-    # Combined — live sports first, then static TV channels, Stalker2M3U last
     all_lines = (
         phalang_lines
         + phaohoa_lines
         + giovang_lines
         + cola_lines
         + dekiki_lines
-        + stalker_lines
     )
     combined_text = epg_header + "\n" + "\n".join(all_lines)
     if err_str:
@@ -1210,7 +987,6 @@ def _refresh_all_playlists():
     _store("combined", combined_text)
 
     _last_counts.update({
-        "stalker":      count(stalker_lines),
         "cola":         count(cola_lines),
         "phaohoa":      count(phaohoa_lines),
         "giovang":      count(giovang_lines),
@@ -1232,9 +1008,6 @@ def _prefetch_loop():
 def _get_entry(key: str):
     entry = _playlist_cache[key]
     with entry["lock"]:
-        # Return a shallow snapshot — only metadata fields, not the large
-        # content/gz byte buffers.  Callers read body via entry directly
-        # under the lock to avoid copying hundreds of KB per request.
         return {
             "content": entry["content"],
             "gz": entry["gz"],
@@ -1247,13 +1020,9 @@ def _get_entry(key: str):
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _m3u_response(key: str, filename: str) -> Response:
-    # Starts the refresh loop when served by Gunicorn as well as when run directly.
     _ensure_background_tasks()
     entry = _get_entry(key)
 
-    # First request — build synchronously if cache is cold.
-    # Use _refresh_lock so only one request does the build; the rest wait
-    # and then read the freshly-populated cache (thundering-herd guard).
     if entry["content"] is None:
         global _refresh_in_progress
         if _refresh_lock.acquire(blocking=False):
@@ -1266,17 +1035,14 @@ def _m3u_response(key: str, filename: str) -> Response:
                 _refresh_in_progress = False
                 _refresh_lock.release()
         else:
-            # Another request is building the cache — wait for it, then read.
             with _refresh_lock:
                 pass
         entry = _get_entry(key)
 
-    # ── ETag / conditional GET ────────────────────────────────────────────────
     etag = entry["etag"]
     if request.headers.get("If-None-Match") == etag:
         return Response(status=304)
 
-    # ── Choose gzip or plain ──────────────────────────────────────────────────
     accept_enc = request.headers.get("Accept-Encoding", "")
     use_gzip   = "gzip" in accept_enc and entry["gz"] is not None
 
@@ -1294,10 +1060,6 @@ def _m3u_response(key: str, filename: str) -> Response:
 @app.route("/live.m3u")
 def live_m3u():
     return _m3u_response("combined", "live.m3u")
-
-@app.route("/stalker.m3u")
-def stalker_m3u():
-    return _m3u_response("stalker", "stalker.m3u")
 
 @app.route("/cola.m3u")
 def cola_m3u():
@@ -1331,8 +1093,7 @@ def status_json():
         "next_refresh_in_seconds": next_s,
         "last_error":   _last_counts.get("last_error", ""),
         "channels": {
-            "total":      sum(_last_counts.get(k, 0) for k in ("stalker","cola","phaohoa","giovang","phalang","dekiki")),
-            "stalker":    _last_counts.get("stalker", 0),
+            "total":      sum(_last_counts.get(k, 0) for k in ("cola","phaohoa","giovang","phalang","dekiki")),
             "cola_tv":    _last_counts.get("cola",    0),
             "phaohoa_tv": _last_counts.get("phaohoa", 0),
             "giovang_tv": _last_counts.get("giovang", 0),
@@ -1340,7 +1101,6 @@ def status_json():
             "dekiki_tv":  _last_counts.get("dekiki",  0),
         },
         "sources": {
-            "stalker":    {"api": STALKER_M3U_URL,                "status": "ok" if _last_counts.get("stalker",0) > 0 else "empty"},
             "cola_tv":    {"api": _colatv_api_cache.get("url"),  "status": "ok" if _last_counts.get("cola",0)    > 0 else "empty"},
             "phaohoa_tv": {"api": PHAOHOA_API_URL,               "status": "ok" if _last_counts.get("phaohoa",0) > 0 else "empty"},
             "giovang_tv": {"api": _giovang_api_cache.get("host"), "status": "ok" if _last_counts.get("giovang",0) > 0 else "empty"},
@@ -1355,16 +1115,6 @@ def ping():
 
 @app.route("/upcoming/<match_id>")
 def upcoming(match_id: str):
-    """Real-time stream resolver for upcoming PhaLang matches.
-
-    When the user opens this URL, fetch the stream from PhaLang API on the
-    spot and redirect.  If the match still has no stream, return a plain
-    text message so the IPTV player shows a readable notice instead of an
-    empty/black screen.
-
-    A 15-second per-match cache prevents 1000 concurrent viewers from
-    hammering the PhaLang API with 1000 identical requests.
-    """
     now = time.time()
     cached = None
     with _upcoming_cache_lock:
@@ -1374,6 +1124,10 @@ def upcoming(match_id: str):
     else:
         stream_url = _fetch_phalang_stream(match_id)
         with _upcoming_cache_lock:
+            # Evict oldest entries to prevent unbounded memory growth
+            if len(_upcoming_cache) >= _UPCOMING_CACHE_MAX:
+                oldest = min(_upcoming_cache, key=lambda k: _upcoming_cache[k]["ts"])
+                del _upcoming_cache[oldest]
             _upcoming_cache[match_id] = {"url": stream_url, "ts": now}
 
     if not stream_url:
@@ -1403,19 +1157,17 @@ def index():
     err      = _last_counts.get("last_error", "")
     err_html = f'<p style="color:red">⚠️ {err}</p>' if err else ""
 
-    stalker_count  = _last_counts.get("stalker",   0)
     cola_count     = _last_counts.get("cola",      0)
     phaohoa_count  = _last_counts.get("phaohoa",   0)
     giovang_count  = _last_counts.get("giovang",   0)
     phalang_count  = _last_counts.get("phalang",   0)
     dekiki_count   = _last_counts.get("dekiki",    0)
-    total          = stalker_count + cola_count + phaohoa_count + giovang_count + phalang_count + dekiki_count
+    total          = cola_count + phaohoa_count + giovang_count + phalang_count + dekiki_count
 
     return (
         "<h2>🎬 IPTV M3U Server</h2>"
         "<h3>📋 Playlist</h3><ul>"
         "<li><a href='/live.m3u'>/live.m3u</a> — Tất cả nguồn gộp lại</li>"
-        "<li><a href='/stalker.m3u'>/stalker.m3u</a> — Stalker2M3U (đã lọc trùng, 1 nguồn/kênh)</li>"
         "<li><a href='/cola.m3u'>/cola.m3u</a> — Cola TV only</li>"
         "<li><a href='/phaohoa.m3u'>/phaohoa.m3u</a> — Pháo Hoa TV only</li>"
          "<li><a href='/giovang.m3u'>/giovang.m3u</a> — Giờ Vàng TV only</li>"
@@ -1425,11 +1177,9 @@ def index():
         "<h3>📊 Trạng thái</h3>"
         f"<p>📺 Tổng kênh: <strong>{total}</strong>"
         f" &nbsp;(🏆 Live: {cola_count + phaohoa_count + giovang_count + phalang_count}"
-        f" | 📡 TV: {stalker_count + dekiki_count})</p>"
+        f" | 📡 TV: {dekiki_count})</p>"
         f"<p>🕐 Cập nhật lần cuối: <strong>{dt_str}</strong></p>"
         f"<p>⏳ Cập nhật tiếp theo: <strong>{next_str}</strong></p>"
-        f"<p>🟢 Stalker2M3U: <strong>{stalker_count} kênh</strong>"
-        f"&nbsp;|&nbsp; <code>{STALKER_M3U_URL}</code></p>"
         f"<p>🟢 Cola TV: <strong>{cola_count} kênh</strong>"
         f"&nbsp;|&nbsp; <code>{_colatv_api_cache['url']}</code></p>"
         f"<p>🟢 Pháo Hoa TV: <strong>{phaohoa_count} kênh</strong>"
