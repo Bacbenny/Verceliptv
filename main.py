@@ -1197,10 +1197,10 @@ def _refresh_all_playlists():
 
     # Combined — live sports first, then static TV channels, Stalker2M3U last
     all_lines = (
-        cola_lines
+        phalang_lines
         + phaohoa_lines
         + giovang_lines
-        + phalang_lines
+        + cola_lines
         + dekiki_lines
         + stalker_lines
     )
