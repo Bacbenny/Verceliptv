@@ -147,6 +147,14 @@ _background_started = False
 _refresh_lock = threading.Lock()
 _refresh_in_progress = False
 
+_source_refresh_locks = {
+    key: threading.Lock()
+    for key in ("cola", "phaohoa", "giovang", "phalang", "dekiki")
+}
+_source_timing_lock = threading.Lock()
+_source_refresh_ms = {}
+_source_refresh_errors = {}
+
 _upcoming_cache: dict[str, dict] = {}
 _upcoming_cache_ttl = 60
 _upcoming_cache_lock = threading.Lock()
@@ -589,29 +597,37 @@ def _fetch_giovang_matches() -> list:
     if not candidates:
         return []
 
+    # Keep list responses that already contain streams; only enrich missing ones.
+    enriched = []
+    needs_detail = []
+    for match in candidates:
+        if _pick_giovang_streams(match):
+            enriched.append(match)
+        else:
+            needs_detail.append(match)
+
     def fetch_detail(match: dict) -> dict:
         fixture_id = match.get("id") or match.get("fi")
         detail_data = _fetch_giovang_json(f"{host}/api/fixtures/{quote(str(fixture_id), safe='')}")
         detail = detail_data.get("response")
         return detail if isinstance(detail, dict) else match
 
-    enriched = []
     errors = 0
-    with ThreadPoolExecutor(max_workers=min(8, len(candidates))) as pool:
-        futures = {pool.submit(fetch_detail, match): match for match in candidates}
-        for future in as_completed(futures):
-            try:
-                detail = future.result()
-            except Exception:
-                errors += 1
-                continue
-            if _giovang_is_active(detail):
-                enriched.append(detail)
+    if needs_detail:
+        with ThreadPoolExecutor(max_workers=min(8, len(needs_detail))) as pool:
+            futures = {pool.submit(fetch_detail, match): match for match in needs_detail}
+            for future in as_completed(futures):
+                try:
+                    detail = future.result()
+                except Exception:
+                    errors += 1
+                    continue
+                if _giovang_is_active(detail):
+                    enriched.append(detail)
 
     if errors and not enriched:
         raise RuntimeError(f"Giờ Vàng fixture details failed for {errors} fixtures")
     return enriched
-
 
 def _giovang_logo(match: dict) -> str:
     league = match.get("league") or {}
@@ -733,33 +749,25 @@ def _fetch_phalang_matches() -> list:
             raise RuntimeError("PhaLang API returned an invalid data list")
         return [m for m in results if isinstance(m, dict)]
 
-    with ThreadPoolExecutor(max_workers=2) as pool:
-        live_future = pool.submit(post_query, {
-            "limit": 100,
-            "page": 1,
-            "order_asc": "start_date",
-            "queries": [{"field": "is_live", "type": "equal", "value": True}],
-        })
-        hot_future = pool.submit(post_query, {
-            "limit": 100,
-            "page": 1,
-            "order_asc": "start_date",
-            "queries": [
-                {"field": "is_hot", "type": "equal", "value": True},
-                {"field": "is_top", "type": "equal", "value": True},
-            ],
-            "query_or": True,
-        })
-        live_matches = live_future.result()
-        hot_matches = hot_future.result()
+    # One OR query replaces the former live + hot/top requests.
+    matches = post_query({
+        "limit": 100,
+        "page": 1,
+        "order_asc": "start_date",
+        "queries": [
+            {"field": "is_live", "type": "equal", "value": True},
+            {"field": "is_hot", "type": "equal", "value": True},
+            {"field": "is_top", "type": "equal", "value": True},
+        ],
+        "query_or": True,
+    })
 
     unique = {}
-    for match in live_matches + hot_matches:
+    for match in matches:
         key = match.get("id")
         if key:
             unique[str(key)] = match
     return list(unique.values())
-
 
 def _phalang_is_active(match: dict) -> bool:
     blv = (match.get("blv") or "").strip()
@@ -810,12 +818,21 @@ def _build_phalang_lines(matches: list) -> list:
         pass
 
     active = [m for m in matches if _phalang_is_active(m)]
-
-    stream_map = {}
-    if active:
-        with ThreadPoolExecutor(max_workers=min(8, len(active))) as pool:
-            futures = {pool.submit(_fetch_phalang_stream, m.get("id", "")): m for m in active}
-            for future in futures:
+    stream_map = {
+        m.get("id", ""): str(m.get("source_live") or "").strip()
+        for m in active
+        if str(m.get("source_live") or "").strip()
+    }
+    # Scheduled matches without a stream use /upcoming/<id> at playback time.
+    # Resolve details eagerly only for live matches that have no source URL.
+    needs_detail = [
+        m for m in active
+        if bool(m.get("is_live")) and not str(m.get("source_live") or "").strip()
+    ]
+    if needs_detail:
+        with ThreadPoolExecutor(max_workers=min(8, len(needs_detail))) as pool:
+            futures = {pool.submit(_fetch_phalang_stream, m.get("id", "")): m for m in needs_detail}
+            for future in as_completed(futures):
                 match = futures[future]
                 try:
                     stream_map[match.get("id", "")] = future.result()
@@ -826,17 +843,16 @@ def _build_phalang_lines(matches: list) -> list:
     for match in active:
         mid = match.get("id", "")
         is_live = bool(match.get("is_live"))
-
         stream_url = stream_map.get(mid, "")
         if not stream_url:
-            stream_url = (match.get("source_live") or "").strip()
+            stream_url = str(match.get("source_live") or "").strip()
 
-        home       = (match.get("team_1") or "Home").strip()
-        away       = (match.get("team_2") or "Away").strip()
-        league     = (match.get("league") or "").strip()
+        home        = (match.get("team_1") or "Home").strip()
+        away        = (match.get("team_2") or "Away").strip()
+        league      = (match.get("league") or "").strip()
         commentator = (match.get("blv") or "").strip()
-        logo       = _phalang_logo(match)
-        start_str  = match.get("start_date", "")
+        logo        = _phalang_logo(match)
+        start_str   = match.get("start_date", "")
 
         try:
             dt = datetime.fromisoformat(start_str)
@@ -877,6 +893,45 @@ def _fetch_dekiki_lines() -> list:
         lines.append(stripped)
     return lines
 
+def _refresh_source_playlist(key: str, skip_recent_seconds: int = 15) -> list:
+    """Refresh one M3U source without waiting for unrelated event providers."""
+    fetchers = {
+        "cola": lambda: _build_colatv_lines(_fetch_colatv_matches()),
+        "phaohoa": lambda: _build_phaohoa_lines(_fetch_phaohoa_matches()),
+        "giovang": lambda: _build_giovang_lines(_fetch_giovang_matches()),
+        "phalang": lambda: _build_phalang_lines(_fetch_phalang_matches()),
+        "dekiki": _fetch_dekiki_lines,
+    }
+    fetcher = fetchers.get(key)
+    lock = _source_refresh_locks.get(key)
+    if fetcher is None or lock is None:
+        raise KeyError(f"Unknown playlist source: {key}")
+
+    with lock:
+        cached = _get_entry(key)
+        if cached["content"] is not None and time.time() - cached["built_at"] < skip_recent_seconds:
+            return cached["content"].decode("utf-8", errors="replace").splitlines()[1:]
+
+        started = time.perf_counter()
+        try:
+            lines = fetcher()
+            if not isinstance(lines, list):
+                raise RuntimeError(f"{key} fetch returned a non-list")
+            epg_header = f'#EXTM3U url-tvg="{EPG_URL}" x-tvg-url="{EPG_URL}"'
+            _store(key, epg_header + "\n" + "\n".join(lines))
+            _last_counts[key] = sum(1 for line in lines if line.startswith("#EXTINF"))
+            with _source_timing_lock:
+                _source_refresh_errors[key] = ""
+            return lines
+        except Exception as exc:
+            with _source_timing_lock:
+                _source_refresh_errors[key] = f"{type(exc).__name__}: {exc}"[:300]
+            raise
+        finally:
+            elapsed_ms = round((time.perf_counter() - started) * 1000)
+            with _source_timing_lock:
+                _source_refresh_ms[key] = elapsed_ms
+
 # ══════════════════════════════════════════════════════════════════════════════
 #  Cache helpers — build compressed + ETag
 # ══════════════════════════════════════════════════════════════════════════════
@@ -903,19 +958,19 @@ def _refresh_all_playlists():
     errors = []
 
     def fetch_cola():
-        return _build_colatv_lines(_fetch_colatv_matches())
+        return _refresh_source_playlist("cola")
 
     def fetch_phaohoa():
-        return _build_phaohoa_lines(_fetch_phaohoa_matches())
+        return _refresh_source_playlist("phaohoa")
 
     def fetch_giovang():
-        return _build_giovang_lines(_fetch_giovang_matches())
+        return _refresh_source_playlist("giovang")
 
     def fetch_phalang():
-        return _build_phalang_lines(_fetch_phalang_matches())
+        return _refresh_source_playlist("phalang")
 
     def fetch_dekiki():
-        return _fetch_dekiki_lines()
+        return _refresh_source_playlist("dekiki")
 
     with ThreadPoolExecutor(max_workers=5) as ex:
         futures = {
@@ -939,6 +994,13 @@ def _refresh_all_playlists():
     giovang_lines   = results.get("giovang",   [])
     phalang_lines   = results.get("phalang",   [])
     dekiki_lines    = results.get("dekiki",    [])
+
+    if not cola_lines and any(error.startswith("cola:") for error in errors):
+        previous = _get_entry("cola")
+        if previous.get("content"):
+            previous_lines = previous["content"].decode("utf-8", errors="replace").splitlines()
+            cola_lines = [line for line in previous_lines if not line.startswith("#EXTM3U")]
+            errors.append("cola: kept last successful playlist")
 
     if not phaohoa_lines and any(error.startswith("phaohoa:") for error in errors):
         previous = _get_entry("phaohoa")
@@ -996,11 +1058,23 @@ def _refresh_all_playlists():
         "last_error":   err_str,
     })
 
+def _refresh_all_with_lock(blocking: bool = True) -> bool:
+    global _refresh_in_progress
+    if not _refresh_lock.acquire(blocking=blocking):
+        return False
+    try:
+        _refresh_in_progress = True
+        _refresh_all_playlists()
+        return True
+    finally:
+        _refresh_in_progress = False
+        _refresh_lock.release()
+
 def _prefetch_loop():
     time.sleep(3)
     while True:
         try:
-            _refresh_all_playlists()
+            _refresh_all_with_lock(blocking=False)
         except Exception:
             pass
         time.sleep(PREFETCH_INTERVAL)
@@ -1024,20 +1098,25 @@ def _m3u_response(key: str, filename: str) -> Response:
     entry = _get_entry(key)
 
     if entry["content"] is None:
-        global _refresh_in_progress
-        if _refresh_lock.acquire(blocking=False):
+        if key == "combined":
             try:
-                _refresh_in_progress = True
-                _refresh_all_playlists()
+                if not _refresh_all_with_lock(blocking=False):
+                    with _refresh_lock:
+                        pass
             except Exception as e:
                 return Response(f"Error: {e}", status=500, mimetype="text/plain")
-            finally:
-                _refresh_in_progress = False
-                _refresh_lock.release()
         else:
-            with _refresh_lock:
-                pass
+            try:
+                _refresh_source_playlist(key)
+            except Exception as e:
+                return Response(f"Upstream error for {key}: {e}", status=502, mimetype="text/plain")
         entry = _get_entry(key)
+        if entry["content"] is None:
+            resp = Response(f"Playlist cache for {key} is not ready", status=503, mimetype="text/plain")
+            resp.headers["Retry-After"] = "3"
+            return resp
+
+
 
     etag = entry["etag"]
     cache_control = "no-store, no-cache, must-revalidate, max-age=0"
@@ -1101,11 +1180,16 @@ def status_json():
     ra    = _last_counts.get("refreshed_at", 0)
     ra_vn = datetime.fromtimestamp(ra, tz=VN_TZ).strftime("%H:%M:%S %d/%m/%Y") if ra else None
     next_s = max(int(PREFETCH_INTERVAL - (time.time() - ra)), 0) if ra else None
+    with _source_timing_lock:
+        source_refresh_ms = dict(_source_refresh_ms)
+        source_refresh_errors = dict(_source_refresh_errors)
     return jsonify({
         "ok":           True,
         "refreshed_at": ra_vn,
         "next_refresh_in_seconds": next_s,
         "last_error":   _last_counts.get("last_error", ""),
+        "source_refresh_ms": source_refresh_ms,
+        "source_refresh_errors": source_refresh_errors,
         "channels": {
             "total":      sum(_last_counts.get(k, 0) for k in ("cola","phaohoa","giovang","phalang","dekiki")),
             "cola_tv":    _last_counts.get("cola",    0),
