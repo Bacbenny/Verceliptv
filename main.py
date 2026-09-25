@@ -271,15 +271,31 @@ def _get_colatv_api_url(scraper) -> str:
 def _fetch_colatv_matches() -> dict:
     scraper = cloudscraper.create_scraper()
     api_url = _get_colatv_api_url(scraper)
-    try:
-        resp = scraper.get(api_url, timeout=15)
-        resp.raise_for_status()
-    except Exception:
-        _colatv_api_cache["discovered_at"] = 0
-        api_url = _get_colatv_api_url(scraper)
-        resp = scraper.get(api_url, timeout=15)
-        resp.raise_for_status()
-    return resp.json().get("data", {})
+    errors = []
+
+    # CoLa occasionally times out during a cold API connection. Retry the
+    # current URL before rediscovering it, so a transient timeout does not
+    # make the IPTV client fall back to an older local playlist.
+    for attempt in range(3):
+        try:
+            resp = scraper.get(api_url, timeout=10)
+            resp.raise_for_status()
+            payload = resp.json()
+            data = payload.get("data", {})
+            if not isinstance(data, dict):
+                raise RuntimeError("CoLa API returned an invalid data object")
+            return data
+        except Exception as exc:
+            errors.append(f"attempt {attempt + 1}: {type(exc).__name__}: {exc}")
+            _colatv_api_cache["discovered_at"] = 0
+            if attempt < 2:
+                try:
+                    api_url = _get_colatv_api_url(scraper)
+                except Exception:
+                    # Keep the last known URL for the next retry.
+                    pass
+
+    raise RuntimeError("CoLa API failed after 3 attempts: " + " | ".join(errors)[-700:])
 
 def _colatv_has_stream(match: dict) -> bool:
     """Treat an available stream as live evidence when the schedule lags."""
