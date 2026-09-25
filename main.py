@@ -1256,8 +1256,17 @@ def status_json():
     with _source_timing_lock:
         source_refresh_ms = dict(_source_refresh_ms)
         source_refresh_errors = dict(_source_refresh_errors)
+
+    def source_state(key: str) -> str:
+        error = source_refresh_errors.get(key, "")
+        count = _last_counts.get(key, 0)
+        if error:
+            return "stale" if count else "error"
+        return "ok" if count else "empty"
+
+    has_errors = bool(_last_counts.get("last_error")) or any(source_refresh_errors.values())
     return jsonify({
-        "ok":           not bool(_last_counts.get("last_error")),
+        "ok":           not has_errors,
         "refreshed_at": ra_vn,
         "next_refresh_in_seconds": next_s,
         "last_error":   _last_counts.get("last_error", ""),
@@ -1272,11 +1281,11 @@ def status_json():
             "dekiki_tv":  _last_counts.get("dekiki",  0),
         },
         "sources": {
-            "cola_tv":    {"api": _colatv_api_cache.get("url"),  "status": "ok" if _last_counts.get("cola",0)    > 0 else "empty"},
-            "phaohoa_tv": {"api": PHAOHOA_API_URL,               "status": "ok" if _last_counts.get("phaohoa",0) > 0 else "empty"},
-            "giovang_tv": {"api": _giovang_api_cache.get("host"), "status": "ok" if _last_counts.get("giovang",0) > 0 else "empty"},
-            "phalang_tv": {"api": PHALANG_API_URL,                "status": "ok" if _last_counts.get("phalang",0) > 0 else "empty"},
-            "dekiki_tv":  {"api": "github-static",               "status": "ok" if _last_counts.get("dekiki",0)  > 0 else "empty"},
+            "cola_tv":    {"api": _colatv_api_cache.get("url"),  "status": source_state("cola")},
+            "phaohoa_tv": {"api": PHAOHOA_API_URL,               "status": source_state("phaohoa")},
+            "giovang_tv": {"api": _giovang_api_cache.get("host"), "status": source_state("giovang")},
+            "phalang_tv": {"api": PHALANG_API_URL,                "status": source_state("phalang")},
+            "dekiki_tv":  {"api": "github-static",               "status": source_state("dekiki")},
         },
     })
 
