@@ -1208,7 +1208,7 @@ def index():
         "<h3>⚙️ Tối ưu băng thông</h3><ul>"
         "<li>Gzip nén tự động (giảm ~70% dữ liệu truyền)</li>"
         "<li>ETag + HTTP 304 — client có cache không cần tải lại</li>"
-        f"<li>Cache-Control: public, max-age={PREFETCH_INTERVAL}s</li>"
+        "<li>Cache-Control: no-store, no-cache, must-revalidate, max-age=0</li>"
         "<li>1 worker process + 16 threads — cache dùng chung, không fetch trùng lặp</li>"
         "<li>Các nguồn fetch song song (ThreadPoolExecutor)</li>"
         f"<li>Làm mới cache mỗi <strong>{PREFETCH_INTERVAL // 60} phút</strong></li>"
