@@ -67,7 +67,7 @@ GIOVANG_API_HOST     = os.environ.get(
     "GIOVANG_API_HOST", "https://live-api.keonhacaitp.one"
 )
 # Bound slow upstream responses so one source cannot hold a cold playlist open.
-GIOVANG_API_TIMEOUT = float(os.environ.get("GIOVANG_API_TIMEOUT", "10")).rstrip("/")
+GIOVANG_API_TIMEOUT = float(os.environ.get("GIOVANG_API_TIMEOUT", "10"))
 
 # ─── Dekiki (GitHub-hosted static list) + EPG ────────────────────────────────
 DEKIKI_M3U_URL = os.environ.get(
