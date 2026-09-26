@@ -202,9 +202,17 @@ _cloudflare_kv_last_error = ""
 _cloudflare_kv_last_write_at = 0
 
 
+def _cloudflare_api_token() -> str:
+    """Normalize a token copied from Vercel without ever logging its value."""
+    token = str(CLOUDFLARE_API_TOKEN or "").strip()
+    if token.lower().startswith("bearer "):
+        token = token[7:].strip()
+    return token
+
+
 def _cloudflare_kv_enabled() -> bool:
     return bool(
-        CLOUDFLARE_API_TOKEN
+        _cloudflare_api_token()
         and CLOUDFLARE_ACCOUNT_ID
         and CLOUDFLARE_KV_NAMESPACE_ID
     )
@@ -217,7 +225,7 @@ def _cloudflare_kv_url(key: str) -> str:
 
 def _cloudflare_kv_headers() -> dict:
     return {
-        "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
+        "Authorization": f"Bearer {_cloudflare_api_token()}",
         "Content-Type": "application/json",
     }
 
