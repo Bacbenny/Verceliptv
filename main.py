@@ -90,6 +90,15 @@ EPG_URL = os.environ.get("EPG_URL", "https://lichphatsong.io.vn/epg.xml")
 VN_TZ                = timezone(timedelta(hours=7))
 SELF_PING_INTERVAL   = 240   # seconds
 PREFETCH_INTERVAL    = 300   # seconds — refresh cache every 5 minutes
+PHALANG_PLAYLIST_INTERVAL = max(
+    30, int(os.environ.get("PHALANG_PLAYLIST_INTERVAL", "120"))
+)  # seconds — discover new/upcoming matches
+PHALANG_STREAM_CACHE_TTL = max(
+    5, int(os.environ.get("PHALANG_STREAM_CACHE_TTL", "15"))
+)  # seconds — successful resolver result
+PHALANG_STREAM_MISS_TTL = max(
+    1, int(os.environ.get("PHALANG_STREAM_MISS_TTL", "3"))
+)  # seconds — not-live-yet resolver result
 API_DISCOVERY_TTL    = 3600  # seconds — re-discover API URL every 1 hour
 
 FINISHED_STATUS_STRINGS    = {"finished", "end", "ended", "complete", "completed"}
@@ -326,8 +335,10 @@ def _hydrate_from_cloudflare_kv(key: str) -> bool:
 
 
 _upcoming_cache: dict[str, dict] = {}
-_upcoming_cache_ttl = 60
 _upcoming_cache_lock = threading.Lock()
+_upcoming_inflight: dict[str, threading.Event] = {}
+_upcoming_cache_ttl = PHALANG_STREAM_CACHE_TTL
+_upcoming_miss_ttl = PHALANG_STREAM_MISS_TTL
 _UPCOMING_CACHE_MAX = 200
 
 
@@ -880,7 +891,7 @@ def _fetch_phalang_stream(match_id: str) -> str:
     api = _get_phalang_api_url()
     try:
         resp = _http_session.get(f"{api}/match/{match_id}/live",
-                            headers=_PHALANG_HEADERS, timeout=10)
+                                 headers=_PHALANG_HEADERS, timeout=10)
         if resp.status_code != 200:
             return ""
         data = resp.json()
@@ -891,6 +902,76 @@ def _fetch_phalang_stream(match_id: str) -> str:
     except Exception:
         pass
     return ""
+
+
+def _cached_phalang_stream(match_id: str) -> str:
+    """Resolve one match with short caching and per-match single-flight.
+
+    A popular channel can be requested by many IPTV clients at the same time.
+    Only the first request should call PhaLang; the other requests wait for the
+    same result instead of creating an upstream burst.
+    """
+    match_id = str(match_id or "").strip()
+    if not match_id:
+        return ""
+
+    now = time.time()
+    leader = False
+    stale_url = ""
+    with _upcoming_cache_lock:
+        cached = _upcoming_cache.get(match_id)
+        if cached:
+            cached_url = str(cached.get("url") or "")
+            stale_url = cached_url
+            ttl = _upcoming_cache_ttl if cached_url else _upcoming_miss_ttl
+            if now - float(cached.get("ts") or 0) < ttl:
+                return cached_url
+
+        event = _upcoming_inflight.get(match_id)
+        if event is None:
+            event = threading.Event()
+            _upcoming_inflight[match_id] = event
+            leader = True
+
+    if not leader:
+        # Do not hold the cache lock while waiting for the network request.
+        # A stale successful URL is safer than turning a burst into 503s.
+        event.wait(timeout=12)
+        with _upcoming_cache_lock:
+            refreshed = _upcoming_cache.get(match_id)
+            if refreshed is not None:
+                return str(refreshed.get("url") or "")
+        return stale_url
+
+    stream_url = ""
+    try:
+        stream_url = _fetch_phalang_stream(match_id)
+        with _upcoming_cache_lock:
+            if match_id not in _upcoming_cache and len(_upcoming_cache) >= _UPCOMING_CACHE_MAX:
+                oldest = min(
+                    _upcoming_cache,
+                    key=lambda key: _upcoming_cache[key].get("ts", 0),
+                )
+                del _upcoming_cache[oldest]
+            _upcoming_cache[match_id] = {
+                "url": stream_url,
+                "ts": time.time(),
+            }
+        return stream_url
+    finally:
+        with _upcoming_cache_lock:
+            event = _upcoming_inflight.pop(match_id, None)
+            if event is not None:
+                event.set()
+
+
+def _phalang_stream_url(match_id: str) -> str:
+    """Return a stable local URL that resolves the upstream link on demand."""
+    resolver = f"{_get_server_base_url()}/phalang/live/{quote(str(match_id), safe='')}"
+    return (
+        f"{resolver}|Referer={PHALANG_LIVE_FRONTEND.rstrip('/')}/"
+        f"&User-Agent=Mozilla/5.0"
+    )
 
 
 def _phalang_logo(match: dict) -> str:
@@ -908,22 +989,13 @@ def _build_phalang_lines(matches: list) -> list:
         pass
 
     active = [m for m in matches if _phalang_is_active(m)]
-    stream_map = {}
-    if active:
-        with ThreadPoolExecutor(max_workers=min(8, len(active))) as pool:
-            futures = {pool.submit(_fetch_phalang_stream, m.get("id", "")): m for m in active}
-            for future in as_completed(futures):
-                match = futures[future]
-                try:
-                    stream_map[match.get("id", "")] = future.result()
-                except Exception:
-                    stream_map[match.get("id", "")] = ""
 
     lines = []
     for match in active:
-        mid = match.get("id", "")
+        mid = str(match.get("id") or "").strip()
+        if not mid:
+            continue
         is_live = bool(match.get("is_live"))
-        stream_url = stream_map.get(mid, "")
 
         home        = (match.get("team_1") or "Home").strip()
         away        = (match.get("team_2") or "Away").strip()
@@ -947,12 +1019,10 @@ def _build_phalang_lines(matches: list) -> list:
             display += f" | {commentator}"
         display += status_label
         lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="PhaLang TV",{display}')
-        if stream_url:
-            if "|" not in stream_url:
-                stream_url += f"|Referer={PHALANG_LIVE_FRONTEND.rstrip('/')}/&User-Agent=Mozilla/5.0"
-            lines.append(stream_url)
-        else:
-            lines.append(f"{_get_server_base_url()}/upcoming/{mid}")
+        # Keep the playlist URL stable. The resolver fetches the current
+        # upstream stream when the player opens this channel, so the playlist
+        # does not need to be reloaded at kickoff time.
+        lines.append(_phalang_stream_url(mid))
     return lines
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1237,6 +1307,13 @@ def _get_entry(key: str):
             "built_at": entry["built_at"],
         }
 
+
+def _playlist_refresh_interval(key: str) -> int:
+    if key == "phalang":
+        return PHALANG_PLAYLIST_INTERVAL
+    return PREFETCH_INTERVAL
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 #  Flask routes
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1257,7 +1334,8 @@ def _m3u_response(key: str, filename: str) -> Response:
     refresh_scheduled = False
     did_refresh = False
     cache_age = time.time() - entry["built_at"] if entry["content"] is not None else None
-    needs_refresh = entry["content"] is None or cache_age >= PREFETCH_INTERVAL
+    refresh_interval = _playlist_refresh_interval(key)
+    needs_refresh = entry["content"] is None or cache_age >= refresh_interval
 
     if needs_refresh and entry["content"] is None:
         # There is no usable body yet, so the first request must populate it.
@@ -1337,6 +1415,11 @@ def status_json():
     with _source_timing_lock:
         source_refresh_ms = dict(_source_refresh_ms)
         source_refresh_errors = dict(_source_refresh_errors)
+    with _upcoming_cache_lock:
+        phalang_resolver_cache = {
+            "cached_matches": len(_upcoming_cache),
+            "inflight_matches": len(_upcoming_inflight),
+        }
 
     def source_state(key: str) -> str:
         error = source_refresh_errors.get(key, "")
@@ -1373,41 +1456,49 @@ def status_json():
             "phalang_tv": {"api": PHALANG_API_URL,                "status": source_state("phalang")},
             "dekiki_tv":  {"api": "github-static",               "status": source_state("dekiki")},
         },
+        "phalang_resolver": {
+            "positive_cache_ttl_seconds": _upcoming_cache_ttl,
+            "negative_cache_ttl_seconds": _upcoming_miss_ttl,
+            **phalang_resolver_cache,
+        },
     })
 
 @app.route("/ping")
 def ping():
     return Response("OK", mimetype="text/plain")
 
-@app.route("/upcoming/<match_id>")
-def upcoming(match_id: str):
-    now = time.time()
-    cached = None
-    with _upcoming_cache_lock:
-        cached = _upcoming_cache.get(match_id)
-    if cached and now - cached["ts"] < _upcoming_cache_ttl:
-        stream_url = cached["url"]
-    else:
-        stream_url = _fetch_phalang_stream(match_id)
-        with _upcoming_cache_lock:
-            # Evict oldest entries to prevent unbounded memory growth
-            if len(_upcoming_cache) >= _UPCOMING_CACHE_MAX:
-                oldest = min(_upcoming_cache, key=lambda k: _upcoming_cache[k]["ts"])
-                del _upcoming_cache[oldest]
-            _upcoming_cache[match_id] = {"url": stream_url, "ts": now}
-
+def _phalang_live_response(match_id: str):
+    stream_url = _cached_phalang_stream(match_id)
     if not stream_url:
-        return Response(
+        response = Response(
             "Tran chua bat dau / Match not started",
             mimetype="text/plain",
             status=503,
         )
-    if "|" not in stream_url:
-        stream_url += (
-            f"|Referer={PHALANG_LIVE_FRONTEND.rstrip('/')}/"
-            f"&User-Agent=Mozilla/5.0"
-        )
-    return redirect(stream_url, code=302)
+        response.headers["Cache-Control"] = "no-store, no-cache, max-age=0, private"
+        response.headers["Retry-After"] = str(_upcoming_miss_ttl)
+        return response
+
+    # The M3U resolver line carries IPTV request options. Keep Location a
+    # standard HLS URL; putting "|" options into a redirect would be encoded
+    # by WSGI and become part of the upstream URL.
+    response = Response(status=302)
+    response.headers["Location"] = stream_url
+    response.headers["Cache-Control"] = "no-store, no-cache, max-age=0, private"
+    response.headers["Surrogate-Control"] = "no-store"
+    response.headers["CDN-Cache-Control"] = "no-store"
+    return response
+
+
+@app.route("/phalang/live/<match_id>")
+def phalang_live(match_id: str):
+    return _phalang_live_response(match_id)
+
+
+@app.route("/upcoming/<match_id>")
+def upcoming(match_id: str):
+    # Backward-compatible alias for older playlists already in IPTV clients.
+    return _phalang_live_response(match_id)
 
 @app.route("/")
 def index():
@@ -1469,8 +1560,9 @@ def index():
          "<li>Chỉ hiển thị trận còn hiệu lực và có ít nhất một bình luận viên có stream</li>"
          "</ul>"
          "<h3>⚡ PhaLang TV — Direct Stream</h3><ul>"
-         "<li>Stream được lấy từ API, chỉ 1 nguồn duy nhất có bình luận viên tiếng Việt</li>"
-         "<li>Fetch song song live + hot matches, gộp và lọc trùng</li>"
+          "<li>Playlist dùng resolver ổn định; link stream được lấy khi người dùng mở kênh</li>"
+          "<li>Cache per-match + single-flight tránh nhiều người dùng gọi trùng API</li>"
+          f"<li>Cache link thành công { _upcoming_cache_ttl }s, cache chưa phát { _upcoming_miss_ttl }s</li>"
          "</ul>"
     )
 
