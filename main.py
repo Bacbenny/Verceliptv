@@ -65,6 +65,20 @@ GIOVANG_API_HOST     = os.environ.get(
 # Bound slow upstream responses so one source cannot hold a cold playlist open.
 GIOVANG_API_TIMEOUT = float(os.environ.get("GIOVANG_API_TIMEOUT", "10"))
 
+# ─── Persistent playlist cache (Cloudflare KV) ────────────────────────────────
+# KV is optional: the app keeps working with the in-process cache when these
+# variables are absent or Cloudflare is temporarily unavailable.
+CLOUDFLARE_API_TOKEN = os.environ.get("CLOUDFLARE_API_TOKEN", "")
+CLOUDFLARE_ACCOUNT_ID = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")
+CLOUDFLARE_KV_NAMESPACE_ID = os.environ.get("CLOUDFLARE_KV_NAMESPACE_ID", "")
+CLOUDFLARE_KV_PREFIX = os.environ.get("CLOUDFLARE_KV_PREFIX", "verceliptv:")
+CLOUDFLARE_KV_TIMEOUT = float(os.environ.get("CLOUDFLARE_KV_TIMEOUT", "3"))
+CLOUDFLARE_KV_MAX_AGE = int(os.environ.get("CLOUDFLARE_KV_MAX_AGE", "1800"))
+CLOUDFLARE_KV_BASE_URL = (
+    f"https://api.cloudflare.com/client/v4/accounts/{CLOUDFLARE_ACCOUNT_ID}"
+    f"/storage/kv/namespaces/{CLOUDFLARE_KV_NAMESPACE_ID}/values"
+)
+
 # ─── Dekiki (GitHub-hosted static list) + EPG ────────────────────────────────
 DEKIKI_M3U_URL = os.environ.get(
     "DEKIKI_M3U_URL",
@@ -179,6 +193,126 @@ _source_refresh_locks = {
 _source_timing_lock = threading.Lock()
 _source_refresh_ms = {}
 _source_refresh_errors = {}
+
+_kv_hydrated_keys = set()
+_kv_hydration_locks = {
+    key: threading.Lock() for key in _playlist_cache
+}
+_cloudflare_kv_last_error = ""
+_cloudflare_kv_last_write_at = 0
+
+
+def _cloudflare_kv_enabled() -> bool:
+    return bool(
+        CLOUDFLARE_API_TOKEN
+        and CLOUDFLARE_ACCOUNT_ID
+        and CLOUDFLARE_KV_NAMESPACE_ID
+    )
+
+
+def _cloudflare_kv_url(key: str) -> str:
+    remote_key = quote(f"{CLOUDFLARE_KV_PREFIX}{key}", safe="")
+    return f"{CLOUDFLARE_KV_BASE_URL}/{remote_key}"
+
+
+def _cloudflare_kv_headers() -> dict:
+    return {
+        "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
+        "Content-Type": "application/json",
+    }
+
+
+def _record_cloudflare_kv_error(exc) -> None:
+    global _cloudflare_kv_last_error
+    with _source_timing_lock:
+        _cloudflare_kv_last_error = f"{type(exc).__name__}: {exc}"[:300]
+
+
+def _cloudflare_kv_get(key: str):
+    if not _cloudflare_kv_enabled():
+        return None
+    try:
+        response = _http_session.get(
+            _cloudflare_kv_url(key),
+            headers=_cloudflare_kv_headers(),
+            timeout=CLOUDFLARE_KV_TIMEOUT,
+        )
+        if response.status_code == 404:
+            return None
+        response.raise_for_status()
+        payload = response.json()
+        if not isinstance(payload, dict) or payload.get("version") != 1:
+            return None
+        content = payload.get("content")
+        built_at = float(payload.get("built_at") or 0)
+        if not isinstance(content, str) or built_at <= 0:
+            return None
+        if time.time() - built_at > CLOUDFLARE_KV_MAX_AGE:
+            return None
+        return content, built_at
+    except Exception as exc:
+        _record_cloudflare_kv_error(exc)
+        return None
+
+
+def _cloudflare_kv_put(key: str, text: str, built_at: float) -> None:
+    global _cloudflare_kv_last_write_at, _cloudflare_kv_last_error
+    if not _cloudflare_kv_enabled():
+        return
+    payload = json.dumps(
+        {"version": 1, "built_at": built_at, "content": text},
+        ensure_ascii=False,
+    )
+    try:
+        response = _http_session.put(
+            _cloudflare_kv_url(key),
+            headers=_cloudflare_kv_headers(),
+            data=payload.encode("utf-8"),
+            timeout=CLOUDFLARE_KV_TIMEOUT,
+        )
+        response.raise_for_status()
+        with _source_timing_lock:
+            _cloudflare_kv_last_write_at = time.time()
+            _cloudflare_kv_last_error = ""
+    except Exception as exc:
+        _record_cloudflare_kv_error(exc)
+
+
+def _persist_cloudflare_kv(key: str, text: str, built_at: float) -> None:
+    # The combined playlist is written synchronously so a serverless invocation
+    # cannot finish before the durable fallback exists. Individual playlists
+    # are written in daemon threads to keep source refreshes fast.
+    if key == "combined":
+        _cloudflare_kv_put(key, text, built_at)
+    else:
+        threading.Thread(
+            target=_cloudflare_kv_put,
+            args=(key, text, built_at),
+            daemon=True,
+            name=f"kv-write-{key}",
+        ).start()
+
+
+def _hydrate_from_cloudflare_kv(key: str) -> bool:
+    if not _cloudflare_kv_enabled() or key in _kv_hydrated_keys:
+        return False
+    lock = _kv_hydration_locks[key]
+    with lock:
+        if key in _kv_hydrated_keys:
+            return False
+        try:
+            saved = _cloudflare_kv_get(key)
+            if not saved:
+                return False
+            text, built_at = saved
+            _store_local(key, text, built_at)
+            _last_counts[key] = sum(
+                1 for line in text.splitlines() if line.startswith("#EXTINF")
+            )
+            return True
+        finally:
+            _kv_hydrated_keys.add(key)
+
 
 _upcoming_cache: dict[str, dict] = {}
 _upcoming_cache_ttl = 60
@@ -868,16 +1002,24 @@ def _refresh_source_playlist(key: str, skip_recent_seconds: int = 15) -> list:
 #  Cache helpers — build compressed + ETag
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _pack(text: str) -> dict:
+def _pack(text: str, built_at: float | None = None) -> dict:
     raw = text.encode("utf-8")
     gz = gzip.compress(raw, compresslevel=6)
-    return {"content": raw, "gz": gz, "built_at": time.time()}
+    return {"content": raw, "gz": gz, "built_at": built_at or time.time()}
 
-def _store(key: str, text: str):
-    packed = _pack(text)
-    entry  = _playlist_cache[key]
+
+def _store_local(key: str, text: str, built_at: float | None = None):
+    packed = _pack(text, built_at)
+    entry = _playlist_cache[key]
     with entry["lock"]:
         entry.update(packed)
+    return packed["built_at"]
+
+
+def _store(key: str, text: str):
+    built_at = _store_local(key, text)
+    if _cloudflare_kv_enabled():
+        _persist_cloudflare_kv(key, text, built_at)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1030,6 +1172,9 @@ def _get_entry(key: str):
 def _m3u_response(key: str, filename: str) -> Response:
     _ensure_background_tasks()
     entry = _get_entry(key)
+    if entry["content"] is None:
+        _hydrate_from_cloudflare_kv(key)
+        entry = _get_entry(key)
     refresh_error = ""
     refresh_scheduled = False
     did_refresh = False
@@ -1130,6 +1275,13 @@ def status_json():
         "last_error":   _last_counts.get("last_error", ""),
         "source_refresh_ms": source_refresh_ms,
         "source_refresh_errors": source_refresh_errors,
+        "persistent_cache": {
+            "provider": "cloudflare-kv",
+            "enabled": _cloudflare_kv_enabled(),
+            "hydrated_keys": sorted(_kv_hydrated_keys),
+            "last_write_at": _cloudflare_kv_last_write_at or None,
+            "last_error": _cloudflare_kv_last_error,
+        },
         "channels": {
             "total":      sum(_last_counts.get(k, 0) for k in ("phaohoa", "giovang", "phalang", "dekiki")),
             "phaohoa_tv": _last_counts.get("phaohoa", 0),
