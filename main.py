@@ -40,11 +40,7 @@ def _disable_playlist_caching(response):
 _http_session = requests.Session()
 _http_session.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
 
-# ─── Cola TV config ───────────────────────────────────────────────────────────
-COLATV_FRONTEND_URL   = os.environ.get("COLATV_FRONTEND", "https://colatv48.live")
-COLATV_KNOWN_API_URL  = os.environ.get("COLATV_API",      "https://api.cltvlv.com/api/matches")
-
-# ─── Pháo Hoa TV config ──────────────────────────────────────────────────────
+# ─── Khán Đài TV config ──────────────────────────────────────────────────────
 PHAOHOA_FRONTEND_URL   = os.environ.get("PHAOHOA_FRONTEND", "https://khandai3.link")
 PHAOHOA_API_URL        = os.environ.get("PHAOHOA_API",      "https://khandai3.link/api/matches/")
 PHAOHOA_FETCH_URL      = "https://khandai3.link/api/matches/?ordering=-start_time&page_size=100"
@@ -82,7 +78,6 @@ SELF_PING_INTERVAL   = 240   # seconds
 PREFETCH_INTERVAL    = 300   # seconds — refresh cache every 5 minutes
 API_DISCOVERY_TTL    = 3600  # seconds — re-discover API URL every 1 hour
 
-COLATV_FINISHED_STATUS_INT = {3}
 FINISHED_STATUS_STRINGS    = {"finished", "end", "ended", "complete", "completed"}
 MATCH_MAX_AGE_SECONDS      = int(os.environ.get("MATCH_MAX_DURATION", 7200))  # 2 h
 
@@ -109,7 +104,6 @@ SPORT_LOGOS = {
 
 
 # ─── API URL caches ───────────────────────────────────────────────────────────
-_colatv_api_cache   = {"url": COLATV_KNOWN_API_URL,    "discovered_at": 0}
 _phaohoa_api_cache  = {"url": PHAOHOA_API_URL,  "discovered_at": 0}
 # The configured API host is known and should be used immediately.
 # Discovery is retried only after an API failure, avoiding a frontend probe on cold start.
@@ -147,7 +141,7 @@ def _resolve_all_frontends() -> None:
             return
         resolved = _resolve_base_url(original)
         if resolved != original.rstrip("/"):
-            print(f"[domain-resolve] Pháo Hoa TV: {original} → {resolved}", flush=True)
+            print(f"[domain-resolve] Khán Đài TV: {original} → {resolved}", flush=True)
         PHAOHOA_FRONTEND_URL = resolved
         _frontends_resolved = True
 
@@ -159,7 +153,6 @@ def _empty_entry():
 
 _playlist_cache = {
     "combined": _empty_entry(),
-    "cola":     _empty_entry(),
     "phaohoa":  _empty_entry(),
     "giovang":  _empty_entry(),
     "phalang":  _empty_entry(),
@@ -167,7 +160,6 @@ _playlist_cache = {
 }
 
 _last_counts = {
-    "cola": 0, "phaohoa": 0, "giovang": 0, "phalang": 0, "dekiki": 0,
     "refreshed_at": 0, "last_error": "",
 }
 
@@ -182,7 +174,7 @@ _stale_refresh_keys = set()
 
 _source_refresh_locks = {
     key: threading.Lock()
-    for key in ("cola", "phaohoa", "giovang", "phalang", "dekiki")
+    for key in ("phaohoa", "giovang", "phalang", "dekiki")
 }
 _source_timing_lock = threading.Lock()
 _source_refresh_ms = {}
@@ -244,15 +236,6 @@ def _logo_from_text(text: str) -> str:
         return SPORT_LOGOS["hockey"]
     return SPORT_LOGOS["football"]
 
-def _cola_logo(match: dict) -> str:
-    parts = " ".join([
-        match.get("competitionName", ""),
-        match.get("sportType", ""),
-        match.get("sport", ""),
-        str(match.get("sportId", "")),
-    ])
-    return _logo_from_text(parts)
-
 def _hq_kda_logo(fixture: dict) -> str:
     sport = fixture.get("sport") or {}
     icon = sport.get("iconUrl", "")
@@ -262,127 +245,7 @@ def _hq_kda_logo(fixture: dict) -> str:
     return _logo_from_text(parts)
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  Cola TV — API discovery + fetch
-# ══════════════════════════════════════════════════════════════════════════════
-
-def _discover_colatv_api(scraper) -> str:
-    try:
-        r = scraper.get(COLATV_FRONTEND_URL, timeout=10)
-        js_files = re.findall(r'src="(/assets/[^"]+\.js)"', r.text)
-        if not js_files:
-            return COLATV_KNOWN_API_URL
-        js = scraper.get(COLATV_FRONTEND_URL.rstrip("/") + js_files[0], timeout=15).text
-        hits = re.findall(r'https://[a-z0-9\-\.]+/api/match[^"\'`\s]{0,30}', js)
-        for hit in hits:
-            base = re.match(r'(https://[a-z0-9\-\.]+)/api/', hit)
-            if base:
-                return base.group(1) + "/api/matches"
-    except Exception:
-        pass
-    return COLATV_KNOWN_API_URL
-
-def _get_colatv_api_url(scraper) -> str:
-    now = time.time()
-    if now - _colatv_api_cache["discovered_at"] > API_DISCOVERY_TTL:
-        _colatv_api_cache["url"] = _discover_colatv_api(scraper)
-        _colatv_api_cache["discovered_at"] = now
-    return _colatv_api_cache["url"]
-
-def _fetch_colatv_matches() -> dict:
-    scraper = cloudscraper.create_scraper()
-    api_url = _get_colatv_api_url(scraper)
-    errors = []
-
-    # Keep retries bounded on Vercel. Re-discovering the frontend on every
-    # failed attempt adds another pair of slow network requests and makes a
-    # cold function wait unnecessarily long.
-    for attempt in range(3):
-        try:
-            resp = scraper.get(api_url, timeout=8)
-            resp.raise_for_status()
-            payload = resp.json()
-            data = payload.get("data", {})
-            if not isinstance(data, dict):
-                raise RuntimeError("CoLa API returned an invalid data object")
-            return data
-        except Exception as exc:
-            errors.append(f"attempt {attempt + 1}: {type(exc).__name__}: {exc}")
-            if attempt < 2:
-                time.sleep(0.2)
-
-    _colatv_api_cache["discovered_at"] = 0
-    raise RuntimeError("CoLa API failed after 3 bounded attempts: " + " | ".join(errors)[-700:])
-
-def _colatv_has_stream(match: dict) -> bool:
-    """Treat an available stream as live evidence when the schedule lags."""
-    anchors = match.get("anchorAppointmentVoList") or []
-    if any(
-        str(anchor.get("playStreamAddress2") or anchor.get("playStreamAddress") or "").strip()
-        for anchor in anchors
-        if isinstance(anchor, dict)
-    ):
-        return True
-    return bool(str(match.get("videoUrl") or "").strip())
-
-
-def _colatv_is_active(match: dict) -> bool:
-    if match.get("matchStatus") in COLATV_FINISHED_STATUS_INT:
-        return False
-    for field in ("match_status", "status", "matchStatusStr"):
-        if str(match.get(field, "")).lower().strip() in FINISHED_STATUS_STRINGS:
-            return False
-    if match.get("isEnd") or match.get("isFinished"):
-        return False
-
-    try:
-        match_time = float(match.get("matchTime") or 0)
-    except (TypeError, ValueError):
-        match_time = 0
-    is_live = bool(match.get("isLive") or match.get("living"))
-    has_stream = _colatv_has_stream(match)
-    if match_time and not is_live and not has_stream:
-        if (time.time() - match_time) > MATCH_MAX_AGE_SECONDS:
-            return False
-    return True
-
-def _build_colatv_lines(matches: dict) -> list:
-    lines = []
-    for match in matches.values():
-        if not _colatv_is_active(match):
-            continue
-        logo        = _cola_logo(match)
-        match_time  = match.get("matchTime", 0)
-        home        = match.get("homeTeamName", "Home")
-        away        = match.get("awayTeamName", "Away")
-        competition = match.get("competitionName", "")
-        try:
-            match_timestamp = float(match.get("matchTime") or 0)
-            dt = datetime.fromtimestamp(match_timestamp, tz=VN_TZ)
-        except (TypeError, ValueError, OverflowError, OSError):
-            dt = datetime.now(tz=VN_TZ)
-        time_str    = dt.strftime("%H:%M")
-        date_str    = dt.strftime("%d/%m")
-        anchors = match.get("anchorAppointmentVoList", [])
-        if anchors:
-            for anchor in anchors:
-                stream_url = anchor.get("playStreamAddress2") or anchor.get("playStreamAddress", "")
-                if not stream_url:
-                    continue
-                commentator = anchor.get("nickName", "").strip()
-                display = f"{time_str} - {date_str} | {home} VS {away} ({competition}) | {commentator}"
-                lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="CoLa TV",{display}')
-                lines.append(stream_url)
-        else:
-            stream_url = match.get("videoUrl", "")
-            if not stream_url:
-                continue
-            display = f"{time_str} - {date_str} | {home} VS {away} ({competition})"
-            lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="CoLa TV",{display}')
-            lines.append(stream_url)
-    return lines
-
-# ══════════════════════════════════════════════════════════════════════════════
-#  Pháo Hoa TV — fetch từ khandai3.link/api/matches (Django REST, không token)
+#  Khán Đài TV — fetch từ khandai3.link/api/matches (Django REST, không token)
 # ══════════════════════════════════════════════════════════════════════════════
 
 _PHAOHOA_HEADERS = {
@@ -398,13 +261,13 @@ _PHAOHOA_HEADERS = {
 def _json_from_reader(text: str) -> dict:
     start = text.find("{")
     if start < 0:
-        raise RuntimeError("Pháo Hoa proxy returned no JSON object")
+        raise RuntimeError("Khán Đài proxy returned no JSON object")
     try:
         data, _ = json.JSONDecoder().raw_decode(text[start:])
     except json.JSONDecodeError as exc:
-        raise RuntimeError("Pháo Hoa proxy returned invalid JSON") from exc
+        raise RuntimeError("Khán Đài proxy returned invalid JSON") from exc
     if not isinstance(data, dict):
-        raise RuntimeError("Pháo Hoa proxy returned a non-object response")
+        raise RuntimeError("Khán Đài proxy returned a non-object response")
     return data
 
 
@@ -414,7 +277,7 @@ def _fetch_phaohoa_json(url: str) -> dict:
         resp.raise_for_status()
         data = resp.json()
         if not isinstance(data, dict):
-            raise RuntimeError("Pháo Hoa API returned a non-object response")
+            raise RuntimeError("Khán Đài API returned a non-object response")
         return data
     except Exception as direct_error:
         reader_target = url.replace("https://", "http://", 1) if url.startswith("https://") else url
@@ -440,7 +303,7 @@ def _fetch_phaohoa_matches() -> list:
     data = _fetch_phaohoa_json(url)
     page_results = data.get("results", [])
     if not isinstance(page_results, list):
-        raise RuntimeError("Pháo Hoa API returned an invalid results list")
+        raise RuntimeError("Khán Đài API returned an invalid results list")
     results = [m for m in page_results if isinstance(m, dict)]
 
     # Collect remaining page URLs from the first page's "next" chain.
@@ -580,7 +443,7 @@ def _build_phaohoa_lines(matches: list) -> list:
             display = f"{time_str} - {date_str} | {home} VS {away} ({tournament}) | {commentator}{status_label}"
         else:
             display = f"{time_str} - {date_str} | {home} VS {away} ({tournament}){status_label}"
-        lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="Pháo Hoa TV",{display}')
+        lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="Khán Đài TV",{display}')
         if "|" not in stream_url:
             stream_url += f"|Referer={PHAOHOA_FRONTEND_URL.rstrip('/')}/&User-Agent=Mozilla/5.0"
         lines.append(stream_url)
@@ -966,7 +829,6 @@ def _fetch_dekiki_lines() -> list:
 def _refresh_source_playlist(key: str, skip_recent_seconds: int = 15) -> list:
     """Refresh one M3U source without waiting for unrelated event providers."""
     fetchers = {
-        "cola": lambda: _build_colatv_lines(_fetch_colatv_matches()),
         "phaohoa": lambda: _build_phaohoa_lines(_fetch_phaohoa_matches()),
         "giovang": lambda: _build_giovang_lines(_fetch_giovang_matches()),
         "phalang": lambda: _build_phalang_lines(_fetch_phalang_matches()),
@@ -1026,9 +888,6 @@ def _refresh_all_playlists():
     _resolve_all_frontends()
     errors = []
 
-    def fetch_cola():
-        return _refresh_source_playlist("cola")
-
     def fetch_phaohoa():
         return _refresh_source_playlist("phaohoa")
 
@@ -1041,9 +900,8 @@ def _refresh_all_playlists():
     def fetch_dekiki():
         return _refresh_source_playlist("dekiki")
 
-    with ThreadPoolExecutor(max_workers=5) as ex:
+    with ThreadPoolExecutor(max_workers=4) as ex:
         futures = {
-            ex.submit(fetch_cola):     "cola",
             ex.submit(fetch_phaohoa):  "phaohoa",
             ex.submit(fetch_giovang):  "giovang",
             ex.submit(fetch_phalang):  "phalang",
@@ -1058,18 +916,10 @@ def _refresh_all_playlists():
                 results[key] = []
                 errors.append(f"{key}: {e}")
 
-    cola_lines      = results.get("cola",      [])
     phaohoa_lines   = results.get("phaohoa",   [])
     giovang_lines   = results.get("giovang",   [])
     phalang_lines   = results.get("phalang",   [])
     dekiki_lines    = results.get("dekiki",    [])
-
-    if not cola_lines and any(error.startswith("cola:") for error in errors):
-        previous = _get_entry("cola")
-        if previous.get("content"):
-            previous_lines = previous["content"].decode("utf-8", errors="replace").splitlines()
-            cola_lines = [line for line in previous_lines if not line.startswith("#EXTM3U")]
-            errors.append("cola: kept last successful playlist")
 
     if not phaohoa_lines and any(error.startswith("phaohoa:") for error in errors):
         previous = _get_entry("phaohoa")
@@ -1104,7 +954,6 @@ def _refresh_all_playlists():
         phalang_lines
         + phaohoa_lines
         + giovang_lines
-        + cola_lines
         + dekiki_lines
     )
     combined_text = epg_header + "\n" + "\n".join(all_lines)
@@ -1113,7 +962,6 @@ def _refresh_all_playlists():
     _store("combined", combined_text)
 
     _last_counts.update({
-        "cola":         count(cola_lines),
         "phaohoa":      count(phaohoa_lines),
         "giovang":      count(giovang_lines),
         "phalang":      count(phalang_lines),
@@ -1241,10 +1089,6 @@ def _m3u_response(key: str, filename: str) -> Response:
 def live_m3u():
     return _m3u_response("combined", "live.m3u")
 
-@app.route("/cola.m3u")
-def cola_m3u():
-    return _m3u_response("cola", "cola.m3u")
-
 @app.route("/phaohoa.m3u")
 def phaohoa_m3u():
     return _m3u_response("phaohoa", "phaohoa.m3u")
@@ -1287,15 +1131,13 @@ def status_json():
         "source_refresh_ms": source_refresh_ms,
         "source_refresh_errors": source_refresh_errors,
         "channels": {
-            "total":      sum(_last_counts.get(k, 0) for k in ("cola","phaohoa","giovang","phalang","dekiki")),
-            "cola_tv":    _last_counts.get("cola",    0),
+            "total":      sum(_last_counts.get(k, 0) for k in ("phaohoa", "giovang", "phalang", "dekiki")),
             "phaohoa_tv": _last_counts.get("phaohoa", 0),
             "giovang_tv": _last_counts.get("giovang", 0),
             "phalang_tv": _last_counts.get("phalang", 0),
             "dekiki_tv":  _last_counts.get("dekiki",  0),
         },
         "sources": {
-            "cola_tv":    {"api": _colatv_api_cache.get("url"),  "status": source_state("cola")},
             "phaohoa_tv": {"api": PHAOHOA_API_URL,               "status": source_state("phaohoa")},
             "giovang_tv": {"api": _giovang_api_cache.get("host"), "status": source_state("giovang")},
             "phalang_tv": {"api": PHALANG_API_URL,                "status": source_state("phalang")},
@@ -1351,32 +1193,27 @@ def index():
     err      = _last_counts.get("last_error", "")
     err_html = f'<p style="color:red">⚠️ {err}</p>' if err else ""
 
-    cola_count     = _last_counts.get("cola",      0)
     phaohoa_count  = _last_counts.get("phaohoa",   0)
     giovang_count  = _last_counts.get("giovang",   0)
     phalang_count  = _last_counts.get("phalang",   0)
     dekiki_count   = _last_counts.get("dekiki",    0)
-    total          = cola_count + phaohoa_count + giovang_count + phalang_count + dekiki_count
+    total          = phaohoa_count + giovang_count + phalang_count + dekiki_count
 
     return (
         "<h2>🎬 IPTV M3U Server</h2>"
         "<h3>📋 Playlist</h3><ul>"
         "<li><a href='/live.m3u'>/live.m3u</a> — Tất cả nguồn gộp lại</li>"
-        "<li><a href='/cola.m3u'>/cola.m3u</a> — Cola TV only</li>"
-        "<li><a href='/phaohoa.m3u'>/phaohoa.m3u</a> — Pháo Hoa TV only</li>"
+        "<li><a href='/phaohoa.m3u'>/phaohoa.m3u</a> — Khán Đài TV only</li>"
          "<li><a href='/giovang.m3u'>/giovang.m3u</a> — Giờ Vàng TV only</li>"
         "<li><a href='/phalang.m3u'>/phalang.m3u</a> — PhaLang TV only</li>"
         "<li><a href='/dekiki.m3u'>/dekiki.m3u</a> — Kênh TV Việt (dekiki)</li>"
         "</ul>"
         "<h3>📊 Trạng thái</h3>"
         f"<p>📺 Tổng kênh: <strong>{total}</strong>"
-        f" &nbsp;(🏆 Live: {cola_count + phaohoa_count + giovang_count + phalang_count}"
         f" | 📡 TV: {dekiki_count})</p>"
         f"<p>🕐 Cập nhật lần cuối: <strong>{dt_str}</strong></p>"
         f"<p>⏳ Cập nhật tiếp theo: <strong>{next_str}</strong></p>"
-        f"<p>🟢 Cola TV: <strong>{cola_count} kênh</strong>"
-        f"&nbsp;|&nbsp; <code>{_colatv_api_cache['url']}</code></p>"
-        f"<p>🟢 Pháo Hoa TV: <strong>{phaohoa_count} kênh</strong>"
+        f"<p>🟢 Khán Đài TV: <strong>{phaohoa_count} kênh</strong>"
         f"&nbsp;|&nbsp; <code>{PHAOHOA_API_URL}</code></p>"
         f"<p>🟢 Giờ Vàng TV: <strong>{giovang_count} kênh</strong>"
         f"&nbsp;|&nbsp; <code>{_giovang_api_cache['host']}</code></p>"
@@ -1393,8 +1230,8 @@ def index():
         "<li>Các nguồn fetch song song (ThreadPoolExecutor)</li>"
         f"<li>Làm mới cache mỗi <strong>{PREFETCH_INTERVAL // 60} phút</strong></li>"
         "</ul>"
-        "<h3>⚡ Pháo Hoa TV — Direct Stream</h3><ul>"
-         "<li>Link stream được fetch cùng playlist và cache như CoLa</li>"
+        "<h3>⚡ Khán Đài TV — Direct Stream</h3><ul>"
+         "<li>Link stream được fetch cùng playlist và cache như Khán Đài</li>"
          "<li>Chỉ hiển thị trận đã có stream URL</li>"
          "</ul>"
          "<h3>⚡ Giờ Vàng TV — Direct Stream</h3><ul>"
