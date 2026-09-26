@@ -111,7 +111,9 @@ SPORT_LOGOS = {
 # ─── API URL caches ───────────────────────────────────────────────────────────
 _colatv_api_cache   = {"url": COLATV_KNOWN_API_URL,    "discovered_at": 0}
 _phaohoa_api_cache  = {"url": PHAOHOA_API_URL,  "discovered_at": 0}
-_giovang_api_cache  = {"host": GIOVANG_API_HOST, "discovered_at": 0}
+# The configured API host is known and should be used immediately.
+# Discovery is retried only after an API failure, avoiding a frontend probe on cold start.
+_giovang_api_cache  = {"host": GIOVANG_API_HOST, "discovered_at": time.time()}
 _phalang_api_cache  = {"url": PHALANG_API_URL,   "discovered_at": 0}
 
 # ─── Auto domain resolution ───────────────────────────────────────────────────
@@ -138,6 +140,11 @@ def _resolve_all_frontends() -> None:
         if _frontends_resolved:
             return
         original = PHAOHOA_FRONTEND_URL
+        # The default host is already canonical; avoid a blocking redirect probe
+        # during a Vercel cold refresh. Custom hosts still get resolved normally.
+        if original.rstrip("/") in {"https://khandai3.link", "https://phaohoa1.live"}:
+            _frontends_resolved = True
+            return
         resolved = _resolve_base_url(original)
         if resolved != original.rstrip("/"):
             print(f"[domain-resolve] Pháo Hoa TV: {original} → {resolved}", flush=True)
