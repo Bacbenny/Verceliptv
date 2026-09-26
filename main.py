@@ -1033,6 +1033,49 @@ def _store(key: str, text: str):
         _persist_cloudflare_kv(key, text, built_at)
 
 
+_SOURCE_GROUP_TITLES = {
+    "phaohoa": "Khán Đài TV",
+    "giovang": "Giờ Vàng TV",
+    "phalang": "PhaLang TV",
+}
+
+
+def _extract_source_lines_from_combined(text: str, key: str) -> list:
+    """Recover one source from a previously cached combined M3U."""
+    title = _SOURCE_GROUP_TITLES.get(key)
+    if not title:
+        return []
+    lines = text.splitlines()
+    selected = []
+    marker = f'group-title="{title}"'
+    for index, line in enumerate(lines):
+        if not line.startswith("#EXTINF") or marker not in line:
+            continue
+        selected.append(line)
+        if index + 1 < len(lines):
+            selected.append(lines[index + 1])
+    return selected
+
+
+def _get_previous_source_lines(key: str) -> list:
+    """Keep source data through an upstream outage, including after cold start."""
+    # A combined KV hydrate does not automatically populate per-source memory.
+    # Try the source-specific KV value before falling back to the combined body.
+    _hydrate_from_cloudflare_kv(key)
+    previous = _get_entry(key)
+    if previous.get("content"):
+        lines = previous["content"].decode("utf-8", errors="replace").splitlines()
+        lines = [line for line in lines if not line.startswith("#EXTM3U")]
+        if any(line.startswith("#EXTINF") for line in lines):
+            return lines
+
+    combined = _get_entry("combined")
+    if combined.get("content"):
+        text = combined["content"].decode("utf-8", errors="replace")
+        return _extract_source_lines_from_combined(text, key)
+    return []
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 #  Background pre-fetch (parallel sources)
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1075,24 +1118,18 @@ def _refresh_all_playlists():
     dekiki_lines    = results.get("dekiki",    [])
 
     if not phaohoa_lines and any(error.startswith("phaohoa:") for error in errors):
-        previous = _get_entry("phaohoa")
-        if previous.get("content"):
-            previous_lines = previous["content"].decode("utf-8", errors="replace").splitlines()
-            phaohoa_lines = [line for line in previous_lines if not line.startswith("#EXTM3U")]
+        phaohoa_lines = _get_previous_source_lines("phaohoa")
+        if phaohoa_lines:
             errors.append("phaohoa: kept last successful playlist")
 
     if not giovang_lines and any(error.startswith("giovang:") for error in errors):
-        previous = _get_entry("giovang")
-        if previous.get("content"):
-            previous_lines = previous["content"].decode("utf-8", errors="replace").splitlines()
-            giovang_lines = [line for line in previous_lines if not line.startswith("#EXTM3U")]
+        giovang_lines = _get_previous_source_lines("giovang")
+        if giovang_lines:
             errors.append("giovang: kept last successful playlist")
 
     if not phalang_lines and any(error.startswith("phalang:") for error in errors):
-        previous = _get_entry("phalang")
-        if previous.get("content"):
-            previous_lines = previous["content"].decode("utf-8", errors="replace").splitlines()
-            phalang_lines = [line for line in previous_lines if not line.startswith("#EXTM3U")]
+        phalang_lines = _get_previous_source_lines("phalang")
+        if phalang_lines:
             errors.append("phalang: kept last successful playlist")
 
     err_str = "; ".join(errors)
