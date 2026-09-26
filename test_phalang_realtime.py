@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 import main
@@ -124,6 +125,35 @@ class PhaLangRealtimeTests(unittest.TestCase):
             repaired,
         )
         self.assertNotIn("localhost:5000", repaired)
+
+    def test_prewarm_only_selects_live_and_near_kickoff_matches(self):
+        now = datetime.now(timezone.utc)
+        now_ts = now.timestamp()
+        matches = [
+            {
+                "id": "live-match",
+                "blv": "Commentator",
+                "is_live": True,
+                "start_date": (now - timedelta(minutes=30)).isoformat(),
+            },
+            {
+                "id": "near-match",
+                "blv": "Commentator",
+                "is_live": False,
+                "start_date": (now + timedelta(seconds=60)).isoformat(),
+            },
+            {
+                "id": "later-match",
+                "blv": "Commentator",
+                "is_live": False,
+                "start_date": (now + timedelta(minutes=10)).isoformat(),
+            },
+        ]
+
+        with patch.object(main.time, "time", return_value=now_ts):
+            candidates = main._phalang_prewarm_candidates(matches)
+
+        self.assertEqual(candidates, ["live-match", "near-match"])
 
 
 if __name__ == "__main__":

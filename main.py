@@ -99,6 +99,15 @@ PHALANG_STREAM_CACHE_TTL = max(
 PHALANG_STREAM_MISS_TTL = max(
     1, int(os.environ.get("PHALANG_STREAM_MISS_TTL", "3"))
 )  # seconds — not-live-yet resolver result
+PHALANG_PREWARM_WINDOW = max(
+    0, int(os.environ.get("PHALANG_PREWARM_WINDOW", "120"))
+)  # seconds before kickoff
+PHALANG_PREWARM_MAX_MATCHES = max(
+    0, min(4, int(os.environ.get("PHALANG_PREWARM_MAX_MATCHES", "3")))
+)  # bounded upstream fan-out
+PHALANG_PREWARM_WAIT = max(
+    0, min(3, int(os.environ.get("PHALANG_PREWARM_WAIT", "2")))
+)  # seconds allowed during playlist refresh
 API_DISCOVERY_TTL    = 3600  # seconds — re-discover API URL every 1 hour
 
 FINISHED_STATUS_STRINGS    = {"finished", "end", "ended", "complete", "completed"}
@@ -340,6 +349,10 @@ _upcoming_inflight: dict[str, threading.Event] = {}
 _upcoming_cache_ttl = PHALANG_STREAM_CACHE_TTL
 _upcoming_miss_ttl = PHALANG_STREAM_MISS_TTL
 _UPCOMING_CACHE_MAX = 200
+_phalang_prewarm_pool = ThreadPoolExecutor(
+    max_workers=PHALANG_PREWARM_MAX_MATCHES or 1,
+    thread_name_prefix="phalang-prewarm",
+)
 
 
 def _ensure_background_tasks() -> None:
@@ -987,6 +1000,59 @@ def _phalang_stream_url(match_id: str) -> str:
     )
 
 
+def _phalang_prewarm_candidates(matches: list) -> list[str]:
+    """Select a small live/near-kickoff set for bounded link prewarming."""
+    if PHALANG_PREWARM_MAX_MATCHES <= 0:
+        return []
+
+    now = time.time()
+    candidates = []
+    for match in matches:
+        match_id = str(match.get("id") or "").strip()
+        if not match_id or not _phalang_is_active(match):
+            continue
+
+        if bool(match.get("is_live")):
+            candidates.append((0, 0, match_id))
+            continue
+
+        start_str = match.get("start_date", "")
+        try:
+            start_ts = datetime.fromisoformat(start_str).timestamp()
+        except Exception:
+            continue
+        seconds_until_start = start_ts - now
+        if 0 <= seconds_until_start <= PHALANG_PREWARM_WINDOW:
+            candidates.append((1, seconds_until_start, match_id))
+
+    candidates.sort(key=lambda item: (item[0], item[1], item[2]))
+    return [match_id for _, _, match_id in candidates[:PHALANG_PREWARM_MAX_MATCHES]]
+
+
+def _prewarm_phalang_matches(matches: list) -> None:
+    """Warm only the most relevant links without blocking playlist delivery."""
+    match_ids = _phalang_prewarm_candidates(matches)
+    if not match_ids:
+        return
+
+    futures = [
+        _phalang_prewarm_pool.submit(_cached_phalang_stream, match_id)
+        for match_id in match_ids
+    ]
+    deadline = time.monotonic() + PHALANG_PREWARM_WAIT
+    for future in futures:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        try:
+            # Waiting briefly makes the first channel open faster while the
+            # bounded worker pool continues unfinished requests in the warm
+            # process. It never waits for the full upstream timeout.
+            future.result(timeout=remaining)
+        except Exception:
+            pass
+
+
 def _phalang_logo(match: dict) -> str:
     parts = " ".join([
         str(match.get("desc") or ""),
@@ -1038,6 +1104,13 @@ def _build_phalang_lines(matches: list) -> list:
         lines.append(_phalang_stream_url(mid))
     return lines
 
+
+def _fetch_phalang_playlist_lines() -> list:
+    matches = _fetch_phalang_matches()
+    lines = _build_phalang_lines(matches)
+    _prewarm_phalang_matches(matches)
+    return lines
+
 # ══════════════════════════════════════════════════════════════════════════════
 #  Dekiki (GitHub-hosted static list)
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1059,7 +1132,7 @@ def _refresh_source_playlist(key: str, skip_recent_seconds: int = 15) -> list:
     fetchers = {
         "phaohoa": lambda: _build_phaohoa_lines(_fetch_phaohoa_matches()),
         "giovang": lambda: _build_giovang_lines(_fetch_giovang_matches()),
-        "phalang": lambda: _build_phalang_lines(_fetch_phalang_matches()),
+        "phalang": _fetch_phalang_playlist_lines,
         "dekiki": _fetch_dekiki_lines,
     }
     fetcher = fetchers.get(key)
