@@ -98,6 +98,33 @@ class PhaLangRealtimeTests(unittest.TestCase):
                     "https://verceliptv.vercel.app",
                 )
 
+    def test_migrates_old_localhost_resolver_urls(self):
+        old_playlist = (
+            "#EXTM3U\n"
+            "#EXTINF:-1 group-title=\"PhaLang TV\",Match\n"
+            "http://localhost:5000/upcoming/match-1\n"
+        )
+        empty_urls = {
+            "RENDER_EXTERNAL_URL": "",
+            "REPLIT_DOMAINS": "",
+            "APP_URL": "",
+            "VERCEL_PROJECT_PRODUCTION_URL": "",
+            "VERCEL_URL": "",
+        }
+        with patch.dict(main.os.environ, empty_urls):
+            with main.app.test_request_context(
+                "/phalang.m3u",
+                base_url="https://verceliptv.vercel.app",
+            ):
+                repaired = main._repair_phalang_playlist_urls(old_playlist)
+
+        self.assertIn(
+            "https://verceliptv.vercel.app/phalang/live/match-1"
+            "|Referer=https://phalang.live/&User-Agent=Mozilla/5.0",
+            repaired,
+        )
+        self.assertNotIn("localhost:5000", repaired)
+
 
 if __name__ == "__main__":
     unittest.main()

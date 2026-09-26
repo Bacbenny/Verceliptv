@@ -1092,6 +1092,39 @@ def _refresh_source_playlist(key: str, skip_recent_seconds: int = 15) -> list:
             with _source_timing_lock:
                 _source_refresh_ms[key] = elapsed_ms
 
+
+def _repair_phalang_playlist_urls(text: str) -> str:
+    """Migrate resolver URLs persisted before the public-host fix."""
+    if not text or not has_request_context():
+        return text
+
+    base_url = _get_server_base_url()
+    if "localhost" in base_url or "127.0.0.1" in base_url:
+        return text
+
+    local_resolver = re.compile(
+        r"^https?://(?:localhost|127\.0\.0\.1)(?::\d+)?/"
+        r"(?:upcoming|phalang/live)/([^|\s]+)(?:\|(.*))?$"
+    )
+    default_options = (
+        f"Referer={PHALANG_LIVE_FRONTEND.rstrip('/')}/"
+        f"&User-Agent=Mozilla/5.0"
+    )
+    repaired = []
+    changed = False
+    for line in text.splitlines():
+        match = local_resolver.match(line.strip())
+        if match:
+            options = match.group(2) or default_options
+            line = f"{base_url}/phalang/live/{match.group(1)}|{options}"
+            changed = True
+        repaired.append(line)
+
+    if not changed:
+        return text
+    return "\n".join(repaired) + ("\n" if text.endswith("\n") else "")
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 #  Cache helpers — build compressed + ETag
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1340,9 +1373,16 @@ def _m3u_response(key: str, filename: str) -> Response:
         if key == "combined" and entry["content"] is not None:
             cached_text = entry["content"].decode("utf-8", errors="replace")
             repaired_text = _repair_combined_from_source_cache(cached_text)
+            repaired_text = _repair_phalang_playlist_urls(repaired_text)
             if repaired_text != cached_text:
                 _store("combined", repaired_text)
                 entry = _get_entry(key)
+    if key == "phalang" and entry["content"] is not None:
+        cached_text = entry["content"].decode("utf-8", errors="replace")
+        repaired_text = _repair_phalang_playlist_urls(cached_text)
+        if repaired_text != cached_text:
+            _store("phalang", repaired_text)
+            entry = _get_entry(key)
     refresh_error = ""
     refresh_scheduled = False
     did_refresh = False
