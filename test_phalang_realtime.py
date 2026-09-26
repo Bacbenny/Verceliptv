@@ -80,6 +80,24 @@ class PhaLangRealtimeTests(unittest.TestCase):
             "no-store, no-cache, max-age=0, private",
         )
 
+    def test_resolver_uses_public_request_host_when_no_app_url_is_set(self):
+        empty_urls = {
+            "RENDER_EXTERNAL_URL": "",
+            "REPLIT_DOMAINS": "",
+            "APP_URL": "",
+            "VERCEL_PROJECT_PRODUCTION_URL": "",
+            "VERCEL_URL": "",
+        }
+        with patch.dict(main.os.environ, empty_urls):
+            with main.app.test_request_context(
+                "/phalang.m3u",
+                base_url="https://verceliptv.vercel.app",
+            ):
+                self.assertEqual(
+                    main._get_server_base_url(),
+                    "https://verceliptv.vercel.app",
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

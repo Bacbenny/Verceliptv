@@ -10,7 +10,7 @@ from urllib.parse import quote
 
 import cloudscraper
 import requests
-from flask import Flask, Response, request, redirect
+from flask import Flask, Response, has_request_context, request, redirect
 
 app = Flask(__name__)
 
@@ -563,6 +563,19 @@ def _get_server_base_url() -> str:
     app_url = os.environ.get("APP_URL", "")
     if app_url:
         return app_url.rstrip("/")
+    for key in ("VERCEL_PROJECT_PRODUCTION_URL", "VERCEL_URL"):
+        vercel_url = os.environ.get(key, "").strip()
+        if vercel_url:
+            if not vercel_url.startswith(("http://", "https://")):
+                vercel_url = f"https://{vercel_url}"
+            return vercel_url.rstrip("/")
+    if has_request_context():
+        forwarded_host = request.headers.get("X-Forwarded-Host", "").split(",")[0].strip()
+        host = forwarded_host or request.host
+        forwarded_proto = request.headers.get("X-Forwarded-Proto", "").split(",")[0].strip()
+        proto = forwarded_proto or request.scheme or "https"
+        if host and "localhost" not in host and "127.0.0.1" not in host:
+            return f"{proto}://{host}".rstrip("/")
     return f"http://localhost:{os.environ.get('PORT', 5000)}"
 
 def _build_phaohoa_lines(matches: list) -> list:
