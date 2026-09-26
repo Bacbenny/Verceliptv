@@ -48,6 +48,9 @@ COLATV_KNOWN_API_URL  = os.environ.get("COLATV_API",      "https://api.cltvlv.co
 PHAOHOA_FRONTEND_URL   = os.environ.get("PHAOHOA_FRONTEND", "https://khandai3.link")
 PHAOHOA_API_URL        = os.environ.get("PHAOHOA_API",      "https://khandai3.link/api/matches/")
 PHAOHOA_FETCH_URL      = "https://khandai3.link/api/matches/?ordering=-start_time&page_size=100"
+# The API exposes a very large history. Only the newest two pages are needed
+# for upcoming/live events; keeping this bounded avoids slowing combined builds.
+PHAOHOA_MAX_PAGES      = max(1, min(int(os.environ.get("PHAOHOA_MAX_PAGES", "2")), 5))
 
 if "phaohoa1.live" in PHAOHOA_FRONTEND_URL:
     PHAOHOA_FRONTEND_URL = "https://khandai3.link"
@@ -62,7 +65,9 @@ PHALANG_API_URL      = os.environ.get("PHALANG_API", "https://api.plapi202624081
 GIOVANG_FRONTEND_URL = os.environ.get("GIOVANG_FRONTEND", "https://giovang.asia")
 GIOVANG_API_HOST     = os.environ.get(
     "GIOVANG_API_HOST", "https://live-api.keonhacaitp.one"
-).rstrip("/")
+)
+# Bound slow upstream responses so one source cannot hold a cold playlist open.
+GIOVANG_API_TIMEOUT = float(os.environ.get("GIOVANG_API_TIMEOUT", "10")).rstrip("/")
 
 # ─── Dekiki (GitHub-hosted static list) + EPG ────────────────────────────────
 DEKIKI_M3U_URL = os.environ.get(
@@ -423,7 +428,7 @@ def _fetch_phaohoa_json(url: str) -> dict:
             ) from proxy_error
 
 def _fetch_phaohoa_matches() -> list:
-    """Fetch Pháo Hoa matches — first page synchronously, remaining pages in parallel."""
+    """Fetch only the newest bounded pages; the API contains a large history."""
     url = PHAOHOA_FETCH_URL
     data = _fetch_phaohoa_json(url)
     page_results = data.get("results", [])
@@ -437,7 +442,7 @@ def _fetch_phaohoa_matches() -> list:
     # each page sequentially.
     next_url = data.get("next")
     remaining_urls = []
-    while next_url and len(remaining_urls) < 4:
+    while next_url and len(remaining_urls) < PHAOHOA_MAX_PAGES - 1:
         remaining_urls.append(next_url)
         # Derive next page URL by incrementing the page parameter
         m = re.search(r'page=(\d+)', next_url)
@@ -614,7 +619,7 @@ def _get_giovang_api_host() -> str:
 
 
 def _fetch_giovang_json(url: str) -> dict:
-    resp = _http_session.get(url, headers=_GIOVANG_HEADERS, timeout=20)
+    resp = _http_session.get(url, headers=_GIOVANG_HEADERS, timeout=GIOVANG_API_TIMEOUT)
     resp.raise_for_status()
     data = resp.json()
     if not isinstance(data, dict):
