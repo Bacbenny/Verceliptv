@@ -308,6 +308,7 @@ def _hydrate_from_cloudflare_kv(key: str) -> bool:
     with lock:
         if key in _kv_hydrated_keys:
             return False
+        hydrated = False
         try:
             saved = _cloudflare_kv_get(key)
             if not saved:
@@ -317,9 +318,11 @@ def _hydrate_from_cloudflare_kv(key: str) -> bool:
             _last_counts[key] = sum(
                 1 for line in text.splitlines() if line.startswith("#EXTINF")
             )
+            hydrated = True
             return True
         finally:
-            _kv_hydrated_keys.add(key)
+            if hydrated:
+                _kv_hydrated_keys.add(key)
 
 
 _upcoming_cache: dict[str, dict] = {}
