@@ -1076,6 +1076,30 @@ def _get_previous_source_lines(key: str) -> list:
     return []
 
 
+def _repair_combined_from_source_cache(text: str) -> str:
+    """Restore missing source sections from source-specific KV after cold start."""
+    lines = text.splitlines()
+    if not lines:
+        return text
+
+    error_lines = [line for line in lines if line.startswith("# Errors:")]
+    body = [line for line in lines if not line.startswith("# Errors:")]
+    changed = False
+    for key in ("phalang", "phaohoa", "giovang"):
+        title = _SOURCE_GROUP_TITLES[key]
+        marker = f'group-title="{title}"'
+        if any(line.startswith("#EXTINF") and marker in line for line in body):
+            continue
+        recovered = _get_previous_source_lines(key)
+        if recovered:
+            body.extend(recovered)
+            changed = True
+
+    if not changed:
+        return text
+    return "\n".join(body + error_lines)
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 #  Background pre-fetch (parallel sources)
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1223,6 +1247,12 @@ def _m3u_response(key: str, filename: str) -> Response:
     if entry["content"] is None:
         _hydrate_from_cloudflare_kv(key)
         entry = _get_entry(key)
+        if key == "combined" and entry["content"] is not None:
+            cached_text = entry["content"].decode("utf-8", errors="replace")
+            repaired_text = _repair_combined_from_source_cache(cached_text)
+            if repaired_text != cached_text:
+                _store("combined", repaired_text)
+                entry = _get_entry(key)
     refresh_error = ""
     refresh_scheduled = False
     did_refresh = False
