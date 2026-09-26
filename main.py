@@ -94,7 +94,7 @@ PHALANG_PLAYLIST_INTERVAL = max(
     30, int(os.environ.get("PHALANG_PLAYLIST_INTERVAL", "120"))
 )  # seconds — discover new/upcoming matches
 PHALANG_STREAM_CACHE_TTL = max(
-    5, int(os.environ.get("PHALANG_STREAM_CACHE_TTL", "15"))
+    5, int(os.environ.get("PHALANG_STREAM_CACHE_TTL", "30"))
 )  # seconds — successful resolver result
 PHALANG_STREAM_MISS_TTL = max(
     1, int(os.environ.get("PHALANG_STREAM_MISS_TTL", "3"))
@@ -106,8 +106,8 @@ PHALANG_PREWARM_MAX_MATCHES = max(
     0, min(4, int(os.environ.get("PHALANG_PREWARM_MAX_MATCHES", "3")))
 )  # bounded upstream fan-out
 PHALANG_PREWARM_WAIT = max(
-    0, min(3, int(os.environ.get("PHALANG_PREWARM_WAIT", "2")))
-)  # seconds allowed during playlist refresh
+    0, min(3, int(os.environ.get("PHALANG_PREWARM_WAIT", "1")))
+)  # seconds allowed during playlist refresh; unfinished matches use resolver fallback
 API_DISCOVERY_TTL    = 3600  # seconds — re-discover API URL every 1 hour
 
 FINISHED_STATUS_STRINGS    = {"finished", "end", "ended", "complete", "completed"}
@@ -991,6 +991,37 @@ def _cached_phalang_stream(match_id: str) -> str:
                 event.set()
 
 
+def _get_cached_phalang_stream(match_id: str) -> str:
+    """Read a still-valid prewarmed URL without triggering another API call."""
+    match_id = str(match_id or "").strip()
+    if not match_id:
+        return ""
+
+    with _upcoming_cache_lock:
+        cached = _upcoming_cache.get(match_id)
+        if not cached:
+            return ""
+        stream_url = str(cached.get("url") or "")
+        if not stream_url:
+            return ""
+        if time.time() - float(cached.get("ts") or 0) >= _upcoming_cache_ttl:
+            return ""
+        return stream_url
+
+
+def _phalang_direct_stream_url(stream_url: str) -> str:
+    """Attach IPTV client request headers to a direct prewarmed HLS URL."""
+    stream_url = str(stream_url or "").strip()
+    if not stream_url:
+        return ""
+    if "|" in stream_url:
+        return stream_url
+    return (
+        f"{stream_url}|Referer={PHALANG_LIVE_FRONTEND.rstrip('/')}/"
+        f"&User-Agent=Mozilla/5.0"
+    )
+
+
 def _phalang_stream_url(match_id: str) -> str:
     """Return a stable local URL that resolves the upstream link on demand."""
     resolver = f"{_get_server_base_url()}/phalang/live/{quote(str(match_id), safe='')}"
@@ -1061,7 +1092,7 @@ def _phalang_logo(match: dict) -> str:
     return _logo_from_text(parts)
 
 
-def _build_phalang_lines(matches: list) -> list:
+def _build_phalang_lines(matches: list, use_prewarmed_live: bool = False) -> list:
     try:
         matches = sorted(matches, key=lambda m: m.get("start_date") or "")
     except Exception:
@@ -1098,18 +1129,26 @@ def _build_phalang_lines(matches: list) -> list:
             display += f" | {commentator}"
         display += status_label
         lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="PhaLang TV",{display}')
-        # Keep the playlist URL stable. The resolver fetches the current
-        # upstream stream when the player opens this channel, so the playlist
-        # does not need to be reloaded at kickoff time.
-        lines.append(_phalang_stream_url(mid))
+        direct_url = (
+            _phalang_direct_stream_url(_get_cached_phalang_stream(mid))
+            if use_prewarmed_live and is_live
+            else ""
+        )
+        if direct_url:
+            # LIVE matches use the already-prewarmed HLS URL, avoiding one
+            # resolver round trip when the IPTV client starts playback.
+            lines.append(direct_url)
+        else:
+            # Keep a resolver fallback for matches that were not prewarmed or
+            # whose direct URL was unavailable.
+            lines.append(_phalang_stream_url(mid))
     return lines
 
 
 def _fetch_phalang_playlist_lines() -> list:
     matches = _fetch_phalang_matches()
-    lines = _build_phalang_lines(matches)
     _prewarm_phalang_matches(matches)
-    return lines
+    return _build_phalang_lines(matches, use_prewarmed_live=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Dekiki (GitHub-hosted static list)

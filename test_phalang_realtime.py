@@ -40,6 +40,32 @@ class PhaLangRealtimeTests(unittest.TestCase):
             '|Referer=https://phalang.live/&User-Agent=Mozilla/5.0',
         )
 
+    def test_live_playlist_uses_prewarmed_hls_with_client_headers(self):
+        matches = [
+            {
+                "id": "live-match",
+                "team_1": "Home",
+                "team_2": "Away",
+                "league": "League",
+                "blv": "Commentator",
+                "start_date": "2026-09-27T12:00:00+00:00",
+                "is_live": True,
+            }
+        ]
+
+        with patch.object(
+            main,
+            "_get_cached_phalang_stream",
+            return_value="https://cdn.example/live.m3u8",
+        ), patch.object(main, "_get_server_base_url", return_value="https://iptv.example"):
+            lines = main._build_phalang_lines(matches, use_prewarmed_live=True)
+
+        self.assertEqual(
+            lines[1],
+            "https://cdn.example/live.m3u8"
+            "|Referer=https://phalang.live/&User-Agent=Mozilla/5.0",
+        )
+
     def test_successful_stream_resolution_is_cached(self):
         with patch.object(
             main,
