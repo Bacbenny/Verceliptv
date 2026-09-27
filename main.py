@@ -1724,23 +1724,29 @@ def status_json():
             "inflight_matches": len(_upcoming_inflight),
         }
 
+    cached_source_bodies = {
+        key: _get_entry(key)["content"] is not None
+        for key in ("phaohoa", "giovang", "phalang", "dekiki")
+    }
+
     def source_state(key: str) -> str:
         error = source_refresh_errors.get(key, "")
         count = _last_counts.get(key, 0)
         if error:
-            return "stale" if count else "error"
-        return "ok" if count else "empty"
+            return "stale" if count or cached_source_bodies[key] else "error"
+        return "ok" if count or cached_source_bodies[key] else "empty"
 
     source_states = {
         key: source_state(key)
         for key in ("phaohoa", "giovang", "phalang", "dekiki")
     }
     has_source_errors = any(state == "error" for state in source_states.values())
+    has_empty_sources = any(state == "empty" for state in source_states.values())
     has_stale_sources = any(state == "stale" for state in source_states.values())
     has_unclassified_error = bool(_last_counts.get("last_error")) and not (
-        has_source_errors or has_stale_sources
+        has_source_errors or has_empty_sources or has_stale_sources
     )
-    if has_source_errors or has_unclassified_error:
+    if has_source_errors or has_empty_sources or has_unclassified_error:
         health_state = "error"
     elif has_stale_sources:
         health_state = "degraded"
@@ -1753,10 +1759,7 @@ def status_json():
         "ok":           health_state == "ok",
         "state":        health_state,
         "degraded":     health_state == "degraded",
-        "serving_cached_playlist": any(
-            _last_counts.get(key, 0) > 0
-            for key in ("phaohoa", "giovang", "phalang", "dekiki")
-        ),
+        "serving_cached_playlist": any(cached_source_bodies.values()),
         "refreshed_at": ra_vn,
         "next_refresh_in_seconds": next_s,
         "last_error":   _last_counts.get("last_error", ""),
@@ -1844,14 +1847,17 @@ def index():
 
     err = _last_counts.get("last_error", "")
     source_errors = dict(_source_refresh_errors)
+    cached_source_bodies = {
+        key: _get_entry(key)["content"] is not None
+        for key in ("phaohoa", "giovang", "phalang", "dekiki")
+    }
     source_states = {}
     for key in ("phaohoa", "giovang", "phalang", "dekiki"):
         count = _last_counts.get(key, 0)
         source_states[key] = (
-            "stale" if source_errors.get(key) and count
-            else "error" if source_errors.get(key)
-            else "ok" if count
-            else "empty"
+            "stale" if source_errors.get(key) and (count or cached_source_bodies[key])
+            else "error" if source_errors.get(key) or not cached_source_bodies[key]
+            else "ok"
         )
     has_source_errors = any(state == "error" for state in source_states.values())
     has_stale_sources = any(state == "stale" for state in source_states.values())
