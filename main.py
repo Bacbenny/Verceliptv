@@ -12,6 +12,8 @@ import cloudscraper
 import certifi
 import requests
 from flask import Flask, Response, has_request_context, request, redirect
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 app = Flask(__name__)
 
@@ -41,6 +43,18 @@ def _disable_playlist_caching(response):
 _http_session = requests.Session()
 _http_session.verify = os.environ.get("REQUESTS_CA_BUNDLE") or certifi.where()
 _http_session.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
+_http_retry = Retry(
+    total=2,
+    connect=2,
+    read=2,
+    status=2,
+    backoff_factor=0.25,
+    status_forcelist=(429, 500, 502, 503, 504),
+    allowed_methods=frozenset({"GET", "HEAD", "OPTIONS", "POST", "PUT"}),
+    raise_on_status=False,
+)
+_http_session.mount("https://", HTTPAdapter(max_retries=_http_retry))
+_http_session.mount("http://", HTTPAdapter(max_retries=_http_retry))
 
 # ─── Khán Đài TV config ──────────────────────────────────────────────────────
 PHAOHOA_FRONTEND_URL   = os.environ.get("PHAOHOA_FRONTEND", "https://khandai3.link")
