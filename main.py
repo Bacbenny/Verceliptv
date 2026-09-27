@@ -9,6 +9,7 @@ from datetime import datetime, timezone, timedelta
 from urllib.parse import quote
 
 import cloudscraper
+import certifi
 import requests
 from flask import Flask, Response, has_request_context, request, redirect
 
@@ -38,6 +39,7 @@ def _disable_playlist_caching(response):
 # Reusing TCP+TLS connections across calls to the same host saves
 # 200-500ms per request under load.
 _http_session = requests.Session()
+_http_session.verify = os.environ.get("REQUESTS_CA_BUNDLE") or certifi.where()
 _http_session.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
 
 # ─── Khán Đài TV config ──────────────────────────────────────────────────────
@@ -64,6 +66,12 @@ GIOVANG_API_HOST     = os.environ.get(
 )
 # Bound slow upstream responses so one source cannot hold a cold playlist open.
 GIOVANG_API_TIMEOUT = float(os.environ.get("GIOVANG_API_TIMEOUT", "10"))
+GIOVANG_DETAIL_WINDOW_SECONDS = max(
+    0, int(os.environ.get("GIOVANG_DETAIL_WINDOW_SECONDS", "21600"))
+)  # fetch upcoming/live fixture details only inside this window
+GIOVANG_DETAIL_CACHE_TTL = max(
+    30, int(os.environ.get("GIOVANG_DETAIL_CACHE_TTL", "300"))
+)  # refresh eligible details with the playlist cache
 
 # ─── Persistent playlist cache (Cloudflare KV) ────────────────────────────────
 # KV is optional: the app keeps working with the in-process cache when these
@@ -211,6 +219,17 @@ _source_refresh_locks = {
 _source_timing_lock = threading.Lock()
 _source_refresh_ms = {}
 _source_refresh_errors = {}
+
+_giovang_detail_cache = {}
+_giovang_detail_cache_lock = threading.Lock()
+_giovang_detail_stats = {
+    "last_requested": 0,
+    "last_successful": 0,
+    "last_errors": 0,
+    "last_cache_hits": 0,
+    "last_reused_outside_window": 0,
+    "last_skipped_without_cache": 0,
+}
 
 _kv_hydrated_keys = set()
 _kv_hydration_locks = {
@@ -696,6 +715,70 @@ def _giovang_is_active(match: dict) -> bool:
     return True
 
 
+def _giovang_fixture_id(match: dict) -> str:
+    return str(match.get("id") or match.get("fi") or "").strip()
+
+
+def _giovang_detail_is_due(match: dict, now: float) -> bool:
+    """Return whether this fixture is live or close enough to kickoff to enrich."""
+    status_code = str(match.get("status_code") or "").upper().strip()
+    if bool(match.get("is_live")) or status_code in {"LIVE", "1H", "2H", "HT", "PEN", "ET"}:
+        return True
+
+    try:
+        start_time = float(match.get("time_start"))
+    except (TypeError, ValueError):
+        return False
+
+    return now <= start_time <= now + GIOVANG_DETAIL_WINDOW_SECONDS
+
+
+def _giovang_cached_detail(fixture_id: str) -> tuple[dict | None, bool]:
+    """Return cached detail and whether it is fresh enough to avoid a fetch."""
+    if not fixture_id:
+        return None, False
+    with _giovang_detail_cache_lock:
+        cached = _giovang_detail_cache.get(fixture_id)
+        if not cached:
+            return None, False
+        detail = cached.get("match")
+        fetched_at = float(cached.get("fetched_at") or 0)
+        if not isinstance(detail, dict):
+            return None, False
+        fresh = time.time() - fetched_at < GIOVANG_DETAIL_CACHE_TTL
+        return detail, fresh
+
+
+def _store_giovang_detail(fixture_id: str, detail: dict) -> None:
+    if not fixture_id or not isinstance(detail, dict):
+        return
+    with _giovang_detail_cache_lock:
+        # Keep the cache bounded in case the upstream keeps adding fixture IDs.
+        if fixture_id not in _giovang_detail_cache and len(_giovang_detail_cache) >= 512:
+            oldest_id = min(
+                _giovang_detail_cache,
+                key=lambda key: _giovang_detail_cache[key].get("fetched_at", 0),
+            )
+            del _giovang_detail_cache[oldest_id]
+        _giovang_detail_cache[fixture_id] = {
+            "match": detail,
+            "fetched_at": time.time(),
+        }
+
+
+def _merge_giovang_schedule_match(schedule: dict, detail: dict) -> dict:
+    """Keep the detail stream while applying the newest schedule/status fields."""
+    merged = dict(detail)
+    for key, value in schedule.items():
+        # List responses currently omit streams, but do not let an empty list
+        # erase a stream held in the detail cache.
+        if key == "blv" and not _pick_giovang_streams(schedule):
+            continue
+        if value not in (None, "", [], {}):
+            merged[key] = value
+    return merged
+
+
 def _fetch_giovang_matches() -> list:
     host = _get_giovang_api_host()
     try:
@@ -727,33 +810,73 @@ def _fetch_giovang_matches() -> list:
     # Keep list responses that already contain streams; only enrich missing ones.
     enriched = []
     needs_detail = []
+    now = time.time()
+    detail_cache_hits = 0
+    reused_outside_window = 0
+    skipped_without_cache = 0
     for match in candidates:
         if _pick_giovang_streams(match):
             enriched.append(match)
-        else:
-            needs_detail.append(match)
+            continue
 
-    def fetch_detail(match: dict) -> dict:
-        fixture_id = match.get("id") or match.get("fi")
+        fixture_id = _giovang_fixture_id(match)
+        cached_detail, cache_is_fresh = _giovang_cached_detail(fixture_id)
+        detail_is_due = _giovang_detail_is_due(match, now)
+        if cached_detail and (cache_is_fresh or not detail_is_due):
+            enriched.append(_merge_giovang_schedule_match(match, cached_detail))
+            if cache_is_fresh:
+                detail_cache_hits += 1
+            else:
+                reused_outside_window += 1
+        elif detail_is_due:
+            needs_detail.append((match, cached_detail))
+        else:
+            skipped_without_cache += 1
+
+    def fetch_detail(match: dict) -> tuple[str, dict]:
+        fixture_id = _giovang_fixture_id(match)
         detail_data = _fetch_giovang_json(f"{host}/api/fixtures/{quote(str(fixture_id), safe='')}")
         detail = detail_data.get("response")
-        return detail if isinstance(detail, dict) else match
+        return fixture_id, detail if isinstance(detail, dict) else match
 
     errors = 0
     if needs_detail:
         with ThreadPoolExecutor(max_workers=min(8, len(needs_detail))) as pool:
-            futures = {pool.submit(fetch_detail, match): match for match in needs_detail}
+            futures = {
+                pool.submit(fetch_detail, match): (match, cached_detail)
+                for match, cached_detail in needs_detail
+            }
             for future in as_completed(futures):
+                match, cached_detail = futures[future]
                 try:
-                    detail = future.result()
+                    fixture_id, detail = future.result()
                 except Exception:
                     errors += 1
+                    if cached_detail and _giovang_is_active(cached_detail):
+                        enriched.append(_merge_giovang_schedule_match(match, cached_detail))
                     continue
-                if _giovang_is_active(detail):
-                    enriched.append(detail)
+                _store_giovang_detail(fixture_id, detail)
+                merged = _merge_giovang_schedule_match(match, detail)
+                if _giovang_is_active(merged) and _pick_giovang_streams(merged):
+                    enriched.append(merged)
 
-    if errors and not enriched:
-        raise RuntimeError(f"Giờ Vàng fixture details failed for {errors} fixtures")
+    with _giovang_detail_cache_lock:
+        cache_size = len(_giovang_detail_cache)
+    with _source_timing_lock:
+        _giovang_detail_stats.update({
+            "last_requested": len(needs_detail),
+            "last_successful": len(needs_detail) - errors,
+            "last_errors": errors,
+            "last_cache_hits": detail_cache_hits,
+            "last_reused_outside_window": reused_outside_window,
+            "last_skipped_without_cache": skipped_without_cache,
+            "cache_entries": cache_size,
+        })
+
+    if candidates and not enriched:
+        if errors:
+            raise RuntimeError(f"Giờ Vàng fixture details failed for {errors} fixtures")
+        raise RuntimeError("Giờ Vàng has no cached streams inside the detail window")
     return enriched
 
 def _giovang_logo(match: dict) -> str:
@@ -1580,6 +1703,7 @@ def status_json():
     with _source_timing_lock:
         source_refresh_ms = dict(_source_refresh_ms)
         source_refresh_errors = dict(_source_refresh_errors)
+        giovang_detail_stats = dict(_giovang_detail_stats)
     with _upcoming_cache_lock:
         phalang_resolver_cache = {
             "cached_matches": len(_upcoming_cache),
@@ -1620,6 +1744,11 @@ def status_json():
             "giovang_tv": {"api": _giovang_api_cache.get("host"), "status": source_state("giovang")},
             "phalang_tv": {"api": PHALANG_API_URL,                "status": source_state("phalang")},
             "dekiki_tv":  {"api": "github-static",               "status": source_state("dekiki")},
+        },
+        "giovang_detail": {
+            "window_seconds": GIOVANG_DETAIL_WINDOW_SECONDS,
+            "cache_ttl_seconds": GIOVANG_DETAIL_CACHE_TTL,
+            **giovang_detail_stats,
         },
         "phalang_resolver": {
             "positive_cache_ttl_seconds": _upcoming_cache_ttl,
@@ -1752,7 +1881,7 @@ def _self_ping():
     while True:
         time.sleep(SELF_PING_INTERVAL)
         try:
-            requests.get(url, timeout=15)
+            _http_session.get(url, timeout=15)
         except Exception:
             pass
 
