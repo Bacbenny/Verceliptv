@@ -1731,9 +1731,32 @@ def status_json():
             return "stale" if count else "error"
         return "ok" if count else "empty"
 
-    has_errors = bool(_last_counts.get("last_error")) or any(source_refresh_errors.values())
+    source_states = {
+        key: source_state(key)
+        for key in ("phaohoa", "giovang", "phalang", "dekiki")
+    }
+    has_source_errors = any(state == "error" for state in source_states.values())
+    has_stale_sources = any(state == "stale" for state in source_states.values())
+    has_unclassified_error = bool(_last_counts.get("last_error")) and not (
+        has_source_errors or has_stale_sources
+    )
+    if has_source_errors or has_unclassified_error:
+        health_state = "error"
+    elif has_stale_sources:
+        health_state = "degraded"
+    else:
+        health_state = "ok"
+
     return jsonify({
-        "ok":           not has_errors,
+        # Keep "ok" for existing monitors. A stale playlist is intentionally
+        # not fully healthy, but the explicit state explains why it is usable.
+        "ok":           health_state == "ok",
+        "state":        health_state,
+        "degraded":     health_state == "degraded",
+        "serving_cached_playlist": any(
+            _last_counts.get(key, 0) > 0
+            for key in ("phaohoa", "giovang", "phalang", "dekiki")
+        ),
         "refreshed_at": ra_vn,
         "next_refresh_in_seconds": next_s,
         "last_error":   _last_counts.get("last_error", ""),
@@ -1754,10 +1777,10 @@ def status_json():
             "dekiki_tv":  _last_counts.get("dekiki",  0),
         },
         "sources": {
-            "phaohoa_tv": {"api": PHAOHOA_API_URL,               "status": source_state("phaohoa")},
-            "giovang_tv": {"api": _giovang_api_cache.get("host"), "status": source_state("giovang")},
-            "phalang_tv": {"api": PHALANG_API_URL,                "status": source_state("phalang")},
-            "dekiki_tv":  {"api": "github-static",               "status": source_state("dekiki")},
+            "phaohoa_tv": {"api": PHAOHOA_API_URL,                "status": source_states["phaohoa"]},
+            "giovang_tv": {"api": _giovang_api_cache.get("host"), "status": source_states["giovang"]},
+            "phalang_tv": {"api": PHALANG_API_URL,                 "status": source_states["phalang"]},
+            "dekiki_tv":  {"api": "github-static",                "status": source_states["dekiki"]},
         },
         "giovang_detail": {
             "window_seconds": GIOVANG_DETAIL_WINDOW_SECONDS,
@@ -1819,8 +1842,39 @@ def index():
         dt_str   = "chưa có dữ liệu"
         next_str = "đang khởi động..."
 
-    err      = _last_counts.get("last_error", "")
-    err_html = f'<p style="color:red">⚠️ {err}</p>' if err else ""
+    err = _last_counts.get("last_error", "")
+    source_errors = dict(_source_refresh_errors)
+    source_states = {}
+    for key in ("phaohoa", "giovang", "phalang", "dekiki"):
+        count = _last_counts.get(key, 0)
+        source_states[key] = (
+            "stale" if source_errors.get(key) and count
+            else "error" if source_errors.get(key)
+            else "ok" if count
+            else "empty"
+        )
+    has_source_errors = any(state == "error" for state in source_states.values())
+    has_stale_sources = any(state == "stale" for state in source_states.values())
+    has_unclassified_error = bool(err) and not (has_source_errors or has_stale_sources)
+    if has_source_errors or has_unclassified_error:
+        health_state = "error"
+    elif has_stale_sources:
+        health_state = "degraded"
+    else:
+        health_state = "ok"
+
+    if health_state == "error":
+        err_html = f'<p style="color:red">❌ Trạng thái: lỗi — {err}</p>' if err else (
+            '<p style="color:red">❌ Trạng thái: lỗi — chưa có playlist khả dụng</p>'
+        )
+    elif health_state == "degraded":
+        err_html = (
+            '<p style="color:#b45309">⚠️ Trạng thái: degraded — '
+            'upstream đang lỗi tạm thời, playlist cache gần nhất vẫn được phục vụ.'
+            f' {err}</p>'
+        )
+    else:
+        err_html = '<p style="color:green">✅ Trạng thái: ok — các nguồn đang hoạt động</p>'
 
     phaohoa_count  = _last_counts.get("phaohoa",   0)
     giovang_count  = _last_counts.get("giovang",   0)
