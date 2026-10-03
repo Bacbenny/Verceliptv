@@ -104,7 +104,7 @@ CLOUDFLARE_KV_BASE_URL = (
 # ─── Dekiki (GitHub-hosted static list) + EPG ────────────────────────────────
 DEKIKI_M3U_URL = os.environ.get(
     "DEKIKI_M3U_URL",
-    "https://raw.githubusercontent.com/Bacbenny/Verceliptv/refs/heads/main/dekiki",
+    "https://raw.githubusercontent.com/Bacbenny/dekiki/refs/heads/main/film4k.m3u",
 )
 EPG_URL = os.environ.get("EPG_URL", "https://lichphatsong.io.vn/epg.xml")
 
