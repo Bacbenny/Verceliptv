@@ -569,6 +569,64 @@ https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/bbcworldnews.smil/manifest.mpd
 #KODIPROP:inputstream.adaptive.license_key=5014941a2c42379880b5edf72304c165:f3fa0fe3cd39a52f4eefd36ff7161e89
 https://s7771.cdn.mytvnet.vn/pkg20/live_dzones/bbcearth.smil/manifest.mpd
 
+#EXTM3U x-tvg-url="http://epg.one/epg.xml.gz"
+#EXTINF:0 group-title="SportUK" tvg-id="7255" tvg-logo="http://epg.one/img/7255.png" tvg-rec="0",Eleven Sports 1 4K PL
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/20068/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="6586" tvg-logo="http://epg.one/img/6586.png" tvg-rec="0",V Sport Ultra 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/19163/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="2889" tvg-logo="http://epg.one/img/2889.png" tvg-rec="3",TNT Sports 1 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/6566/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="2890" tvg-logo="http://epg.one/img/2890.png" tvg-rec="3",TNT Sports 2 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/2506/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="3560" tvg-logo="http://epg.one/img/3560.png" tvg-rec="3",TNT Sports 3 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/6564/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="6507" tvg-logo="http://epg.one/img/6507.png" tvg-rec="0",TNT Sports 4 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/19054/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="4569" tvg-logo="http://epg.one/img/4569.png" tvg-rec="3",Sky Sports Premier League HD
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/9334/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="4570" tvg-logo="http://epg.one/img/4570.png" tvg-rec="3",Sky Sports Football HD
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/9289/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="4571" tvg-logo="http://epg.one/img/4571.png" tvg-rec="3",Sky Sports Main Event HD
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/9308/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="9051" tvg-logo="http://epg.one/img/9051.png" tvg-rec="3",Sky Sports News HD
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/9314/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="4573" tvg-logo="http://epg.one/img/4573.png" tvg-rec="3",Sky Sports Mix HD
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/9310/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="4578" tvg-logo="http://epg.one/img/4578.png" tvg-rec="3",Sky Sports Golf HD
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/9293/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="2915" tvg-logo="http://epg.one/img/2915.png" tvg-rec="0",DAZN 1 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/19158/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="2916" tvg-logo="http://epg.one/img/2916.png" tvg-rec="3",DAZN 2 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/2532/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="9508" tvg-logo="http://epg.one/img/2917.png" tvg-rec="0",DAZN 3 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/31956/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="9501" tvg-logo="http://epg.one/img/2918.png" tvg-rec="0",DAZN 4 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/31957/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="9502" tvg-logo="http://epg.one/img/2919.png" tvg-rec="0",DAZN 5 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/31958/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="2944" tvg-logo="http://epg.one/img/2944.png" tvg-rec="3",Ziggo Sport 1
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/2560/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="2945" tvg-logo="http://epg.one/img/2945.png" tvg-rec="3",Ziggo Sport 2 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/2561/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="2943" tvg-logo="http://epg.one/img/2943.png" tvg-rec="3",Ziggo Sport 3 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/2559/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="11430" tvg-logo="http://epg.one/img/9262.png" tvg-rec="0",Sport TV+
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/31941/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="11045" tvg-logo="http://epg.one/img/2909.png" tvg-rec="0",Sport TV 1
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/31942/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="11431" tvg-logo="http://epg.one/img/2910.png" tvg-rec="0",Sport TV 2
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/31943/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="11432" tvg-logo="http://epg.one/img/2911.png" tvg-rec="0",Sport TV 3 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/31944/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="11433" tvg-logo="http://epg.one/img/2912.png" tvg-rec="0",Sport TV 4 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/31945/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="11434" tvg-logo="http://epg.one/img/2913.png" tvg-rec="0",Sport TV 5 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/31946/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="11435" tvg-logo="http://epg.one/img/11435.png" tvg-rec="0",Sport TV 6 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/31947/index.m3u8
+#EXTINF:0 group-title="SportUK" tvg-id="11436" tvg-logo="http://epg.one/img/11436.png" tvg-rec="0",Sport TV 7 
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/9XRHZ7MZ9PNWS6/31948/index.m3u8
+
 #EXTINF:-1 tvg-id="tv360plus1" group-title="Sự Kiện TV360" tvg-logo="https://img-zlr1.tv360.vn/image1/2026/04/15/22/1776266760359/ba1ca843cd06_480_270.png", TV360+1
 #EXTVLCOPT:http-user-agent=Dalvik/2.1.0
 #KODIPROP:inputstream.adaptive.manifest_type=mpd
