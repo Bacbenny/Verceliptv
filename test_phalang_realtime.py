@@ -1,6 +1,6 @@
 import unittest
 from datetime import datetime, timedelta, timezone
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import main
 
@@ -15,6 +15,82 @@ class PhaLangRealtimeTests(unittest.TestCase):
         with main._upcoming_cache_lock:
             main._upcoming_cache.clear()
             main._upcoming_inflight.clear()
+
+    def test_fetch_matches_uses_separate_live_and_featured_queries(self):
+        live_match = {"id": "live-1", "team_1": "Live", "team_2": "Match"}
+        featured_match = {"id": "upcoming-1", "team_1": "Home", "team_2": "Away"}
+        duplicate_live = {"id": "shared-1", "blv": "Live version"}
+        duplicate_featured = {"id": "shared-1", "blv": "Featured version"}
+        requests = []
+
+        def post(_url, json, **_kwargs):
+            requests.append(json)
+            if json["queries"][0]["field"] == "is_live":
+                rows = [live_match, duplicate_live]
+            else:
+                rows = [featured_match, duplicate_featured]
+            response = Mock()
+            response.json.return_value = {"data": rows, "total": len(rows)}
+            return response
+
+        with patch.object(main._http_session, "post", side_effect=post):
+            matches = main._fetch_phalang_matches()
+
+        self.assertEqual({match["id"] for match in matches}, {"live-1", "upcoming-1", "shared-1"})
+        self.assertEqual(len(requests), 2)
+        live_query = next(payload for payload in requests if payload["queries"][0]["field"] == "is_live")
+        featured_query = next(payload for payload in requests if payload["queries"][0]["field"] == "is_hot")
+        self.assertNotIn("query_or", live_query)
+        self.assertTrue(featured_query["query_or"])
+        self.assertEqual(
+            next(match for match in matches if match["id"] == "shared-1")["blv"],
+            "Featured version",
+        )
+
+    def test_fetch_matches_paginates_until_upstream_total_is_collected(self):
+        live_pages = []
+
+        def post(_url, json, **_kwargs):
+            if json["queries"][0]["field"] == "is_live":
+                page = json["page"]
+                live_pages.append(page)
+                rows = (
+                    [{"id": f"live-{index}"} for index in range(50)]
+                    if page == 1
+                    else [{"id": "live-50"}]
+                )
+                total = 51
+            else:
+                rows = []
+                total = 0
+            response = Mock()
+            response.json.return_value = {"data": rows, "total": total}
+            return response
+
+        with patch.object(main._http_session, "post", side_effect=post):
+            matches = main._fetch_phalang_matches()
+
+        self.assertEqual(live_pages, [1, 2])
+        self.assertEqual(len(matches), 51)
+
+    def test_live_match_older_than_max_age_is_filtered_even_if_api_marks_live(self):
+        now = datetime.now(timezone.utc)
+        old_match = {
+            "id": "stale-live",
+            "blv": "Commentator",
+            "start_date": (now - timedelta(hours=3)).isoformat(),
+            "is_live": True,
+        }
+        current_match = {
+            "id": "current-live",
+            "blv": "Commentator",
+            "start_date": (now - timedelta(minutes=30)).isoformat(),
+            "is_live": True,
+        }
+
+        with patch.object(main.time, "time", return_value=now.timestamp()):
+            self.assertFalse(main._phalang_is_active(old_match))
+            self.assertTrue(main._phalang_is_active(current_match))
 
     def test_playlist_uses_stable_resolver_without_fetching_streams(self):
         matches = [
@@ -48,7 +124,7 @@ class PhaLangRealtimeTests(unittest.TestCase):
                 "team_2": "Away",
                 "league": "League",
                 "blv": "Commentator",
-                "start_date": "2026-09-27T12:00:00+00:00",
+                "start_date": (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat(),
                 "is_live": True,
             }
         ]

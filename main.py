@@ -130,6 +130,8 @@ PHALANG_PREWARM_MAX_MATCHES = max(
 PHALANG_PREWARM_WAIT = max(
     0, min(3, int(os.environ.get("PHALANG_PREWARM_WAIT", "1")))
 )  # seconds allowed during playlist refresh; unfinished matches use resolver fallback
+PHALANG_QUERY_PAGE_SIZE = 50
+PHALANG_QUERY_MAX_PAGES = 5
 API_DISCOVERY_TTL    = 3600  # seconds — re-discover API URL every 1 hour
 
 FINISHED_STATUS_STRINGS    = {"finished", "end", "ended", "complete", "completed"}
@@ -1002,29 +1004,66 @@ def _fetch_phalang_matches() -> list:
     api = _get_phalang_api_url()
     url = f"{api}/matches/graph"
 
-    def post_query(payload: dict) -> list:
-        resp = _http_session.post(url, json=payload, headers=_PHALANG_HEADERS, timeout=20)
-        resp.raise_for_status()
-        data = resp.json()
-        if not isinstance(data, dict):
-            raise RuntimeError("PhaLang API returned a non-object response")
-        results = data.get("data", [])
-        if not isinstance(results, list):
-            raise RuntimeError("PhaLang API returned an invalid data list")
-        return [m for m in results if isinstance(m, dict)]
+    def post_query(queries: list[dict], query_or: bool = False) -> list:
+        matches = []
+        fetched = 0
+        total = None
 
-    # One OR query replaces the former live + hot/top requests.
-    matches = post_query({
-        "limit": 100,
-        "page": 1,
-        "order_asc": "start_date",
-        "queries": [
-            {"field": "is_live", "type": "equal", "value": True},
-            {"field": "is_hot", "type": "equal", "value": True},
-            {"field": "is_top", "type": "equal", "value": True},
-        ],
-        "query_or": True,
-    })
+        for page in range(1, PHALANG_QUERY_MAX_PAGES + 1):
+            payload = {
+                "limit": PHALANG_QUERY_PAGE_SIZE,
+                "page": page,
+                "order_asc": "start_date",
+                "queries": queries,
+            }
+            if query_or:
+                payload["query_or"] = True
+
+            resp = _http_session.post(
+                url,
+                json=payload,
+                headers=_PHALANG_HEADERS,
+                timeout=20,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            if not isinstance(data, dict):
+                raise RuntimeError("PhaLang API returned a non-object response")
+            results = data.get("data", [])
+            if not isinstance(results, list):
+                raise RuntimeError("PhaLang API returned an invalid data list")
+
+            page_matches = [match for match in results if isinstance(match, dict)]
+            if not page_matches:
+                break
+            matches.extend(page_matches)
+            fetched += len(page_matches)
+
+            try:
+                total = max(0, int(data.get("total")))
+            except (TypeError, ValueError):
+                total = None
+
+            if total is not None and fetched >= total:
+                break
+            if total is None and len(page_matches) < PHALANG_QUERY_PAGE_SIZE:
+                break
+
+        return matches
+
+    # Keep live events separate from featured/upcoming events. A combined OR
+    # query can place a full page of old live records ahead of today's fixtures.
+    live_query = [
+        {"field": "is_live", "type": "equal", "value": True},
+    ]
+    featured_query = [
+        {"field": "is_hot", "type": "equal", "value": True},
+        {"field": "is_top", "type": "equal", "value": True},
+    ]
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        live_future = pool.submit(post_query, live_query)
+        featured_future = pool.submit(post_query, featured_query, True)
+        matches = live_future.result() + featured_future.result()
 
     unique = {}
     for match in matches:
@@ -1038,8 +1077,7 @@ def _phalang_is_active(match: dict) -> bool:
     if not blv:
         return False
     start_str = match.get("start_date", "")
-    is_live = bool(match.get("is_live"))
-    if start_str and not is_live:
+    if start_str:
         try:
             dt = datetime.fromisoformat(start_str)
             elapsed = time.time() - dt.timestamp()
@@ -1732,6 +1770,10 @@ def status_json():
     def source_state(key: str) -> str:
         error = source_refresh_errors.get(key, "")
         count = _last_counts.get(key, 0)
+        if key == "phalang" and not count:
+            if error:
+                return "stale" if cached_source_bodies[key] else "error"
+            return "empty"
         if error:
             return "stale" if count or cached_source_bodies[key] else "error"
         return "ok" if count or cached_source_bodies[key] else "empty"
