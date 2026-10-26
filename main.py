@@ -1,12 +1,15 @@
 import gzip
+import html
+import ipaddress
 import json
 import os
 import re
 import threading
 import time
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
-from urllib.parse import quote
+from urllib.parse import quote, urlencode, urlsplit
 
 import cloudscraper
 import certifi
@@ -55,19 +58,6 @@ _http_retry = Retry(
 )
 _http_session.mount("https://", HTTPAdapter(max_retries=_http_retry))
 _http_session.mount("http://", HTTPAdapter(max_retries=_http_retry))
-
-# ─── Khán Đài TV config ──────────────────────────────────────────────────────
-PHAOHOA_FRONTEND_URL   = os.environ.get("PHAOHOA_FRONTEND", "https://khandai3.link")
-PHAOHOA_API_URL        = os.environ.get("PHAOHOA_API",      "https://khandai3.link/api/matches/")
-PHAOHOA_FETCH_URL      = "https://khandai3.link/api/matches/?ordering=-start_time&page_size=100"
-# The API exposes a very large history. Only the newest two pages are needed
-# for upcoming/live events; keeping this bounded avoids slowing combined builds.
-PHAOHOA_MAX_PAGES      = max(1, min(int(os.environ.get("PHAOHOA_MAX_PAGES", "2")), 5))
-
-if "phaohoa1.live" in PHAOHOA_FRONTEND_URL:
-    PHAOHOA_FRONTEND_URL = "https://khandai3.link"
-if "phaohoa1.live" in PHAOHOA_API_URL:
-    PHAOHOA_API_URL = "https://khandai3.link/api/matches/"
 
 # ─── PhaLang TV config ───────────────────────────────────────────────────────
 PHALANG_FRONTEND_URL = os.environ.get("PHALANG_FRONTEND", "https://phalang.tv")
@@ -159,49 +149,144 @@ SPORT_LOGOS = {
 }
 
 
+def _safe_logo_source(value: object) -> str:
+    """Accept public HTTP(S) image URLs only; these are embedded, never fetched here."""
+    raw = str(value or "").strip()
+    if not raw or len(raw) > 2048 or any(ord(char) < 32 for char in raw):
+        return ""
+    try:
+        parsed = urlsplit(raw)
+        host = (parsed.hostname or "").lower().rstrip(".")
+        if parsed.scheme.lower() not in {"http", "https"} or not host:
+            return ""
+        if parsed.username or parsed.password or host == "localhost" or host.endswith(
+            (".localhost", ".local")
+        ):
+            return ""
+        try:
+            if not ipaddress.ip_address(host).is_global:
+                return ""
+        except ValueError:
+            pass
+    except ValueError:
+        return ""
+    return raw
+
+
+_LOGO_URL_KEYS = (
+    "logo_url", "logoUrl", "logo", "image_url", "imageUrl", "image",
+    "img_url", "imgUrl", "badge_url", "badgeUrl", "badge",
+    "crest_url", "crestUrl", "crest", "emblem_url", "emblemUrl",
+    "emblem", "icon_url", "iconUrl", "icon", "src", "url",
+)
+
+
+def _extract_logo_url(value: object) -> str:
+    if isinstance(value, str):
+        return _safe_logo_source(value)
+    if isinstance(value, dict):
+        for key in _LOGO_URL_KEYS:
+            if key in value:
+                found = _extract_logo_url(value[key])
+                if found:
+                    return found
+    elif isinstance(value, (list, tuple)):
+        for item in value[:5]:
+            found = _extract_logo_url(item)
+            if found:
+                return found
+    return ""
+
+
+def _first_logo_url(*values: object) -> str:
+    for value in values:
+        found = _extract_logo_url(value)
+        if found:
+            return found
+    return ""
+
+
+def _fixture_name(value: object, fallback: str) -> str:
+    if isinstance(value, str):
+        return value.strip()[:80] or fallback
+    if isinstance(value, dict):
+        for key in ("name", "title", "short_name", "shortName", "display_name"):
+            name = value.get(key)
+            if isinstance(name, str) and name.strip():
+                return name.strip()[:80]
+    return fallback
+
+
+def _football_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, str, str]:
+    if provider == "giovang":
+        teams = match.get("teams") if isinstance(match.get("teams"), dict) else {}
+        home = teams.get("home") or match.get("home_team") or match.get("home") or {}
+        away = teams.get("away") or match.get("away_team") or match.get("away") or {}
+        league = match.get("league") or match.get("competition") or {}
+        home_name = _fixture_name(home, "Home")
+        away_name = _fixture_name(away, "Away")
+        league_name = _fixture_name(league, "")
+        home_logo = _first_logo_url(
+            match.get("home_team_logo"), match.get("home_team_logo_url"),
+            match.get("home_logo"), match.get("team_1_logo"), home,
+        )
+        away_logo = _first_logo_url(
+            match.get("away_team_logo"), match.get("away_team_logo_url"),
+            match.get("away_logo"), match.get("team_2_logo"), away,
+        )
+        league_logo = _first_logo_url(
+            match.get("league_logo"), match.get("league_logo_url"),
+            match.get("competition_logo"), match.get("tournament_logo"), league,
+        )
+    else:
+        home = match.get("team_1") or match.get("home_team") or {}
+        away = match.get("team_2") or match.get("away_team") or {}
+        league = match.get("league") or match.get("tournament") or {}
+        home_name = _fixture_name(home, "Home")
+        away_name = _fixture_name(away, "Away")
+        league_name = _fixture_name(league, "")
+        home_logo = _first_logo_url(
+            match.get("team_1_logo"), match.get("team_1_logo_url"),
+            match.get("home_team_logo"), match.get("home_team_logo_url"),
+            match.get("home_logo"), home,
+        )
+        away_logo = _first_logo_url(
+            match.get("team_2_logo"), match.get("team_2_logo_url"),
+            match.get("away_team_logo"), match.get("away_team_logo_url"),
+            match.get("away_logo"), away,
+        )
+        league_logo = _first_logo_url(
+            match.get("league_logo"), match.get("league_logo_url"),
+            match.get("tournament_logo"), match.get("competition_logo"), league,
+        )
+    return home_logo, league_logo, away_logo, home_name, league_name, away_name
+
+
+def _composite_football_logo_url(match: dict, provider: str) -> str:
+    home_logo, league_logo, away_logo, home_name, league_name, away_name = (
+        _football_logo_parts(match, provider)
+    )
+    query = urlencode({
+        "home": home_logo, "league": league_logo, "away": away_logo,
+        "home_name": home_name, "league_name": league_name, "away_name": away_name,
+    })
+    return f"{_get_server_base_url()}/match-logo.svg?{query}"
+
+
+def _football_or_sport_logo(match: dict, provider: str, parts: str) -> str:
+    fallback = _logo_from_text(parts)
+    if fallback != SPORT_LOGOS["football"]:
+        return fallback
+    return _composite_football_logo_url(match, provider)
+
+
 # ─── API URL caches ───────────────────────────────────────────────────────────
-_phaohoa_api_cache  = {"url": PHAOHOA_API_URL,  "discovered_at": 0}
 # The configured API host is known and should be used immediately.
 # Discovery is retried only after an API failure, avoiding a frontend probe on cold start.
 _giovang_api_cache  = {"host": GIOVANG_API_HOST, "discovered_at": time.time()}
 _phalang_api_cache  = {"url": PHALANG_API_URL,   "discovered_at": 0}
 
 # ─── Auto domain resolution ───────────────────────────────────────────────────
-def _resolve_base_url(url: str, timeout: int = 8) -> str:
-    try:
-        r = _http_session.get(
-            url, timeout=timeout, allow_redirects=True,
-        )
-        final = r.url or url
-    except Exception:
-        final = url
-    m = re.match(r"(https?://[^/?#]+)", final)
-    return m.group(1) if m else url.rstrip("/")
-
-
-_frontend_resolve_lock = threading.Lock()
-_frontends_resolved = False
-
-def _resolve_all_frontends() -> None:
-    global PHAOHOA_FRONTEND_URL, _frontends_resolved
-    if _frontends_resolved:
-        return
-    with _frontend_resolve_lock:
-        if _frontends_resolved:
-            return
-        original = PHAOHOA_FRONTEND_URL
-        # The default host is already canonical; avoid a blocking redirect probe
-        # during a Vercel cold refresh. Custom hosts still get resolved normally.
-        if original.rstrip("/") in {"https://khandai3.link", "https://phaohoa1.live"}:
-            _frontends_resolved = True
-            return
-        resolved = _resolve_base_url(original)
-        if resolved != original.rstrip("/"):
-            print(f"[domain-resolve] Khán Đài TV: {original} → {resolved}", flush=True)
-        PHAOHOA_FRONTEND_URL = resolved
-        _frontends_resolved = True
-
-
 # ─── Playlist content cache ───────────────────────────────────────────────────
 def _empty_entry():
     return {"content": None, "gz": None, "built_at": 0,
@@ -209,7 +294,6 @@ def _empty_entry():
 
 _playlist_cache = {
     "combined": _empty_entry(),
-    "phaohoa":  _empty_entry(),
     "giovang":  _empty_entry(),
     "phalang":  _empty_entry(),
     "dekiki":   _empty_entry(),
@@ -230,7 +314,7 @@ _stale_refresh_keys = set()
 
 _source_refresh_locks = {
     key: threading.Lock()
-    for key in ("phaohoa", "giovang", "phalang", "dekiki")
+    for key in ("giovang", "phalang", "dekiki")
 }
 _source_timing_lock = threading.Lock()
 _source_refresh_ms = {}
@@ -253,6 +337,8 @@ _kv_hydration_locks = {
 }
 _cloudflare_kv_last_error = ""
 _cloudflare_kv_last_write_at = 0
+_removed_group_cache_purge_attempted = False
+_removed_group_cache_purge_lock = threading.Lock()
 
 
 def _cloudflare_api_token() -> str:
@@ -339,6 +425,31 @@ def _cloudflare_kv_put(key: str, text: str, built_at: float) -> None:
         _record_cloudflare_kv_error(exc)
 
 
+def _cloudflare_kv_delete(key: str) -> None:
+    if not _cloudflare_kv_enabled():
+        return
+    response = _http_session.delete(
+        _cloudflare_kv_url(key),
+        headers=_cloudflare_kv_headers(),
+        timeout=CLOUDFLARE_KV_TIMEOUT,
+    )
+    if response.status_code != 404:
+        response.raise_for_status()
+
+
+def _purge_removed_group_cache() -> None:
+    """Delete the obsolete source-specific cache once; combined is scrubbed on hydrate."""
+    global _removed_group_cache_purge_attempted
+    with _removed_group_cache_purge_lock:
+        if _removed_group_cache_purge_attempted:
+            return
+        _removed_group_cache_purge_attempted = True
+        try:
+            _cloudflare_kv_delete("phaohoa")
+        except Exception as exc:
+            _record_cloudflare_kv_error(exc)
+
+
 def _persist_cloudflare_kv(key: str, text: str, built_at: float) -> None:
     # The combined playlist is written synchronously so a serverless invocation
     # cannot finish before the durable fallback exists. Individual playlists
@@ -367,6 +478,11 @@ def _hydrate_from_cloudflare_kv(key: str) -> bool:
             if not saved:
                 return False
             text, built_at = saved
+            if key == "combined":
+                cleaned_text = _strip_removed_groups(text)
+                if cleaned_text != text:
+                    text = cleaned_text
+                    _cloudflare_kv_put("combined", text, built_at)
             _store_local(key, text, built_at)
             _last_counts[key] = sum(
                 1 for line in text.splitlines() if line.startswith("#EXTINF")
@@ -440,167 +556,6 @@ def _logo_from_text(text: str) -> str:
         return SPORT_LOGOS["hockey"]
     return SPORT_LOGOS["football"]
 
-def _hq_kda_logo(fixture: dict) -> str:
-    sport = fixture.get("sport") or {}
-    icon = sport.get("iconUrl", "")
-    if icon:
-        return icon
-    parts = " ".join([sport.get("name", ""), sport.get("slug", "")])
-    return _logo_from_text(parts)
-
-# ══════════════════════════════════════════════════════════════════════════════
-#  Khán Đài TV — fetch từ khandai3.link/api/matches (Django REST, không token)
-# ══════════════════════════════════════════════════════════════════════════════
-
-_PHAOHOA_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    ),
-    "Referer": "https://khandai3.link/",
-    "Accept": "application/json",
-}
-
-
-def _json_from_reader(text: str) -> dict:
-    start = text.find("{")
-    if start < 0:
-        raise RuntimeError("Khán Đài proxy returned no JSON object")
-    try:
-        data, _ = json.JSONDecoder().raw_decode(text[start:])
-    except json.JSONDecodeError as exc:
-        raise RuntimeError("Khán Đài proxy returned invalid JSON") from exc
-    if not isinstance(data, dict):
-        raise RuntimeError("Khán Đài proxy returned a non-object response")
-    return data
-
-
-def _fetch_phaohoa_json(url: str) -> dict:
-    try:
-        resp = _http_session.get(url, headers=_PHAOHOA_HEADERS, timeout=15)
-        resp.raise_for_status()
-        data = resp.json()
-        if not isinstance(data, dict):
-            raise RuntimeError("Khán Đài API returned a non-object response")
-        return data
-    except Exception as direct_error:
-        reader_target = url.replace("https://", "http://", 1) if url.startswith("https://") else url
-        format_sep = "&" if "?" in reader_target else "?"
-        reader_target += format_sep + "format=json"
-        reader_url = "https://r.jina.ai/" + reader_target.replace("&", "%26")
-        try:
-            proxy_resp = _http_session.get(
-                reader_url,
-                headers={"User-Agent": "Mozilla/5.0", "Accept": "text/plain"},
-                timeout=20,
-            )
-            proxy_resp.raise_for_status()
-            return _json_from_reader(proxy_resp.text)
-        except Exception as proxy_error:
-            raise RuntimeError(
-                f"direct API failed ({direct_error}); Reader fallback failed ({proxy_error})"
-            ) from proxy_error
-
-def _fetch_phaohoa_matches() -> list:
-    """Fetch only the newest bounded pages; the API contains a large history."""
-    url = PHAOHOA_FETCH_URL
-    data = _fetch_phaohoa_json(url)
-    page_results = data.get("results", [])
-    if not isinstance(page_results, list):
-        raise RuntimeError("Khán Đài API returned an invalid results list")
-    results = [m for m in page_results if isinstance(m, dict)]
-
-    # Collect remaining page URLs from the first page's "next" chain.
-    # The Django REST API exposes page numbers in the URL, so we can
-    # build all remaining URLs from the first "next" URL without fetching
-    # each page sequentially.
-    next_url = data.get("next")
-    remaining_urls = []
-    while next_url and len(remaining_urls) < PHAOHOA_MAX_PAGES - 1:
-        remaining_urls.append(next_url)
-        # Derive next page URL by incrementing the page parameter
-        m = re.search(r'page=(\d+)', next_url)
-        if m:
-            next_page = int(m.group(1)) + 1
-            next_url = re.sub(r'page=\d+', f'page={next_page}', next_url)
-        else:
-            break
-
-    # Fetch remaining pages in parallel
-    if remaining_urls:
-        with ThreadPoolExecutor(max_workers=min(4, len(remaining_urls))) as pool:
-            futures = {pool.submit(_fetch_phaohoa_json, u): u for u in remaining_urls}
-            for future in as_completed(futures):
-                try:
-                    page_data = future.result()
-                    page_results = page_data.get("results", [])
-                    if isinstance(page_results, list):
-                        results.extend(m for m in page_results if isinstance(m, dict))
-                except Exception:
-                    pass
-
-    unique = {}
-    for match in results:
-        if not _phaohoa_is_active(match):
-            continue
-        key = match.get("id") or match.get("slug")
-        if key:
-            unique[str(key)] = match
-    return list(unique.values())
-
-def _phaohoa_has_stream(match: dict) -> bool:
-    """Keep a non-terminal match when any usable stream is still published."""
-    commentators = match.get("commentators") or []
-    if any(
-        str(commentator.get("stream_url") or commentator.get("streamUrl") or "").strip()
-        for commentator in commentators
-        if isinstance(commentator, dict)
-    ):
-        return True
-    return any(
-        str(match.get(field) or "").strip()
-        for field in ("primary_stream_url", "backup_stream_url")
-    )
-
-
-def _phaohoa_is_active(match: dict) -> bool:
-    status = str(match.get("status") or "").lower().strip()
-    if status in FINISHED_STATUS_STRINGS:
-        return False
-
-    start_str = match.get("start_time", "")
-    has_stream = _phaohoa_has_stream(match)
-    if status not in ("scheduled", "upcoming", "") and start_str and not has_stream:
-        try:
-            dt = datetime.fromisoformat(start_str)
-            if time.time() - dt.timestamp() > MATCH_MAX_AGE_SECONDS:
-                return False
-        except Exception:
-            pass
-    return True
-
-def _pick_phaohoa_stream(match: dict) -> tuple:
-    for c in (match.get("commentators") or []):
-        url = (c.get("stream_url") or c.get("streamUrl") or "").strip()
-        name = (c.get("nickname") or c.get("name") or "").strip()
-        if url:
-            return url, name
-    primary = (match.get("primary_stream_url") or "").strip()
-    if primary:
-        return primary, ""
-    backup = (match.get("backup_stream_url") or "").strip()
-    if backup:
-        return backup, ""
-    return "", ""
-
-def _phaohoa_logo(match: dict) -> str:
-    parts = " ".join([
-        match.get("sport_name", ""),
-        match.get("sport_slug", ""),
-        match.get("tournament_name", ""),
-    ])
-    return _logo_from_text(parts)
-
 def _get_server_base_url() -> str:
     render_url = os.environ.get("RENDER_EXTERNAL_URL", "")
     if render_url:
@@ -625,46 +580,6 @@ def _get_server_base_url() -> str:
         if host and "localhost" not in host and "127.0.0.1" not in host:
             return f"{proto}://{host}".rstrip("/")
     return f"http://localhost:{os.environ.get('PORT', 5000)}"
-
-def _build_phaohoa_lines(matches: list) -> list:
-    lines = []
-    try:
-        matches = sorted(matches, key=lambda m: m.get("start_time") or "")
-    except Exception:
-        pass
-    for match in matches:
-        if not _phaohoa_is_active(match):
-            continue
-        slug = (match.get("slug") or "").strip()
-        if not slug:
-            continue
-        stream_url, commentator = _pick_phaohoa_stream(match)
-        if not stream_url:
-            continue
-        home       = (match.get("home_team_name") or "Home").strip()
-        away       = (match.get("away_team_name") or "Away").strip()
-        tournament = (match.get("tournament_name") or "").strip()
-        logo       = _phaohoa_logo(match)
-        start_str  = match.get("start_time", "")
-        status     = str(match.get("status") or "").lower().strip()
-        try:
-            dt       = datetime.fromisoformat(start_str)
-            dt_vn    = dt.astimezone(VN_TZ)
-            time_str = dt_vn.strftime("%H:%M")
-            date_str = dt_vn.strftime("%d/%m")
-        except Exception:
-            time_str = "--:--"
-            date_str = "--/--"
-        status_label = " LIVE" if status == "live" else ""
-        if commentator:
-            display = f"{time_str} - {date_str} | {home} VS {away} ({tournament}) | {commentator}{status_label}"
-        else:
-            display = f"{time_str} - {date_str} | {home} VS {away} ({tournament}){status_label}"
-        lines.append(f'#EXTINF:-1 tvg-logo="{logo}" group-title="Khán Đài TV",{display}')
-        if "|" not in stream_url:
-            stream_url += f"|Referer={PHAOHOA_FRONTEND_URL.rstrip('/')}/&User-Agent=Mozilla/5.0"
-        lines.append(stream_url)
-    return lines
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Giờ Vàng TV — JSON schedule + per-fixture stream details
@@ -899,10 +814,10 @@ def _giovang_logo(match: dict) -> str:
     league = match.get("league") or {}
     parts = " ".join([
         str(match.get("type") or ""),
-        str(league.get("title") or ""),
-        str(league.get("code") or ""),
+        str(league.get("title") if isinstance(league, dict) else league or ""),
+        str(league.get("code") or "") if isinstance(league, dict) else "",
     ])
-    return _logo_from_text(parts)
+    return _football_or_sport_logo(match, "giovang", parts)
 
 
 def _pick_giovang_streams(match: dict) -> list:
@@ -1264,7 +1179,7 @@ def _phalang_logo(match: dict) -> str:
         str(match.get("desc") or ""),
         str(match.get("league") or ""),
     ])
-    return _logo_from_text(parts)
+    return _football_or_sport_logo(match, "phalang", parts)
 
 
 def _build_phalang_lines(matches: list, use_prewarmed_live: bool = False) -> list:
@@ -1344,7 +1259,6 @@ def _fetch_dekiki_lines() -> list:
 def _refresh_source_playlist(key: str, skip_recent_seconds: int = 15) -> list:
     """Refresh one M3U source without waiting for unrelated event providers."""
     fetchers = {
-        "phaohoa": lambda: _build_phaohoa_lines(_fetch_phaohoa_matches()),
         "giovang": lambda: _build_giovang_lines(_fetch_giovang_matches()),
         "phalang": _fetch_phalang_playlist_lines,
         "dekiki": _fetch_dekiki_lines,
@@ -1437,7 +1351,6 @@ def _store(key: str, text: str):
 
 
 _SOURCE_GROUP_TITLES = {
-    "phaohoa": "Khán Đài TV",
     "giovang": "Giờ Vàng TV",
     "phalang": "PhaLang TV",
 }
@@ -1479,16 +1392,50 @@ def _get_previous_source_lines(key: str) -> list:
     return []
 
 
+def _is_removed_group_extinf(line: str) -> bool:
+    if not line.startswith("#EXTINF"):
+        return False
+    match = re.search(r"\bgroup-title\s*=\s*([\"'])(.*?)\1", line, re.IGNORECASE)
+    if not match:
+        return False
+    group = match.group(2).strip().lower().replace("đ", "d")
+    group = unicodedata.normalize("NFKD", group).encode("ascii", "ignore").decode("ascii")
+    return group.startswith("khan dai") or group == "phaohoa"
+
+
+def _strip_removed_groups(text: str) -> str:
+    """Remove Khán Đài entries, including their stream/options, from legacy M3U caches."""
+    if not text:
+        return text
+    output = []
+    skipping_entry = False
+    for line in text.splitlines():
+        if line.startswith("#EXTINF"):
+            skipping_entry = _is_removed_group_extinf(line)
+            if not skipping_entry:
+                output.append(line)
+            continue
+        if skipping_entry:
+            if not line.strip() or line.lstrip().startswith("#"):
+                continue
+            skipping_entry = False
+            continue
+        output.append(line)
+    cleaned = "\n".join(output)
+    return cleaned + ("\n" if text.endswith(("\n", "\r")) else "")
+
+
 def _repair_combined_from_source_cache(text: str) -> str:
     """Restore missing source sections from source-specific KV after cold start."""
-    lines = text.splitlines()
+    cleaned_text = _strip_removed_groups(text)
+    lines = cleaned_text.splitlines()
     if not lines:
-        return text
+        return cleaned_text
 
     error_lines = [line for line in lines if line.startswith("# Errors:")]
     body = [line for line in lines if not line.startswith("# Errors:")]
-    changed = False
-    for key in ("phalang", "phaohoa", "giovang"):
+    changed = cleaned_text != text
+    for key in ("phalang", "giovang"):
         title = _SOURCE_GROUP_TITLES[key]
         marker = f'group-title="{title}"'
         if any(line.startswith("#EXTINF") and marker in line for line in body):
@@ -1499,7 +1446,7 @@ def _repair_combined_from_source_cache(text: str) -> str:
             changed = True
 
     if not changed:
-        return text
+        return cleaned_text
     return "\n".join(body + error_lines)
 
 
@@ -1508,11 +1455,8 @@ def _repair_combined_from_source_cache(text: str) -> str:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _refresh_all_playlists():
-    _resolve_all_frontends()
+    _purge_removed_group_cache()
     errors = []
-
-    def fetch_phaohoa():
-        return _refresh_source_playlist("phaohoa")
 
     def fetch_giovang():
         return _refresh_source_playlist("giovang")
@@ -1523,9 +1467,8 @@ def _refresh_all_playlists():
     def fetch_dekiki():
         return _refresh_source_playlist("dekiki")
 
-    with ThreadPoolExecutor(max_workers=4) as ex:
+    with ThreadPoolExecutor(max_workers=3) as ex:
         futures = {
-            ex.submit(fetch_phaohoa):  "phaohoa",
             ex.submit(fetch_giovang):  "giovang",
             ex.submit(fetch_phalang):  "phalang",
             ex.submit(fetch_dekiki):   "dekiki",
@@ -1539,15 +1482,9 @@ def _refresh_all_playlists():
                 results[key] = []
                 errors.append(f"{key}: {e}")
 
-    phaohoa_lines   = results.get("phaohoa",   [])
     giovang_lines   = results.get("giovang",   [])
     phalang_lines   = results.get("phalang",   [])
     dekiki_lines    = results.get("dekiki",    [])
-
-    if not phaohoa_lines and any(error.startswith("phaohoa:") for error in errors):
-        phaohoa_lines = _get_previous_source_lines("phaohoa")
-        if phaohoa_lines:
-            errors.append("phaohoa: kept last successful playlist")
 
     if not giovang_lines and any(error.startswith("giovang:") for error in errors):
         giovang_lines = _get_previous_source_lines("giovang")
@@ -1562,24 +1499,16 @@ def _refresh_all_playlists():
     err_str = "; ".join(errors)
 
     def count(lines):
-        return sum(1 for l in lines if l.startswith("#EXTINF"))
+        return sum(1 for line in lines if line.startswith("#EXTINF"))
 
     epg_header = f'#EXTM3U url-tvg="{EPG_URL}" x-tvg-url="{EPG_URL}"'
-
-
-    all_lines = (
-        phalang_lines
-        + phaohoa_lines
-        + giovang_lines
-        + dekiki_lines
-    )
+    all_lines = phalang_lines + giovang_lines + dekiki_lines
     combined_text = epg_header + "\n" + "\n".join(all_lines)
     if err_str:
         combined_text += f"\n# Errors: {err_str}"
-    _store("combined", combined_text)
+    _store("combined", _strip_removed_groups(combined_text))
 
     _last_counts.update({
-        "phaohoa":      count(phaohoa_lines),
         "giovang":      count(giovang_lines),
         "phalang":      count(phalang_lines),
         "dekiki":       count(dekiki_lines),
@@ -1730,10 +1659,6 @@ def _m3u_response(key: str, filename: str) -> Response:
 def live_m3u():
     return _m3u_response("combined", "live.m3u")
 
-@app.route("/phaohoa.m3u")
-def phaohoa_m3u():
-    return _m3u_response("phaohoa", "phaohoa.m3u")
-
 @app.route("/giovang.m3u")
 def giovang_m3u():
     return _m3u_response("giovang", "giovang.m3u")
@@ -1764,7 +1689,7 @@ def status_json():
 
     cached_source_bodies = {
         key: _get_entry(key)["content"] is not None
-        for key in ("phaohoa", "giovang", "phalang", "dekiki")
+        for key in ("giovang", "phalang", "dekiki")
     }
 
     def source_state(key: str) -> str:
@@ -1780,7 +1705,7 @@ def status_json():
 
     source_states = {
         key: source_state(key)
-        for key in ("phaohoa", "giovang", "phalang", "dekiki")
+        for key in ("giovang", "phalang", "dekiki")
     }
     has_source_errors = any(state == "error" for state in source_states.values())
     has_empty_sources = any(state == "empty" for state in source_states.values())
@@ -1815,14 +1740,12 @@ def status_json():
             "last_error": _cloudflare_kv_last_error,
         },
         "channels": {
-            "total":      sum(_last_counts.get(k, 0) for k in ("phaohoa", "giovang", "phalang", "dekiki")),
-            "phaohoa_tv": _last_counts.get("phaohoa", 0),
+            "total":      sum(_last_counts.get(k, 0) for k in ("giovang", "phalang", "dekiki")),
             "giovang_tv": _last_counts.get("giovang", 0),
             "phalang_tv": _last_counts.get("phalang", 0),
             "dekiki_tv":  _last_counts.get("dekiki",  0),
         },
         "sources": {
-            "phaohoa_tv": {"api": PHAOHOA_API_URL,                "status": source_states["phaohoa"]},
             "giovang_tv": {"api": _giovang_api_cache.get("host"), "status": source_states["giovang"]},
             "phalang_tv": {"api": PHALANG_API_URL,                 "status": source_states["phalang"]},
             "dekiki_tv":  {"api": "github-static",                "status": source_states["dekiki"]},
@@ -1866,6 +1789,65 @@ def _phalang_live_response(match_id: str):
     return response
 
 
+@app.route("/match-logo.svg")
+def match_logo_svg():
+    """Return a match mark with the home, competition, and away logos."""
+    args = request.args
+    home_url = _safe_logo_source(args.get("home"))
+    league_url = _safe_logo_source(args.get("league"))
+    away_url = _safe_logo_source(args.get("away"))
+    home_name = html.escape((args.get("home_name") or "Home")[:80], quote=True)
+    league_name = html.escape((args.get("league_name") or "League")[:80], quote=True)
+    away_name = html.escape((args.get("away_name") or "Away")[:80], quote=True)
+
+    def image_or_initials(url: str, name: str, x: int, y: int, size: int, radius: int) -> str:
+        if url:
+            safe_url = html.escape(url, quote=True)
+            return (
+                f'<image href="{safe_url}" xlink:href="{safe_url}" '
+                f'x="{x}" y="{y}" width="{size}" height="{size}" '
+                'preserveAspectRatio="xMidYMid meet" />'
+            )
+        words = [word for word in name.replace("-", " ").split() if word]
+        initials = "".join(word[0] for word in words[:2]).upper() or "?"
+        return (
+            f'<circle cx="{x + size // 2}" cy="{y + size // 2}" r="{radius}" '
+            'fill="#ffffff" fill-opacity="0.14" stroke="#ffffff" '
+            'stroke-opacity="0.32" stroke-width="2" />'
+            f'<text x="{x + size // 2}" y="{y + size // 2 + 18}" '
+            'text-anchor="middle" font-family="Arial,sans-serif" '
+            'font-size="52" font-weight="700" fill="#ffffff">'
+            f'{html.escape(initials, quote=True)}</text>'
+        )
+
+    home = image_or_initials(home_url, home_name, 58, 54, 220, 110)
+    league = image_or_initials(league_url, league_name, 380, 92, 200, 136)
+    away = image_or_initials(away_url, away_name, 682, 54, 220, 110)
+    title = html.escape(f"{home_name} - {league_name} - {away_name}", quote=True)
+    svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" '
+        'xmlns:xlink="http://www.w3.org/1999/xlink" '
+        'viewBox="0 0 960 320" width="960" height="320" role="img">'
+        '<defs><linearGradient id="bg" x1="0" x2="1">'
+        '<stop offset="0" stop-color="#75634a"/>'
+        '<stop offset="0.5" stop-color="#293044"/>'
+        '<stop offset="1" stop-color="#092b70"/>'
+        '</linearGradient><radialGradient id="glow">'
+        '<stop offset="0" stop-color="#ffffff" stop-opacity=".25"/>'
+        '<stop offset="1" stop-color="#ffffff" stop-opacity="0"/>'
+        '</radialGradient></defs>'
+        '<rect width="960" height="320" rx="22" fill="url(#bg)"/>'
+        '<circle cx="480" cy="160" r="190" fill="url(#glow)"/>'
+        '<rect x="30" y="26" width="900" height="268" rx="20" '
+        'fill="#061122" fill-opacity=".16" stroke="#ffffff" stroke-opacity=".12"/>'
+        f"<title>{title}</title>{home}{league}{away}</svg>"
+    )
+    response = Response(svg, mimetype="image/svg+xml")
+    response.headers["Cache-Control"] = "public, max-age=3600"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
 @app.route("/phalang/live/<match_id>")
 def phalang_live(match_id: str):
     return _phalang_live_response(match_id)
@@ -1891,10 +1873,10 @@ def index():
     source_errors = dict(_source_refresh_errors)
     cached_source_bodies = {
         key: _get_entry(key)["content"] is not None
-        for key in ("phaohoa", "giovang", "phalang", "dekiki")
+        for key in ("giovang", "phalang", "dekiki")
     }
     source_states = {}
-    for key in ("phaohoa", "giovang", "phalang", "dekiki"):
+    for key in ("giovang", "phalang", "dekiki"):
         count = _last_counts.get(key, 0)
         source_states[key] = (
             "stale" if source_errors.get(key) and (count or cached_source_bodies[key])
@@ -1924,17 +1906,15 @@ def index():
     else:
         err_html = '<p style="color:green">✅ Trạng thái: ok — các nguồn đang hoạt động</p>'
 
-    phaohoa_count  = _last_counts.get("phaohoa",   0)
     giovang_count  = _last_counts.get("giovang",   0)
     phalang_count  = _last_counts.get("phalang",   0)
     dekiki_count   = _last_counts.get("dekiki",    0)
-    total          = phaohoa_count + giovang_count + phalang_count + dekiki_count
+    total          = giovang_count + phalang_count + dekiki_count
 
     return (
         "<h2>🎬 IPTV M3U Server</h2>"
         "<h3>📋 Playlist</h3><ul>"
         "<li><a href='/live.m3u'>/live.m3u</a> — Tất cả nguồn gộp lại</li>"
-        "<li><a href='/phaohoa.m3u'>/phaohoa.m3u</a> — Khán Đài TV only</li>"
          "<li><a href='/giovang.m3u'>/giovang.m3u</a> — Giờ Vàng TV only</li>"
         "<li><a href='/phalang.m3u'>/phalang.m3u</a> — PhaLang TV only</li>"
         "<li><a href='/dekiki.m3u'>/dekiki.m3u</a> — Kênh TV Việt (dekiki)</li>"
@@ -1944,8 +1924,6 @@ def index():
         f" | 📡 TV: {dekiki_count})</p>"
         f"<p>🕐 Cập nhật lần cuối: <strong>{dt_str}</strong></p>"
         f"<p>⏳ Cập nhật tiếp theo: <strong>{next_str}</strong></p>"
-        f"<p>🟢 Khán Đài TV: <strong>{phaohoa_count} kênh</strong>"
-        f"&nbsp;|&nbsp; <code>{PHAOHOA_API_URL}</code></p>"
         f"<p>🟢 Giờ Vàng TV: <strong>{giovang_count} kênh</strong>"
         f"&nbsp;|&nbsp; <code>{_giovang_api_cache['host']}</code></p>"
         f"<p>🟢 PhaLang TV: <strong>{phalang_count} kênh</strong>"
@@ -1961,10 +1939,6 @@ def index():
         "<li>Các nguồn fetch song song (ThreadPoolExecutor)</li>"
         f"<li>Làm mới cache mỗi <strong>{PREFETCH_INTERVAL // 60} phút</strong></li>"
         "</ul>"
-        "<h3>⚡ Khán Đài TV — Direct Stream</h3><ul>"
-         "<li>Link stream được fetch cùng playlist và cache như Khán Đài</li>"
-         "<li>Chỉ hiển thị trận đã có stream URL</li>"
-         "</ul>"
          "<h3>⚡ Giờ Vàng TV — Direct Stream</h3><ul>"
          "<li>Schedule và stream được lấy từ JSON public, chi tiết fixture fetch song song</li>"
          "<li>Chỉ hiển thị trận còn hiệu lực và có ít nhất một bình luận viên có stream</li>"
