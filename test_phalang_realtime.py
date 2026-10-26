@@ -1,6 +1,7 @@
 import unittest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
+from urllib.parse import parse_qs, urlsplit
 
 import main
 
@@ -256,6 +257,105 @@ class PhaLangRealtimeTests(unittest.TestCase):
             candidates = main._phalang_prewarm_candidates(matches)
 
         self.assertEqual(candidates, ["live-match", "near-match"])
+
+    def test_phalang_football_logo_composes_both_teams_and_league(self):
+        match = {
+            "id": "logo-match",
+            "team_1": "Home FC",
+            "team_2": "Away FC",
+            "league": "Premier League",
+            "team_1_logo_url": "https://assets.example/home.png",
+            "team_2_logo_url": "https://assets.example/away.png",
+            "league_logo_url": "https://assets.example/league.png",
+            "blv": "Commentator",
+            "start_date": "2099-01-01T12:00:00+00:00",
+            "is_live": False,
+        }
+        with patch.object(main, "_get_server_base_url", return_value="https://iptv.example"):
+            line = main._build_phalang_lines([match])[0]
+
+        logo_url = line.split('tvg-logo="', 1)[1].split('"', 1)[0]
+        query = parse_qs(urlsplit(logo_url).query)
+        self.assertEqual(urlsplit(logo_url).path, "/match-logo.svg")
+        self.assertEqual(query["home"], ["https://assets.example/home.png"])
+        self.assertEqual(query["league"], ["https://assets.example/league.png"])
+        self.assertEqual(query["away"], ["https://assets.example/away.png"])
+
+    def test_giovang_football_logo_reads_nested_provider_logos(self):
+        match = {
+            "id": "gio-logo-match",
+            "teams": {
+                "home": {"name": "Home FC", "logo": "https://assets.example/home.png"},
+                "away": {"name": "Away FC", "badge": "https://assets.example/away.png"},
+            },
+            "league": {"title": "MLS", "image_url": "https://assets.example/league.png"},
+            "time_start": 4102444800,
+            "blv": [{
+                "blv_name": "Commentator",
+                "mobile_stream_url": "https://stream.example/live.m3u8",
+            }],
+        }
+        with patch.object(main, "_get_server_base_url", return_value="https://iptv.example"):
+            line = main._build_giovang_lines([match])[0]
+
+        logo_url = line.split('tvg-logo="', 1)[1].split('"', 1)[0]
+        query = parse_qs(urlsplit(logo_url).query)
+        self.assertEqual(query["home"], ["https://assets.example/home.png"])
+        self.assertEqual(query["league"], ["https://assets.example/league.png"])
+        self.assertEqual(query["away"], ["https://assets.example/away.png"])
+
+    def test_match_logo_svg_embeds_the_three_logos_in_order(self):
+        response = main.app.test_client().get(
+            "/match-logo.svg?home=https%3A%2F%2Fassets.example%2Fhome.png"
+            "&league=https%3A%2F%2Fassets.example%2Fleague.png"
+            "&away=https%3A%2F%2Fassets.example%2Faway.png"
+            "&home_name=Home&league_name=MLS&away_name=Away"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "image/svg+xml")
+        svg = response.get_data(as_text=True)
+        self.assertEqual(svg.count("<image "), 3)
+        self.assertIn("https://assets.example/home.png", svg)
+        self.assertIn("https://assets.example/league.png", svg)
+        self.assertIn("https://assets.example/away.png", svg)
+
+    def test_legacy_khan_dai_cache_entries_and_streams_are_removed(self):
+        legacy = (
+            "#EXTM3U\n"
+            '#EXTINF:-1 group-title="Khán Đài TV",Match\n'
+            "#EXTVLCOPT:http-user-agent=Example\n"
+            "https://old.example/stream.m3u8\n"
+            '#EXTINF:-1 group-title="Giờ Vàng TV",Keep this\n'
+            "https://new.example/stream.m3u8\n"
+        )
+        cleaned = main._strip_removed_groups(legacy)
+        self.assertNotIn("Khán Đài", cleaned)
+        self.assertNotIn("old.example", cleaned)
+        self.assertIn("Keep this", cleaned)
+        self.assertIn("new.example", cleaned)
+
+    def test_legacy_combined_cache_is_scrubbed_before_hydration(self):
+        legacy = (
+            "#EXTM3U\n"
+            '#EXTINF:-1 group-title="Khán Đài TV",Old event\n'
+            "https://old.example/stream.m3u8\n"
+            '#EXTINF:-1 group-title="Giờ Vàng TV",Keep this\n'
+            "https://new.example/stream.m3u8\n"
+        )
+        main._kv_hydrated_keys.discard("combined")
+        try:
+            with patch.object(main, "_cloudflare_kv_enabled", return_value=True), \
+                    patch.object(main, "_cloudflare_kv_get", return_value=(legacy, 123.0)), \
+                    patch.object(main, "_cloudflare_kv_put") as put:
+                self.assertTrue(main._hydrate_from_cloudflare_kv("combined"))
+
+            cached = main._get_entry("combined")["content"].decode("utf-8")
+            self.assertNotIn("Khán Đài", cached)
+            self.assertNotIn("old.example", cached)
+            self.assertIn("Keep this", cached)
+            put.assert_called_once_with("combined", cached, 123.0)
+        finally:
+            main._kv_hydrated_keys.discard("combined")
 
 
 if __name__ == "__main__":
