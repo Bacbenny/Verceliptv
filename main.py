@@ -301,7 +301,7 @@ def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, s
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
-MATCH_LOGO_RENDER_VERSION = "2"
+MATCH_LOGO_RENDER_VERSION = "3"
 
 
 def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
@@ -1954,7 +1954,7 @@ def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -
             pass
     draw.ellipse(
         (cx - radius, cy - radius, cx + radius, cy + radius),
-        fill=(8, 18, 38, 112),
+        fill=(241, 243, 245, 255),
     )
     initials = _logo_initials(name)
     font = _match_logo_font(max(28, diameter // 3))
@@ -1965,26 +1965,14 @@ def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -
         (cx - text_width / 2 - bounds[0], cy - text_height / 2 - bounds[1]),
         initials,
         font=font,
-        fill=(255, 255, 255, 255),
+        fill=(24, 32, 48, 255),
     )
 
 
 def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
                           home_name: str, league_name: str, away_name: str) -> bytes:
     width, height = 960, 540
-    canvas = Image.new("RGBA", (width, height), (9, 30, 68, 255))
-    draw = ImageDraw.Draw(canvas)
-    stops = ((0, (126, 103, 71)), (0.5, (48, 57, 79)), (1, (7, 37, 103)))
-    for x in range(width):
-        position = x / (width - 1)
-        if position <= 0.5:
-            start, end = stops[0][1], stops[1][1]
-            amount = position * 2
-        else:
-            start, end = stops[1][1], stops[2][1]
-            amount = (position - 0.5) * 2
-        color = tuple(round(a + (b - a) * amount) for a, b in zip(start, end))
-        draw.line((x, 0, x, height), fill=(*color, 255))
+    canvas = Image.new("RGBA", (width, height), (255, 255, 255, 255))
     _draw_match_logo_badge(canvas, (232, 270), 246, home_url, home_name)
     _draw_match_logo_badge(canvas, (480, 270), 196, league_url, league_name)
     _draw_match_logo_badge(canvas, (728, 270), 246, away_url, away_name)
@@ -2034,10 +2022,10 @@ def match_logo_svg():
         initials = "".join(word[0] for word in words[:2]).upper() or "?"
         return (
             f'<circle cx="{x + size // 2}" cy="{y + size // 2}" r="{radius}" '
-            'fill="#061122" fill-opacity="0.32" />'
+            'fill="#f1f3f5" />'
             f'<text x="{x + size // 2}" y="{y + size // 2 + 18}" '
             'text-anchor="middle" font-family="Arial,sans-serif" '
-            'font-size="52" font-weight="700" fill="#ffffff">'
+            'font-size="52" font-weight="700" fill="#18202c">'
             f'{html.escape(initials, quote=True)}</text>'
         )
 
@@ -2049,16 +2037,7 @@ def match_logo_svg():
         '<svg xmlns="http://www.w3.org/2000/svg" '
         'xmlns:xlink="http://www.w3.org/1999/xlink" '
         'viewBox="0 0 960 320" width="960" height="320" role="img">'
-        '<defs><linearGradient id="bg" x1="0" x2="1">'
-        '<stop offset="0" stop-color="#75634a"/>'
-        '<stop offset="0.5" stop-color="#293044"/>'
-        '<stop offset="1" stop-color="#092b70"/>'
-        '</linearGradient><radialGradient id="glow">'
-        '<stop offset="0" stop-color="#ffffff" stop-opacity=".25"/>'
-        '<stop offset="1" stop-color="#ffffff" stop-opacity="0"/>'
-        '</radialGradient></defs>'
-        '<rect width="960" height="320" rx="22" fill="url(#bg)"/>'
-        '<circle cx="480" cy="160" r="190" fill="url(#glow)"/>'
+        '<rect width="960" height="320" fill="#ffffff"/>'
         f"<title>{title}</title>{home}{league}{away}</svg>"
     )
     response = Response(svg, mimetype="image/svg+xml")
