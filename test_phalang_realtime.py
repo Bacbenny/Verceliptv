@@ -282,6 +282,7 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(query["home"], ["https://assets.example/home.png"])
         self.assertEqual(query["league"], ["https://assets.example/league.png"])
         self.assertEqual(query["away"], ["https://assets.example/away.png"])
+        self.assertEqual(query["v"], [main.MATCH_LOGO_RENDER_VERSION])
 
     def test_phalang_basketball_logo_composes_teams_and_sport_mark(self):
         match = {

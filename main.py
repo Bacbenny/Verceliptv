@@ -301,6 +301,9 @@ def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, s
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
+MATCH_LOGO_RENDER_VERSION = "2"
+
+
 def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
     home_logo, league_logo, away_logo, home_name, league_name, away_name = (
         _match_logo_parts(match, provider)
@@ -311,6 +314,7 @@ def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
     query = urlencode({
         "home": home_logo, "league": league_logo, "away": away_logo,
         "home_name": home_name, "league_name": league_name, "away_name": away_name,
+        "v": MATCH_LOGO_RENDER_VERSION,
     })
     return f"{_get_server_base_url()}/match-logo.png?{query}"
 
