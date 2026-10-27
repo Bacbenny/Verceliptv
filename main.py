@@ -220,55 +220,94 @@ def _fixture_name(value: object, fallback: str) -> str:
     return fallback
 
 
-def _football_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, str, str]:
+def _logo_context_text(value: object) -> str:
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, dict):
+        return _fixture_name(value, "")
+    if isinstance(value, (list, tuple)):
+        return " ".join(filter(None, (_logo_context_text(item) for item in value)))
+    return ""
+
+
+def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, str, str]:
     if provider == "giovang":
         teams = match.get("teams") if isinstance(match.get("teams"), dict) else {}
-        home = teams.get("home") or match.get("home_team") or match.get("home") or {}
-        away = teams.get("away") or match.get("away_team") or match.get("away") or {}
-        league = match.get("league") or match.get("competition") or {}
+        home = (
+            teams.get("home") or match.get("team_1") or match.get("player_1")
+            or match.get("home_team") or match.get("home") or {}
+        )
+        away = (
+            teams.get("away") or match.get("team_2") or match.get("player_2")
+            or match.get("away_team") or match.get("away") or {}
+        )
+        league = (
+            match.get("league") or match.get("competition")
+            or match.get("tournament") or match.get("category") or {}
+        )
         home_name = _fixture_name(home, "Home")
         away_name = _fixture_name(away, "Away")
         league_name = _fixture_name(league, "")
         home_logo = _first_logo_url(
             match.get("home_team_logo"), match.get("home_team_logo_url"),
-            match.get("home_logo"), match.get("team_1_logo"), home,
+            match.get("home_logo"), match.get("team_1_logo"),
+            match.get("team_1_logo_url"), match.get("player_1_logo"),
+            match.get("home_player_logo"), match.get("participant_1_logo"), home,
         )
         away_logo = _first_logo_url(
             match.get("away_team_logo"), match.get("away_team_logo_url"),
-            match.get("away_logo"), match.get("team_2_logo"), away,
+            match.get("away_logo"), match.get("team_2_logo"),
+            match.get("team_2_logo_url"), match.get("player_2_logo"),
+            match.get("away_player_logo"), match.get("participant_2_logo"), away,
         )
         league_logo = _first_logo_url(
             match.get("league_logo"), match.get("league_logo_url"),
-            match.get("competition_logo"), match.get("tournament_logo"), league,
+            match.get("competition_logo"), match.get("tournament_logo"),
+            match.get("category_logo"), league,
         )
     else:
-        home = match.get("team_1") or match.get("home_team") or {}
-        away = match.get("team_2") or match.get("away_team") or {}
-        league = match.get("league") or match.get("tournament") or {}
+        home = (
+            match.get("team_1") or match.get("player_1") or match.get("home")
+            or match.get("home_team") or match.get("participant_1") or {}
+        )
+        away = (
+            match.get("team_2") or match.get("player_2") or match.get("away")
+            or match.get("away_team") or match.get("participant_2") or {}
+        )
+        league = (
+            match.get("league") or match.get("tournament")
+            or match.get("competition") or match.get("category") or {}
+        )
         home_name = _fixture_name(home, "Home")
         away_name = _fixture_name(away, "Away")
         league_name = _fixture_name(league, "")
         home_logo = _first_logo_url(
             match.get("team_1_logo"), match.get("team_1_logo_url"),
             match.get("home_team_logo"), match.get("home_team_logo_url"),
-            match.get("home_logo"), home,
+            match.get("home_logo"), match.get("player_1_logo"),
+            match.get("participant_1_logo"), home,
         )
         away_logo = _first_logo_url(
             match.get("team_2_logo"), match.get("team_2_logo_url"),
             match.get("away_team_logo"), match.get("away_team_logo_url"),
-            match.get("away_logo"), away,
+            match.get("away_logo"), match.get("player_2_logo"),
+            match.get("participant_2_logo"), away,
         )
         league_logo = _first_logo_url(
             match.get("league_logo"), match.get("league_logo_url"),
-            match.get("tournament_logo"), match.get("competition_logo"), league,
+            match.get("tournament_logo"), match.get("competition_logo"),
+            match.get("category_logo"), league,
         )
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
-def _composite_football_logo_url(match: dict, provider: str) -> str:
+def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
     home_logo, league_logo, away_logo, home_name, league_name, away_name = (
-        _football_logo_parts(match, provider)
+        _match_logo_parts(match, provider)
     )
+    # Give every sport a relevant centre mark when the provider has no league
+    # logo. Team/player logos still take priority on either side.
+    league_logo = league_logo or _logo_from_text(parts)
     query = urlencode({
         "home": home_logo, "league": league_logo, "away": away_logo,
         "home_name": home_name, "league_name": league_name, "away_name": away_name,
@@ -276,11 +315,8 @@ def _composite_football_logo_url(match: dict, provider: str) -> str:
     return f"{_get_server_base_url()}/match-logo.png?{query}"
 
 
-def _football_or_sport_logo(match: dict, provider: str, parts: str) -> str:
-    fallback = _logo_from_text(parts)
-    if fallback != SPORT_LOGOS["football"]:
-        return fallback
-    return _composite_football_logo_url(match, provider)
+def _match_or_sport_logo(match: dict, provider: str, parts: str) -> str:
+    return _composite_match_logo_url(match, provider, parts)
 
 
 # ─── API URL caches ───────────────────────────────────────────────────────────
@@ -815,13 +851,15 @@ def _fetch_giovang_matches() -> list:
     return enriched
 
 def _giovang_logo(match: dict) -> str:
-    league = match.get("league") or {}
-    parts = " ".join([
-        str(match.get("type") or ""),
-        str(league.get("title") if isinstance(league, dict) else league or ""),
-        str(league.get("code") or "") if isinstance(league, dict) else "",
-    ])
-    return _football_or_sport_logo(match, "giovang", parts)
+    values = (
+        match.get("type"), match.get("league"), match.get("competition"),
+        match.get("tournament"), match.get("category"), match.get("sport"),
+    )
+    parts = " ".join(
+        part for value in values
+        if (part := _logo_context_text(value))
+    )
+    return _match_or_sport_logo(match, "giovang", parts)
 
 
 def _pick_giovang_streams(match: dict) -> list:
@@ -1179,11 +1217,17 @@ def _prewarm_phalang_matches(matches: list) -> None:
 
 
 def _phalang_logo(match: dict) -> str:
-    parts = " ".join([
-        str(match.get("desc") or ""),
-        str(match.get("league") or ""),
-    ])
-    return _football_or_sport_logo(match, "phalang", parts)
+    values = (
+        match.get("desc"), match.get("title"), match.get("type"),
+        match.get("league"), match.get("tournament"),
+        match.get("competition"), match.get("category"),
+        match.get("sport"), match.get("tags"),
+    )
+    parts = " ".join(
+        part for value in values
+        if (part := _logo_context_text(value))
+    )
+    return _match_or_sport_logo(match, "phalang", parts)
 
 
 def _build_phalang_lines(matches: list, use_prewarmed_live: bool = False) -> list:
@@ -1804,8 +1848,12 @@ def _phalang_live_response(match_id: str):
 
 
 _LOGO_IMAGE_ALLOWED_HOSTS = frozenset({
+    "cdn-img.thethao247.vn",
+    "cdn.keobongvip.digital",
+    "cdn.jsdelivr.net",
     "imgts.sportpulseapiz.com",
     "images.keovip88.net",
+    "static.wikia.nocookie.net",
     "static.flashscore.com",
     "upload.wikimedia.org",
     "encrypted-tbn0.gstatic.com",
@@ -1876,12 +1924,6 @@ def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -
     cx, cy = center
     radius = diameter // 2
     draw = ImageDraw.Draw(canvas)
-    draw.ellipse(
-        (cx - radius, cy - radius, cx + radius, cy + radius),
-        fill=(8, 18, 38, 255),
-        outline=(255, 255, 255, 255),
-        width=5,
-    )
     asset = _download_logo_asset(url) if url else b""
     if asset:
         try:
@@ -1896,7 +1938,7 @@ def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -
                 source.load()
                 logo = ImageOps.contain(
                     source.convert("RGBA"),
-                    (diameter - 44, diameter - 44),
+                    (diameter, diameter),
                     method=Image.Resampling.LANCZOS,
                 )
             canvas.alpha_composite(
@@ -1906,6 +1948,10 @@ def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -
             return
         except Exception:
             pass
+    draw.ellipse(
+        (cx - radius, cy - radius, cx + radius, cy + radius),
+        fill=(8, 18, 38, 112),
+    )
     initials = _logo_initials(name)
     font = _match_logo_font(max(28, diameter // 3))
     bounds = draw.textbbox((0, 0), initials, font=font)
@@ -1935,12 +1981,6 @@ def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
             amount = (position - 0.5) * 2
         color = tuple(round(a + (b - a) * amount) for a, b in zip(start, end))
         draw.line((x, 0, x, height), fill=(*color, 255))
-    draw.rounded_rectangle(
-        (18, 18, width - 18, height - 18),
-        radius=34,
-        outline=(255, 255, 255, 95),
-        width=3,
-    )
     _draw_match_logo_badge(canvas, (232, 270), 246, home_url, home_name)
     _draw_match_logo_badge(canvas, (480, 270), 196, league_url, league_name)
     _draw_match_logo_badge(canvas, (728, 270), 246, away_url, away_name)
@@ -1990,8 +2030,7 @@ def match_logo_svg():
         initials = "".join(word[0] for word in words[:2]).upper() or "?"
         return (
             f'<circle cx="{x + size // 2}" cy="{y + size // 2}" r="{radius}" '
-            'fill="#ffffff" fill-opacity="0.14" stroke="#ffffff" '
-            'stroke-opacity="0.32" stroke-width="2" />'
+            'fill="#061122" fill-opacity="0.32" />'
             f'<text x="{x + size // 2}" y="{y + size // 2 + 18}" '
             'text-anchor="middle" font-family="Arial,sans-serif" '
             'font-size="52" font-weight="700" fill="#ffffff">'
@@ -2016,8 +2055,6 @@ def match_logo_svg():
         '</radialGradient></defs>'
         '<rect width="960" height="320" rx="22" fill="url(#bg)"/>'
         '<circle cx="480" cy="160" r="190" fill="url(#glow)"/>'
-        '<rect x="30" y="26" width="900" height="268" rx="20" '
-        'fill="#061122" fill-opacity=".16" stroke="#ffffff" stroke-opacity=".12"/>'
         f"<title>{title}</title>{home}{league}{away}</svg>"
     )
     response = Response(svg, mimetype="image/svg+xml")

@@ -283,6 +283,26 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(query["league"], ["https://assets.example/league.png"])
         self.assertEqual(query["away"], ["https://assets.example/away.png"])
 
+    def test_phalang_basketball_logo_composes_teams_and_sport_mark(self):
+        match = {
+            "id": "basketball-logo-match",
+            "team_1": {"name": "Cleveland Cavaliers", "logo": "https://assets.example/cavaliers.png"},
+            "team_2": {"name": "Minnesota Timberwolves", "logo": "https://assets.example/timberwolves.png"},
+            "league": {"title": "NBA"},
+            "desc": "Basketball",
+            "blv": "Commentator",
+            "start_date": "2099-01-01T12:00:00+00:00",
+            "is_live": False,
+        }
+        with patch.object(main, "_get_server_base_url", return_value="https://iptv.example"):
+            line = main._build_phalang_lines([match])[0]
+
+        logo_url = line.split('tvg-logo="', 1)[1].split('"', 1)[0]
+        query = parse_qs(urlsplit(logo_url).query)
+        self.assertEqual(query["home"], ["https://assets.example/cavaliers.png"])
+        self.assertEqual(query["league"], [main.SPORT_LOGOS["basketball"]])
+        self.assertEqual(query["away"], ["https://assets.example/timberwolves.png"])
+
     def test_giovang_football_logo_reads_nested_provider_logos(self):
         match = {
             "id": "gio-logo-match",
@@ -306,6 +326,30 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(query["league"], ["https://assets.example/league.png"])
         self.assertEqual(query["away"], ["https://assets.example/away.png"])
 
+    def test_giovang_volleyball_logo_composes_nested_participant_logos(self):
+        match = {
+            "id": "gio-volleyball-logo-match",
+            "type": "Volleyball",
+            "teams": {
+                "home": {"name": "Japan", "logo": "https://assets.example/japan.png"},
+                "away": {"name": "Thailand", "logo": "https://assets.example/thailand.png"},
+            },
+            "league": {"title": "Nations League"},
+            "time_start": 4102444800,
+            "blv": [{
+                "blv_name": "Commentator",
+                "mobile_stream_url": "https://stream.example/live.m3u8",
+            }],
+        }
+        with patch.object(main, "_get_server_base_url", return_value="https://iptv.example"):
+            line = main._build_giovang_lines([match])[0]
+
+        logo_url = line.split('tvg-logo="', 1)[1].split('"', 1)[0]
+        query = parse_qs(urlsplit(logo_url).query)
+        self.assertEqual(query["home"], ["https://assets.example/japan.png"])
+        self.assertEqual(query["league"], [main.SPORT_LOGOS["volleyball"]])
+        self.assertEqual(query["away"], ["https://assets.example/thailand.png"])
+
     def test_match_logo_png_renders_raster_and_embeds_all_three_assets(self):
         asset = BytesIO()
         Image.new("RGBA", (32, 32), (220, 30, 60, 255)).save(asset, format="PNG")
@@ -325,6 +369,11 @@ class PhaLangRealtimeTests(unittest.TestCase):
         result = Image.open(BytesIO(response.data))
         self.assertEqual(result.size, (960, 540))
         self.assertEqual(fetch.call_count, 3)
+
+    def test_match_logo_png_has_no_outer_white_frame(self):
+        response = main.app.test_client().get("/match-logo.png")
+        result = Image.open(BytesIO(response.data)).convert("RGB")
+        self.assertNotEqual(result.getpixel((480, 18)), (255, 255, 255))
 
     def test_match_logo_png_uses_initials_when_source_logos_are_missing(self):
         with patch.object(main, "_download_logo_asset") as fetch:
@@ -361,6 +410,8 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertIn("https://assets.example/home.png", svg)
         self.assertIn("https://assets.example/league.png", svg)
         self.assertIn("https://assets.example/away.png", svg)
+        self.assertNotIn('stroke="#ffffff"', svg)
+        self.assertNotIn('stroke-opacity=".12"', svg)
 
     def test_legacy_khan_dai_cache_entries_and_streams_are_removed(self):
         legacy = (
