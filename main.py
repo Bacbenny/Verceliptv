@@ -6,6 +6,8 @@ import os
 import re
 import threading
 import time
+from functools import lru_cache
+from io import BytesIO
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
@@ -14,6 +16,7 @@ from urllib.parse import quote, urlencode, urlsplit
 import cloudscraper
 import certifi
 import requests
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from flask import Flask, Response, has_request_context, request, redirect
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -270,7 +273,7 @@ def _composite_football_logo_url(match: dict, provider: str) -> str:
         "home": home_logo, "league": league_logo, "away": away_logo,
         "home_name": home_name, "league_name": league_name, "away_name": away_name,
     })
-    return f"{_get_server_base_url()}/match-logo.svg?{query}"
+    return f"{_get_server_base_url()}/match-logo.png?{query}"
 
 
 def _football_or_sport_logo(match: dict, provider: str, parts: str) -> str:
@@ -478,11 +481,12 @@ def _hydrate_from_cloudflare_kv(key: str) -> bool:
             if not saved:
                 return False
             text, built_at = saved
+            cleaned_text = _repair_match_logo_urls(text)
             if key == "combined":
-                cleaned_text = _strip_removed_groups(text)
-                if cleaned_text != text:
-                    text = cleaned_text
-                    _cloudflare_kv_put("combined", text, built_at)
+                cleaned_text = _strip_removed_groups(cleaned_text)
+            if cleaned_text != text:
+                text = cleaned_text
+                _cloudflare_kv_put(key, text, built_at)
             _store_local(key, text, built_at)
             _last_counts[key] = sum(
                 1 for line in text.splitlines() if line.startswith("#EXTINF")
@@ -1327,6 +1331,13 @@ def _repair_phalang_playlist_urls(text: str) -> str:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+def _repair_match_logo_urls(text: str) -> str:
+    """Migrate cached match-logo links from SVG to raster PNG for IPTV clients."""
+    if not text:
+        return text
+    return re.sub(r"/match-logo\.svg(?=\?)", "/match-logo.png", text)
+
+
 #  Cache helpers — build compressed + ETag
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -1427,7 +1438,7 @@ def _strip_removed_groups(text: str) -> str:
 
 def _repair_combined_from_source_cache(text: str) -> str:
     """Restore missing source sections from source-specific KV after cold start."""
-    cleaned_text = _strip_removed_groups(text)
+    cleaned_text = _repair_match_logo_urls(_strip_removed_groups(text))
     lines = cleaned_text.splitlines()
     if not lines:
         return cleaned_text
@@ -1590,14 +1601,17 @@ def _m3u_response(key: str, filename: str) -> Response:
             cached_text = entry["content"].decode("utf-8", errors="replace")
             repaired_text = _repair_combined_from_source_cache(cached_text)
             repaired_text = _repair_phalang_playlist_urls(repaired_text)
+            repaired_text = _repair_match_logo_urls(repaired_text)
             if repaired_text != cached_text:
                 _store("combined", repaired_text)
                 entry = _get_entry(key)
-    if key == "phalang" and entry["content"] is not None:
+    if key in ("phalang", "giovang") and entry["content"] is not None:
         cached_text = entry["content"].decode("utf-8", errors="replace")
-        repaired_text = _repair_phalang_playlist_urls(cached_text)
+        repaired_text = _repair_match_logo_urls(cached_text)
+        if key == "phalang":
+            repaired_text = _repair_phalang_playlist_urls(repaired_text)
         if repaired_text != cached_text:
-            _store("phalang", repaired_text)
+            _store(key, repaired_text)
             entry = _get_entry(key)
     refresh_error = ""
     refresh_scheduled = False
@@ -1786,6 +1800,170 @@ def _phalang_live_response(match_id: str):
     response.headers["Cache-Control"] = "no-store, no-cache, max-age=0, private"
     response.headers["Surrogate-Control"] = "no-store"
     response.headers["CDN-Cache-Control"] = "no-store"
+    return response
+
+
+_LOGO_IMAGE_ALLOWED_HOSTS = frozenset({
+    "imgts.sportpulseapiz.com",
+    "images.keovip88.net",
+    "static.flashscore.com",
+    "upload.wikimedia.org",
+    "encrypted-tbn0.gstatic.com",
+})
+_LOGO_IMAGE_MAX_BYTES = 512 * 1024
+_LOGO_IMAGE_MAX_PIXELS = 4_000_000
+
+
+@lru_cache(maxsize=96)
+def _download_logo_asset(url: str) -> bytes:
+    """Fetch only known public logo CDNs; never proxy arbitrary URL parameters."""
+    safe_url = _safe_logo_source(url)
+    if not safe_url:
+        return b""
+    try:
+        parsed = urlsplit(safe_url)
+        host = (parsed.hostname or "").lower().rstrip(".")
+        if (
+            parsed.scheme.lower() != "https"
+            or host not in _LOGO_IMAGE_ALLOWED_HOSTS
+            or parsed.port not in (None, 443)
+            or parsed.username
+            or parsed.password
+        ):
+            return b""
+        with requests.get(
+            safe_url,
+            headers={"User-Agent": "Mozilla/5.0"},
+            timeout=(2.5, 4),
+            allow_redirects=False,
+            stream=True,
+        ) as response:
+            if response.status_code != 200:
+                return b""
+            content_type = response.headers.get("Content-Type", "")
+            content_type = content_type.split(";", 1)[0].strip().lower()
+            if content_type not in {"image/png", "image/jpeg", "image/webp", "image/gif"}:
+                return b""
+            length = response.headers.get("Content-Length")
+            if length and int(length) > _LOGO_IMAGE_MAX_BYTES:
+                return b""
+            content = bytearray()
+            for chunk in response.iter_content(chunk_size=32 * 1024):
+                if chunk:
+                    content.extend(chunk)
+                    if len(content) > _LOGO_IMAGE_MAX_BYTES:
+                        return b""
+            return bytes(content)
+    except Exception:
+        return b""
+
+
+def _logo_initials(name: str) -> str:
+    normalized = unicodedata.normalize("NFKD", str(name or ""))
+    ascii_name = "".join(char for char in normalized if not unicodedata.combining(char))
+    words = re.findall(r"[A-Za-z0-9]+", ascii_name)
+    return "".join(word[0] for word in words[:2]).upper() or "?"
+
+
+def _match_logo_font(size: int):
+    try:
+        return ImageFont.truetype("DejaVuSans-Bold.ttf", size)
+    except OSError:
+        return ImageFont.load_default(size=size)
+
+
+def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -> None:
+    cx, cy = center
+    radius = diameter // 2
+    draw = ImageDraw.Draw(canvas)
+    draw.ellipse(
+        (cx - radius, cy - radius, cx + radius, cy + radius),
+        fill=(8, 18, 38, 255),
+        outline=(255, 255, 255, 255),
+        width=5,
+    )
+    asset = _download_logo_asset(url) if url else b""
+    if asset:
+        try:
+            with Image.open(BytesIO(asset)) as source:
+                if (
+                    source.format not in {"PNG", "JPEG", "WEBP", "GIF"}
+                    or source.width <= 0
+                    or source.height <= 0
+                    or source.width * source.height > _LOGO_IMAGE_MAX_PIXELS
+                ):
+                    raise ValueError("unsupported logo image")
+                source.load()
+                logo = ImageOps.contain(
+                    source.convert("RGBA"),
+                    (diameter - 44, diameter - 44),
+                    method=Image.Resampling.LANCZOS,
+                )
+            canvas.alpha_composite(
+                logo,
+                (int(cx - logo.width / 2), int(cy - logo.height / 2)),
+            )
+            return
+        except Exception:
+            pass
+    initials = _logo_initials(name)
+    font = _match_logo_font(max(28, diameter // 3))
+    bounds = draw.textbbox((0, 0), initials, font=font)
+    text_width = bounds[2] - bounds[0]
+    text_height = bounds[3] - bounds[1]
+    draw.text(
+        (cx - text_width / 2 - bounds[0], cy - text_height / 2 - bounds[1]),
+        initials,
+        font=font,
+        fill=(255, 255, 255, 255),
+    )
+
+
+def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
+                          home_name: str, league_name: str, away_name: str) -> bytes:
+    width, height = 960, 540
+    canvas = Image.new("RGBA", (width, height), (9, 30, 68, 255))
+    draw = ImageDraw.Draw(canvas)
+    stops = ((0, (126, 103, 71)), (0.5, (48, 57, 79)), (1, (7, 37, 103)))
+    for x in range(width):
+        position = x / (width - 1)
+        if position <= 0.5:
+            start, end = stops[0][1], stops[1][1]
+            amount = position * 2
+        else:
+            start, end = stops[1][1], stops[2][1]
+            amount = (position - 0.5) * 2
+        color = tuple(round(a + (b - a) * amount) for a, b in zip(start, end))
+        draw.line((x, 0, x, height), fill=(*color, 255))
+    draw.rounded_rectangle(
+        (18, 18, width - 18, height - 18),
+        radius=34,
+        outline=(255, 255, 255, 95),
+        width=3,
+    )
+    _draw_match_logo_badge(canvas, (232, 270), 246, home_url, home_name)
+    _draw_match_logo_badge(canvas, (480, 270), 196, league_url, league_name)
+    _draw_match_logo_badge(canvas, (728, 270), 246, away_url, away_name)
+    output = BytesIO()
+    canvas.convert("RGB").save(output, format="PNG", optimize=True)
+    return output.getvalue()
+
+
+@app.route("/match-logo.png")
+def match_logo_png():
+    """Return a raster match mark for IPTV clients that cannot render SVG."""
+    args = request.args
+    png = _build_match_logo_png(
+        _safe_logo_source(args.get("home")),
+        _safe_logo_source(args.get("league")),
+        _safe_logo_source(args.get("away")),
+        args.get("home_name", "Home")[:80],
+        args.get("league_name", "League")[:80],
+        args.get("away_name", "Away")[:80],
+    )
+    response = Response(png, mimetype="image/png")
+    response.headers["Cache-Control"] = "public, max-age=3600"
+    response.headers["X-Content-Type-Options"] = "nosniff"
     return response
 
 

@@ -3,3 +3,4 @@ cloudscraper>=1.2.71
 certifi>=2025.1.31
 requests>=2.34.2
 gunicorn>=23.0.0
+Pillow>=11.0.0

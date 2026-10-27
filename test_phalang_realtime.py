@@ -1,9 +1,11 @@
 import unittest
 from datetime import datetime, timedelta, timezone
+from io import BytesIO
 from unittest.mock import Mock, patch
 from urllib.parse import parse_qs, urlsplit
 
 import main
+from PIL import Image
 
 
 class PhaLangRealtimeTests(unittest.TestCase):
@@ -276,7 +278,7 @@ class PhaLangRealtimeTests(unittest.TestCase):
 
         logo_url = line.split('tvg-logo="', 1)[1].split('"', 1)[0]
         query = parse_qs(urlsplit(logo_url).query)
-        self.assertEqual(urlsplit(logo_url).path, "/match-logo.svg")
+        self.assertEqual(urlsplit(logo_url).path, "/match-logo.png")
         self.assertEqual(query["home"], ["https://assets.example/home.png"])
         self.assertEqual(query["league"], ["https://assets.example/league.png"])
         self.assertEqual(query["away"], ["https://assets.example/away.png"])
@@ -303,6 +305,47 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(query["home"], ["https://assets.example/home.png"])
         self.assertEqual(query["league"], ["https://assets.example/league.png"])
         self.assertEqual(query["away"], ["https://assets.example/away.png"])
+
+    def test_match_logo_png_renders_raster_and_embeds_all_three_assets(self):
+        asset = BytesIO()
+        Image.new("RGBA", (32, 32), (220, 30, 60, 255)).save(asset, format="PNG")
+        png_bytes = asset.getvalue()
+        path = (
+            "/match-logo.png?home=https%3A%2F%2Fimgts.sportpulseapiz.com%2Fhome.png"
+            "&league=https%3A%2F%2Fimages.keovip88.net%2Fleague.png"
+            "&away=https%3A%2F%2Fstatic.flashscore.com%2Faway.png"
+            "&home_name=Home+FC&league_name=Premier+League&away_name=Away+FC"
+        )
+        with patch.object(main, "_download_logo_asset", return_value=png_bytes) as fetch:
+            response = main.app.test_client().get(path)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "image/png")
+        self.assertTrue(response.data.startswith(b"\x89PNG\r\n\x1a\n"))
+        result = Image.open(BytesIO(response.data))
+        self.assertEqual(result.size, (960, 540))
+        self.assertEqual(fetch.call_count, 3)
+
+    def test_match_logo_png_uses_initials_when_source_logos_are_missing(self):
+        with patch.object(main, "_download_logo_asset") as fetch:
+            response = main.app.test_client().get(
+                "/match-logo.png?home_name=Home+FC&league_name=MLS&away_name=Galaxy"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "image/png")
+        fetch.assert_not_called()
+
+    def test_match_logo_png_rejects_unapproved_asset_hosts(self):
+        self.assertEqual(
+            main._download_logo_asset("https://not-approved.example/logo.png"),
+            b"",
+        )
+
+    def test_cached_match_logo_urls_migrate_to_png(self):
+        cached = '#EXTINF:-1 tvg-logo="https://iptv.example/match-logo.svg?home=x",Match\n'
+        repaired = main._repair_match_logo_urls(cached)
+        self.assertIn("/match-logo.png?", repaired)
+        self.assertNotIn("/match-logo.svg?", repaired)
 
     def test_match_logo_svg_embeds_the_three_logos_in_order(self):
         response = main.app.test_client().get(
@@ -339,7 +382,7 @@ class PhaLangRealtimeTests(unittest.TestCase):
             "#EXTM3U\n"
             '#EXTINF:-1 group-title="Khán Đài TV",Old event\n'
             "https://old.example/stream.m3u8\n"
-            '#EXTINF:-1 group-title="Giờ Vàng TV",Keep this\n'
+            '#EXTINF:-1 tvg-logo="https://iptv.example/match-logo.svg?home=x" group-title="Giờ Vàng TV",Keep this\n'
             "https://new.example/stream.m3u8\n"
         )
         main._kv_hydrated_keys.discard("combined")
@@ -353,6 +396,8 @@ class PhaLangRealtimeTests(unittest.TestCase):
             self.assertNotIn("Khán Đài", cached)
             self.assertNotIn("old.example", cached)
             self.assertIn("Keep this", cached)
+            self.assertIn("/match-logo.png?", cached)
+            self.assertNotIn("/match-logo.svg?", cached)
             put.assert_called_once_with("combined", cached, 123.0)
         finally:
             main._kv_hydrated_keys.discard("combined")
