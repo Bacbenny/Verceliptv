@@ -371,11 +371,13 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(result.size, (960, 540))
         self.assertEqual(fetch.call_count, 3)
 
-    def test_match_logo_png_uses_white_background_without_outer_frame(self):
+    def test_match_logo_png_uses_white_card_with_colored_frame(self):
         response = main.app.test_client().get("/match-logo.png")
         result = Image.open(BytesIO(response.data)).convert("RGB")
-        self.assertEqual(result.getpixel((10, 10)), (255, 255, 255))
-        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "3")
+        self.assertEqual(result.getpixel((10, 10)), (11, 11, 17))
+        self.assertEqual(result.getpixel((480, 80)), (255, 255, 255))
+        self.assertEqual(result.getpixel((100, 30)), (5, 128, 245))
+        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "4")
 
     def test_match_logo_png_uses_initials_when_source_logos_are_missing(self):
         with patch.object(main, "_download_logo_asset") as fetch:
@@ -414,7 +416,9 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertIn("https://assets.example/away.png", svg)
         self.assertNotIn('stroke="#ffffff"', svg)
         self.assertNotIn('stroke-opacity=".12"', svg)
-        self.assertIn('fill="#ffffff"', svg)
+        self.assertIn('<rect width="960" height="320" fill="#0b0b10"/>', svg)
+        self.assertIn('<rect x="18" y="14" width="924" height="292" rx="36" fill="#ffffff"/>', svg)
+        self.assertIn('fill="#05cbc1"', svg)
 
     def test_legacy_khan_dai_cache_entries_and_streams_are_removed(self):
         legacy = (

@@ -301,7 +301,7 @@ def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, s
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
-MATCH_LOGO_RENDER_VERSION = "3"
+MATCH_LOGO_RENDER_VERSION = "4"
 
 
 def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
@@ -1972,7 +1972,24 @@ def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -
 def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
                           home_name: str, league_name: str, away_name: str) -> bytes:
     width, height = 960, 540
-    canvas = Image.new("RGBA", (width, height), (255, 255, 255, 255))
+    canvas = Image.new("RGBA", (width, height), (11, 11, 17, 255))
+    draw = ImageDraw.Draw(canvas)
+    draw.rounded_rectangle(
+        (18, 18, width - 18, height - 18),
+        radius=60,
+        fill=(255, 255, 255, 255),
+    )
+    blue = (5, 128, 245, 255)
+    cyan = (5, 203, 193, 255)
+    frame_accents = (
+        (blue, ((60, 25), (370, 25), (352, 42), (43, 42))),
+        (cyan, ((550, 25), (780, 25), (763, 42), (533, 42))),
+        (blue, ((866, 25), (914, 25), (898, 42), (850, 42))),
+        (blue, ((43, 498), (300, 498), (284, 515), (60, 515))),
+        (cyan, ((570, 498), (914, 498), (898, 515), (553, 515))),
+    )
+    for color, points in frame_accents:
+        draw.polygon(points, fill=color)
     _draw_match_logo_badge(canvas, (232, 270), 246, home_url, home_name)
     _draw_match_logo_badge(canvas, (480, 270), 196, league_url, league_name)
     _draw_match_logo_badge(canvas, (728, 270), 246, away_url, away_name)
@@ -2037,7 +2054,13 @@ def match_logo_svg():
         '<svg xmlns="http://www.w3.org/2000/svg" '
         'xmlns:xlink="http://www.w3.org/1999/xlink" '
         'viewBox="0 0 960 320" width="960" height="320" role="img">'
-        '<rect width="960" height="320" fill="#ffffff"/>'
+        '<rect width="960" height="320" fill="#0b0b10"/>'
+        '<rect x="18" y="14" width="924" height="292" rx="36" fill="#ffffff"/>'
+        '<polygon points="60,20 370,20 354,34 44,34" fill="#0580f5"/>'
+        '<polygon points="550,20 780,20 764,34 534,34" fill="#05cbc1"/>'
+        '<polygon points="866,20 914,20 898,34 850,34" fill="#0580f5"/>'
+        '<polygon points="44,286 300,286 284,300 60,300" fill="#0580f5"/>'
+        '<polygon points="570,286 914,286 898,300 554,300" fill="#05cbc1"/>'
         f"<title>{title}</title>{home}{league}{away}</svg>"
     )
     response = Response(svg, mimetype="image/svg+xml")
