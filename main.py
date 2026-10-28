@@ -82,7 +82,7 @@ GIOVANG_API_HOST     = os.environ.get(
     "GIOVANG_API_HOST", "https://live-api.keonhacaitp.one"
 )
 # Bound slow upstream responses so one source cannot hold a cold playlist open.
-GIOVANG_API_TIMEOUT = float(os.environ.get("GIOVANG_API_TIMEOUT", "10"))
+GIOVANG_API_TIMEOUT = float(os.environ.get("GIOVANG_API_TIMEOUT", "15"))
 GIOVANG_DETAIL_WINDOW_SECONDS = max(
     0, int(os.environ.get("GIOVANG_DETAIL_WINDOW_SECONDS", "21600"))
 )  # fetch upcoming/live fixture details only inside this window
@@ -1223,7 +1223,7 @@ def _fetch_phalang_stream(match_id: str) -> str:
     api = _get_phalang_api_url()
     try:
         resp = _http_session.get(f"{api}/match/{match_id}/live",
-                                 headers=_PHALANG_HEADERS, timeout=10)
+                                 headers=_PHALANG_HEADERS, timeout=15)
         if resp.status_code != 200:
             return ""
         data = resp.json()
