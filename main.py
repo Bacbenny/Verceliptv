@@ -11,7 +11,7 @@ from io import BytesIO
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
-from urllib.parse import quote, urlencode, urlsplit
+from urllib.parse import quote, urlencode, urljoin, urlsplit
 
 import cloudscraper
 import certifi
@@ -61,6 +61,16 @@ _http_retry = Retry(
 )
 _http_session.mount("https://", HTTPAdapter(max_retries=_http_retry))
 _http_session.mount("http://", HTTPAdapter(max_retries=_http_retry))
+_cloudflare_kv_session = requests.Session()
+_cloudflare_kv_session.verify = _http_session.verify
+_cloudflare_kv_session.headers.update(
+    {"User-Agent": "Verceliptv-KV/1.0"}
+)
+_phalang_prewarm_session = requests.Session()
+_phalang_prewarm_session.verify = _http_session.verify
+_phalang_prewarm_session.headers.update(
+    {"User-Agent": "Mozilla/5.0", "Accept": "application/vnd.apple.mpegurl"}
+)
 
 # ─── PhaLang TV config ───────────────────────────────────────────────────────
 PHALANG_FRONTEND_URL = os.environ.get("PHALANG_FRONTEND", "https://phalang.tv")
@@ -123,6 +133,18 @@ PHALANG_PREWARM_MAX_MATCHES = max(
 PHALANG_PREWARM_WAIT = max(
     0, min(3, int(os.environ.get("PHALANG_PREWARM_WAIT", "1")))
 )  # seconds allowed during playlist refresh; unfinished matches use resolver fallback
+PHALANG_STREAM_KV_TTL = max(
+    60, min(600, int(os.environ.get("PHALANG_STREAM_KV_TTL", "180")))
+)  # shared resolver URL cache; enough to bridge the kickoff window
+PHALANG_STREAM_KV_TIMEOUT = max(
+    0.2, min(2.0, float(os.environ.get("PHALANG_STREAM_KV_TIMEOUT", "0.7")))
+)  # keep KV failures from delaying channel opens
+PHALANG_HLS_PREWARM_TIMEOUT = max(
+    1, min(8, int(os.environ.get("PHALANG_HLS_PREWARM_TIMEOUT", "5")))
+)
+PHALANG_HLS_ALLOWED_HOSTS = frozenset(
+    {"pull.digitalcdn.net", "100ycdn.com"}
+)
 PHALANG_QUERY_PAGE_SIZE = 50
 PHALANG_QUERY_MAX_PAGES = 5
 API_DISCOVERY_TTL    = 3600  # seconds — re-discover API URL every 1 hour
@@ -380,6 +402,7 @@ _kv_hydration_locks = {
 }
 _cloudflare_kv_last_error = ""
 _cloudflare_kv_last_write_at = 0
+_cloudflare_kv_backoff_until = 0
 _removed_group_cache_purge_attempted = False
 _removed_group_cache_purge_lock = threading.Lock()
 
@@ -413,23 +436,53 @@ def _cloudflare_kv_headers() -> dict:
 
 
 def _record_cloudflare_kv_error(exc) -> None:
-    global _cloudflare_kv_last_error
+    global _cloudflare_kv_last_error, _cloudflare_kv_backoff_until
+    response = getattr(exc, "response", None)
+    status = getattr(response, "status_code", None)
+    reason = getattr(response, "reason", "") or ""
+    if status:
+        message = f"{type(exc).__name__}: HTTP {status} {reason}"[:160]
+    else:
+        message = type(exc).__name__
+
     with _source_timing_lock:
-        _cloudflare_kv_last_error = f"{type(exc).__name__}: {exc}"[:300]
+        _cloudflare_kv_last_error = message
+        if status == 429:
+            retry_after = None
+            try:
+                retry_after = float(response.headers.get("Retry-After", ""))
+            except (TypeError, ValueError):
+                pass
+            cooldown = min(300, max(30, retry_after or 60))
+            _cloudflare_kv_backoff_until = time.time() + cooldown
 
 
-def _cloudflare_kv_get(key: str):
-    if not _cloudflare_kv_enabled():
+def _cloudflare_kv_in_backoff() -> bool:
+    with _source_timing_lock:
+        return time.time() < _cloudflare_kv_backoff_until
+
+
+def _clear_cloudflare_kv_error() -> None:
+    global _cloudflare_kv_last_error, _cloudflare_kv_backoff_until
+    with _source_timing_lock:
+        _cloudflare_kv_last_error = ""
+        _cloudflare_kv_backoff_until = 0
+
+
+def _cloudflare_kv_get(key: str, timeout: float | None = None):
+    if not _cloudflare_kv_enabled() or _cloudflare_kv_in_backoff():
         return None
     try:
-        response = _http_session.get(
+        response = _cloudflare_kv_session.get(
             _cloudflare_kv_url(key),
             headers=_cloudflare_kv_headers(),
-            timeout=CLOUDFLARE_KV_TIMEOUT,
+            timeout=timeout if timeout is not None else CLOUDFLARE_KV_TIMEOUT,
         )
         if response.status_code == 404:
+            _clear_cloudflare_kv_error()
             return None
         response.raise_for_status()
+        _clear_cloudflare_kv_error()
         payload = response.json()
         if not isinstance(payload, dict) or payload.get("version") != 1:
             return None
@@ -445,39 +498,59 @@ def _cloudflare_kv_get(key: str):
         return None
 
 
-def _cloudflare_kv_put(key: str, text: str, built_at: float) -> None:
+def _cloudflare_kv_put(
+    key: str,
+    text: str,
+    built_at: float,
+    expiration_ttl: int | None = None,
+    timeout: float | None = None,
+) -> None:
     global _cloudflare_kv_last_write_at, _cloudflare_kv_last_error
-    if not _cloudflare_kv_enabled():
+    global _cloudflare_kv_backoff_until
+    if not _cloudflare_kv_enabled() or _cloudflare_kv_in_backoff():
         return
     payload = json.dumps(
         {"version": 1, "built_at": built_at, "content": text},
         ensure_ascii=False,
     )
     try:
-        response = _http_session.put(
+        params = (
+            {"expiration_ttl": max(60, int(expiration_ttl))}
+            if expiration_ttl is not None
+            else None
+        )
+        headers = _cloudflare_kv_headers()
+        headers["Content-Type"] = "application/octet-stream"
+        response = _cloudflare_kv_session.put(
             _cloudflare_kv_url(key),
-            headers=_cloudflare_kv_headers(),
+            params=params,
+            headers=headers,
             data=payload.encode("utf-8"),
-            timeout=CLOUDFLARE_KV_TIMEOUT,
+            timeout=timeout if timeout is not None else CLOUDFLARE_KV_TIMEOUT,
         )
         response.raise_for_status()
         with _source_timing_lock:
             _cloudflare_kv_last_write_at = time.time()
             _cloudflare_kv_last_error = ""
+            _cloudflare_kv_backoff_until = 0
     except Exception as exc:
         _record_cloudflare_kv_error(exc)
 
 
 def _cloudflare_kv_delete(key: str) -> None:
-    if not _cloudflare_kv_enabled():
+    if not _cloudflare_kv_enabled() or _cloudflare_kv_in_backoff():
         return
-    response = _http_session.delete(
-        _cloudflare_kv_url(key),
-        headers=_cloudflare_kv_headers(),
-        timeout=CLOUDFLARE_KV_TIMEOUT,
-    )
-    if response.status_code != 404:
-        response.raise_for_status()
+    try:
+        response = _cloudflare_kv_session.delete(
+            _cloudflare_kv_url(key),
+            headers=_cloudflare_kv_headers(),
+            timeout=CLOUDFLARE_KV_TIMEOUT,
+        )
+        if response.status_code != 404:
+            response.raise_for_status()
+        _clear_cloudflare_kv_error()
+    except Exception as exc:
+        _record_cloudflare_kv_error(exc)
 
 
 def _purge_removed_group_cache() -> None:
@@ -548,6 +621,103 @@ _phalang_prewarm_pool = ThreadPoolExecutor(
     max_workers=PHALANG_PREWARM_MAX_MATCHES or 1,
     thread_name_prefix="phalang-prewarm",
 )
+_phalang_resolver_stats = {
+    "persistent_cache_hits": 0,
+    "persistent_cache_misses": 0,
+    "manifest_prewarm_attempts": 0,
+    "manifest_prewarm_successes": 0,
+    "manifest_prewarm_errors": 0,
+    "manifest_prewarm_last_ms": 0,
+    "manifest_prewarm_last_at": 0,
+}
+
+
+def _increment_phalang_resolver_stat(name: str, amount: int = 1) -> None:
+    with _source_timing_lock:
+        _phalang_resolver_stats[name] = (
+            int(_phalang_resolver_stats.get(name, 0)) + amount
+        )
+
+
+def _valid_phalang_stream_url(stream_url: str) -> bool:
+    if not stream_url or len(stream_url) > 4096:
+        return False
+    try:
+        parsed = urlsplit(stream_url)
+    except Exception:
+        return False
+    return (
+        parsed.scheme in ("http", "https")
+        and bool(parsed.hostname)
+        and parsed.username is None
+        and parsed.password is None
+    )
+
+
+def _phalang_stream_kv_key(match_id: str) -> str:
+    return f"phalang-stream:{quote(match_id, safe='')}"
+
+
+def _remember_phalang_stream(match_id: str, stream_url: str, built_at: float) -> None:
+    with _upcoming_cache_lock:
+        if match_id not in _upcoming_cache and len(_upcoming_cache) >= _UPCOMING_CACHE_MAX:
+            oldest = min(
+                _upcoming_cache,
+                key=lambda key: _upcoming_cache[key].get("ts", 0),
+            )
+            del _upcoming_cache[oldest]
+        _upcoming_cache[match_id] = {"url": stream_url, "ts": built_at}
+
+
+def _persist_phalang_stream_kv(
+    match_id: str,
+    stream_url: str,
+    built_at: float,
+    synchronous: bool = False,
+) -> None:
+    if not _cloudflare_kv_enabled() or not _valid_phalang_stream_url(stream_url):
+        return
+    args = (_phalang_stream_kv_key(match_id), stream_url, built_at)
+    kwargs = {
+        "expiration_ttl": PHALANG_STREAM_KV_TTL,
+        "timeout": PHALANG_STREAM_KV_TIMEOUT,
+    }
+    if synchronous:
+        _cloudflare_kv_put(*args, **kwargs)
+        return
+    threading.Thread(
+        target=_cloudflare_kv_put,
+        args=args,
+        kwargs=kwargs,
+        daemon=True,
+        name=f"kv-write-phalang-{match_id[:24]}",
+    ).start()
+
+
+def _get_phalang_stream_from_kv(match_id: str) -> str:
+    if not _cloudflare_kv_enabled():
+        return ""
+    saved = _cloudflare_kv_get(
+        _phalang_stream_kv_key(match_id),
+        timeout=PHALANG_STREAM_KV_TIMEOUT,
+    )
+    if not saved:
+        _increment_phalang_resolver_stat("persistent_cache_misses")
+        return ""
+
+    stream_url, built_at = saved
+    age = time.time() - built_at
+    if (
+        age < 0
+        or age > PHALANG_STREAM_KV_TTL
+        or not _valid_phalang_stream_url(stream_url)
+    ):
+        _increment_phalang_resolver_stat("persistent_cache_misses")
+        return ""
+
+    _remember_phalang_stream(match_id, stream_url, built_at)
+    _increment_phalang_resolver_stat("persistent_cache_hits")
+    return stream_url
 
 
 def _ensure_background_tasks() -> None:
@@ -1066,7 +1236,7 @@ def _fetch_phalang_stream(match_id: str) -> str:
     return ""
 
 
-def _cached_phalang_stream(match_id: str) -> str:
+def _cached_phalang_stream(match_id: str, persist_kv: bool = True) -> str:
     """Resolve one match with short caching and per-match single-flight.
 
     A popular channel can be requested by many IPTV clients at the same time.
@@ -1080,13 +1250,15 @@ def _cached_phalang_stream(match_id: str) -> str:
     now = time.time()
     leader = False
     stale_url = ""
+    stale_ts = 0
     with _upcoming_cache_lock:
         cached = _upcoming_cache.get(match_id)
         if cached:
             cached_url = str(cached.get("url") or "")
             stale_url = cached_url
+            stale_ts = float(cached.get("ts") or 0)
             ttl = _upcoming_cache_ttl if cached_url else _upcoming_miss_ttl
-            if now - float(cached.get("ts") or 0) < ttl:
+            if now - stale_ts < ttl:
                 return cached_url
 
         event = _upcoming_inflight.get(match_id)
@@ -1107,18 +1279,46 @@ def _cached_phalang_stream(match_id: str) -> str:
 
     stream_url = ""
     try:
-        stream_url = _fetch_phalang_stream(match_id)
-        with _upcoming_cache_lock:
-            if match_id not in _upcoming_cache and len(_upcoming_cache) >= _UPCOMING_CACHE_MAX:
-                oldest = min(
-                    _upcoming_cache,
-                    key=lambda key: _upcoming_cache[key].get("ts", 0),
-                )
-                del _upcoming_cache[oldest]
-            _upcoming_cache[match_id] = {
-                "url": stream_url,
-                "ts": time.time(),
-            }
+        stream_url = _get_phalang_stream_from_kv(match_id)
+        fetched_from_upstream = not bool(stream_url)
+        if fetched_from_upstream:
+            stream_url = _fetch_phalang_stream(match_id)
+            if not _valid_phalang_stream_url(stream_url):
+                stream_url = ""
+
+        if stream_url:
+            if fetched_from_upstream:
+                cache_ts = time.time()
+                _remember_phalang_stream(match_id, stream_url, cache_ts)
+                if persist_kv:
+                    _persist_phalang_stream_kv(
+                        match_id, stream_url, cache_ts, synchronous=False
+                    )
+            else:
+                with _upcoming_cache_lock:
+                    cached = _upcoming_cache.get(match_id) or {}
+                    cache_ts = float(cached.get("ts") or time.time())
+                _remember_phalang_stream(match_id, stream_url, cache_ts)
+        elif stale_url and 0 <= time.time() - stale_ts <= PHALANG_STREAM_KV_TTL:
+            # A recently successful link is preferable to a 503 during a brief
+            # upstream resolver outage. Keep its original age so it is retried.
+            stream_url = stale_url
+            _remember_phalang_stream(match_id, stream_url, stale_ts)
+        else:
+            with _upcoming_cache_lock:
+                if (
+                    match_id not in _upcoming_cache
+                    and len(_upcoming_cache) >= _UPCOMING_CACHE_MAX
+                ):
+                    oldest = min(
+                        _upcoming_cache,
+                        key=lambda key: _upcoming_cache[key].get("ts", 0),
+                    )
+                    del _upcoming_cache[oldest]
+                _upcoming_cache[match_id] = {
+                    "url": "",
+                    "ts": time.time(),
+                }
         return stream_url
     finally:
         with _upcoming_cache_lock:
@@ -1196,6 +1396,120 @@ def _phalang_prewarm_candidates(matches: list) -> list[str]:
     return [match_id for _, _, match_id in candidates[:PHALANG_PREWARM_MAX_MATCHES]]
 
 
+def _phalang_hls_url_allowed(url: str) -> bool:
+    try:
+        parsed = urlsplit(str(url or "").strip())
+        host = (parsed.hostname or "").lower()
+        port = parsed.port
+    except Exception:
+        return False
+    if (
+        parsed.scheme != "https"
+        or not host
+        or port not in (None, 443)
+        or parsed.username is not None
+        or parsed.password is not None
+    ):
+        return False
+    return any(
+        host == allowed or host.endswith(f".{allowed}")
+        for allowed in PHALANG_HLS_ALLOWED_HOSTS
+    )
+
+
+def _fetch_phalang_manifest(url: str):
+    """Fetch one allowlisted playlist, following only safe CDN redirects."""
+    current_url = url
+    for _ in range(4):
+        if not _phalang_hls_url_allowed(current_url):
+            return None
+        response = None
+        try:
+            response = _phalang_prewarm_session.get(
+                current_url,
+                headers=_PHALANG_HEADERS,
+                timeout=(2, PHALANG_HLS_PREWARM_TIMEOUT),
+                allow_redirects=False,
+                stream=True,
+            )
+            if response.status_code in (301, 302, 303, 307, 308):
+                location = response.headers.get("Location", "")
+                if not location:
+                    return None
+                current_url = urljoin(current_url, location)
+                continue
+            if response.status_code != 200:
+                return None
+            body = response.raw.read(65536, decode_content=True)
+            if not body.lstrip().startswith(b"#EXTM3U"):
+                return None
+            return response.url or current_url, body
+        except Exception:
+            return None
+        finally:
+            if response is not None:
+                response.close()
+    return None
+
+
+def _first_phalang_variant(manifest: bytes, base_url: str) -> str:
+    text = manifest.decode("utf-8", errors="replace")
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        if not line.strip().startswith("#EXT-X-STREAM-INF"):
+            continue
+        for candidate in lines[index + 1:]:
+            candidate = candidate.strip()
+            if candidate and not candidate.startswith("#"):
+                variant_url = urljoin(base_url, candidate)
+                return variant_url if _phalang_hls_url_allowed(variant_url) else ""
+    return ""
+
+
+def _prewarm_phalang_manifest(stream_url: str) -> bool:
+    started = time.monotonic()
+    success = False
+    _increment_phalang_resolver_stat("manifest_prewarm_attempts")
+    try:
+        if not _phalang_hls_url_allowed(stream_url):
+            return False
+        master = _fetch_phalang_manifest(stream_url)
+        if not master:
+            return False
+        master_url, manifest = master
+        variant_url = _first_phalang_variant(manifest, master_url)
+        if variant_url:
+            success = bool(_fetch_phalang_manifest(variant_url))
+        else:
+            # The first document is already a media playlist.
+            success = True
+        return success
+    except Exception:
+        return False
+    finally:
+        elapsed_ms = int((time.monotonic() - started) * 1000)
+        with _source_timing_lock:
+            if success:
+                _phalang_resolver_stats["manifest_prewarm_successes"] += 1
+            else:
+                _phalang_resolver_stats["manifest_prewarm_errors"] += 1
+            _phalang_resolver_stats["manifest_prewarm_last_ms"] = elapsed_ms
+            _phalang_resolver_stats["manifest_prewarm_last_at"] = time.time()
+
+
+def _prewarm_phalang_match(match_id: str) -> bool:
+    stream_url = _cached_phalang_stream(match_id, persist_kv=False)
+    if not stream_url:
+        return False
+    with _upcoming_cache_lock:
+        cached = _upcoming_cache.get(match_id) or {}
+        built_at = float(cached.get("ts") or time.time())
+    _persist_phalang_stream_kv(
+        match_id, stream_url, built_at, synchronous=True
+    )
+    return _prewarm_phalang_manifest(stream_url)
+
+
 def _prewarm_phalang_matches(matches: list) -> None:
     """Warm only the most relevant links without blocking playlist delivery."""
     match_ids = _phalang_prewarm_candidates(matches)
@@ -1203,7 +1517,7 @@ def _prewarm_phalang_matches(matches: list) -> None:
         return
 
     futures = [
-        _phalang_prewarm_pool.submit(_cached_phalang_stream, match_id)
+        _phalang_prewarm_pool.submit(_prewarm_phalang_match, match_id)
         for match_id in match_ids
     ]
     deadline = time.monotonic() + PHALANG_PREWARM_WAIT
@@ -1743,6 +2057,10 @@ def status_json():
         source_refresh_ms = dict(_source_refresh_ms)
         source_refresh_errors = dict(_source_refresh_errors)
         giovang_detail_stats = dict(_giovang_detail_stats)
+        phalang_resolver_stats = dict(_phalang_resolver_stats)
+        cloudflare_kv_backoff_seconds = max(
+            0, int(_cloudflare_kv_backoff_until - time.time())
+        )
     with _upcoming_cache_lock:
         phalang_resolver_cache = {
             "cached_matches": len(_upcoming_cache),
@@ -1800,6 +2118,7 @@ def status_json():
             "hydrated_keys": sorted(_kv_hydrated_keys),
             "last_write_at": _cloudflare_kv_last_write_at or None,
             "last_error": _cloudflare_kv_last_error,
+            "backoff_remaining_seconds": cloudflare_kv_backoff_seconds,
         },
         "channels": {
             "total":      sum(_last_counts.get(k, 0) for k in ("giovang", "phalang", "dekiki")),
@@ -1820,6 +2139,10 @@ def status_json():
         "phalang_resolver": {
             "positive_cache_ttl_seconds": _upcoming_cache_ttl,
             "negative_cache_ttl_seconds": _upcoming_miss_ttl,
+            "persistent_cache_ttl_seconds": PHALANG_STREAM_KV_TTL,
+            "prewarm_window_seconds": PHALANG_PREWARM_WINDOW,
+            "manifest_prewarm_timeout_seconds": PHALANG_HLS_PREWARM_TIMEOUT,
+            **phalang_resolver_stats,
             **phalang_resolver_cache,
         },
     })
