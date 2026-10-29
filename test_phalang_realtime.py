@@ -381,7 +381,7 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(result.getpixel((10, 10)), (9, 11, 18))
         self.assertEqual(result.getpixel((480, 25)), (218, 221, 228))
         self.assertNotEqual(result.getpixel((100, 180)), result.getpixel((860, 180)))
-        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "5")
+        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "6")
 
     def test_match_logo_png_uses_initials_when_source_logos_are_missing(self):
         with patch.object(main, "_download_logo_asset") as fetch:
@@ -402,10 +402,10 @@ class PhaLangRealtimeTests(unittest.TestCase):
         cached = '#EXTINF:-1 tvg-logo="https://iptv.example/match-logo.svg?home=x&v=4",Match\n'
         repaired = main._repair_match_logo_urls(cached)
         self.assertIn("/match-logo.png?", repaired)
-        self.assertIn("&v=5", repaired)
+        self.assertIn("&v=6", repaired)
         self.assertNotIn("/match-logo.svg?", repaired)
         older = 'tvg-logo="https://iptv.example/match-logo.png?home=x"'
-        self.assertIn("&v=5", main._repair_match_logo_urls(older))
+        self.assertIn("&v=6", main._repair_match_logo_urls(older))
 
     def test_match_logo_svg_embeds_the_three_logos_in_order(self):
         response = main.app.test_client().get(
