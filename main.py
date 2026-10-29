@@ -324,15 +324,7 @@ def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, s
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
-MATCH_LOGO_RENDER_VERSION = "7"
-
-
-def _match_logo_is_live(match: dict, provider: str) -> bool:
-    status = str(match.get("status_code") or match.get("status") or "").upper()
-    return bool(match.get("is_live")) or (
-        provider == "giovang"
-        and status in {"LIVE", "1H", "2H", "HT", "PEN", "ET"}
-    )
+MATCH_LOGO_RENDER_VERSION = "8"
 
 
 def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
@@ -345,7 +337,6 @@ def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
     query = urlencode({
         "home": home_logo, "league": league_logo, "away": away_logo,
         "home_name": home_name, "league_name": league_name, "away_name": away_name,
-        "live": "1" if _match_logo_is_live(match, provider) else "0",
         "v": MATCH_LOGO_RENDER_VERSION,
     })
     return f"{_get_server_base_url()}/match-logo.png?{query}"
@@ -2409,8 +2400,7 @@ def _match_logo_font_for_width(draw, text: str, max_width: int, start_size: int)
 
 
 def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
-                          home_name: str, league_name: str, away_name: str,
-                          is_live: bool = False) -> bytes:
+                          home_name: str, league_name: str, away_name: str) -> bytes:
     width, height = 960, 540
     canvas = Image.new("RGBA", (width, height), (9, 13, 22, 255))
     draw = ImageDraw.Draw(canvas)
@@ -2472,11 +2462,6 @@ def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
     vs_font = _match_logo_font(39)
     draw.text((480, 218), "VS", font=vs_font, fill=(20, 28, 43, 255), anchor="mm")
 
-    if is_live:
-        draw.rounded_rectangle((829, 49, 911, 85), radius=12, fill=(190, 37, 48, 255))
-        draw.text((870, 67), "LIVE", font=_match_logo_font(20),
-                  fill=(255, 255, 255, 255), anchor="mm")
-
     draw.rounded_rectangle((32, 430, 928, 510), radius=20, fill=(25, 42, 126, 255))
     draw.line((52, 435, 908, 435), fill=(108, 133, 225, 255), width=2)
     _draw_match_logo_badge(canvas, (78, 470), 50, league_url, league_name, league_asset)
@@ -2501,7 +2486,6 @@ def match_logo_png():
         args.get("home_name", "Home")[:80],
         args.get("league_name", "League")[:80],
         args.get("away_name", "Away")[:80],
-        args.get("live", "").strip().lower() in {"1", "true", "yes"},
     )
     response = Response(png, mimetype="image/png")
     response.headers["Cache-Control"] = "public, max-age=3600"
