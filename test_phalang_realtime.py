@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 from urllib.parse import parse_qs, urlsplit
 
 import main
@@ -266,8 +266,8 @@ class PhaLangRealtimeTests(unittest.TestCase):
             "team_1": "Home FC",
             "team_2": "Away FC",
             "league": "Premier League",
-            "team_1_logo_url": "https://assets.example/home.png",
-            "team_2_logo_url": "https://assets.example/away.png",
+            "team_1_logo": "https://assets.example/home.png",
+            "team_2_logo": "https://assets.example/away.png",
             "league_logo_url": "https://assets.example/league.png",
             "blv": "Commentator",
             "start_date": "2099-01-01T12:00:00+00:00",
@@ -373,16 +373,18 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(response.mimetype, "image/png")
         self.assertTrue(response.data.startswith(b"\x89PNG\r\n\x1a\n"))
         result = Image.open(BytesIO(response.data))
-        self.assertEqual(result.size, (960, 540))
+        self.assertEqual(result.size, (1920, 1080))
         self.assertEqual(fetch.call_count, 3)
 
-    def test_match_logo_png_uses_team_colors_without_an_outer_white_frame(self):
+    def test_match_logo_png_has_no_white_team_or_vs_discs(self):
         response = main.app.test_client().get("/match-logo.png")
         result = Image.open(BytesIO(response.data)).convert("RGB")
         self.assertEqual(result.getpixel((10, 10)), (9, 13, 22))
         self.assertEqual(result.getpixel((480, 25)), (9, 13, 22))
-        self.assertNotEqual(result.getpixel((100, 180)), result.getpixel((860, 180)))
-        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "8")
+        self.assertNotEqual(result.getpixel((300, 500)), result.getpixel((1600, 500)))
+        self.assertLess(max(result.getpixel((512, 250))), 230)
+        self.assertLess(max(result.getpixel((960, 350))), 230)
+        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "9")
 
     def test_match_logo_png_displays_larger_team_logos(self):
         asset = BytesIO()
@@ -429,14 +431,68 @@ class PhaLangRealtimeTests(unittest.TestCase):
             b"",
         )
 
+    def test_logo_asset_urls_use_larger_known_cdn_variants(self):
+        self.assertEqual(
+            main._logo_asset_download_url(
+                "https://imgts.sportpulseapiz.com/football/team/abc/image/small"
+            ),
+            "https://imgts.sportpulseapiz.com/football/team/abc/image",
+        )
+        self.assertEqual(
+            main._logo_asset_download_url(
+                "https://img0.aiscore.com/volleyball/team/abc.png!w60"
+            ),
+            "https://img0.aiscore.com/volleyball/team/abc.png",
+        )
+        self.assertEqual(
+            main._logo_asset_download_url(
+                "https://thumb.wikimedia.org/wikipedia/vi/thumb/a/bc/logo.png/250px-logo.png"
+            ),
+            "https://thumb.wikimedia.org/wikipedia/vi/thumb/a/bc/logo.png/500px-logo.png",
+        )
+
+    def test_logo_asset_download_accepts_phalang_image_hosts(self):
+        asset = BytesIO()
+        Image.new("RGBA", (8, 8), (220, 30, 60, 255)).save(asset, format="PNG")
+        png_bytes = asset.getvalue()
+        response = MagicMock()
+        response.status_code = 200
+        response.headers = {
+            "Content-Type": "image/png",
+            "Content-Length": str(len(png_bytes)),
+        }
+        response.iter_content.return_value = [png_bytes]
+        response.__enter__.return_value = response
+        urls = [
+            (
+                "https://thumb.wikimedia.org/wikipedia/vi/thumb/a/bc/logo.png/250px-logo.png",
+                "https://thumb.wikimedia.org/wikipedia/vi/thumb/a/bc/logo.png/500px-logo.png",
+            ),
+            (
+                "https://img0.aiscore.com/volleyball/team/abc.png!w60",
+                "https://img0.aiscore.com/volleyball/team/abc.png",
+            ),
+        ]
+
+        with patch.object(main._http_session, "get", return_value=response) as fetch:
+            for url, _ in urls:
+                main._download_logo_asset.cache_clear()
+                self.assertEqual(main._download_logo_asset(url), png_bytes)
+
+        self.assertEqual(
+            [call.args[0] for call in fetch.call_args_list],
+            [download_url for _, download_url in urls],
+        )
+        main._download_logo_asset.cache_clear()
+
     def test_cached_match_logo_urls_migrate_to_png(self):
         cached = '#EXTINF:-1 tvg-logo="https://iptv.example/match-logo.svg?home=x&v=4",Match\n'
         repaired = main._repair_match_logo_urls(cached)
         self.assertIn("/match-logo.png?", repaired)
-        self.assertIn("&v=8", repaired)
+        self.assertIn("&v=9", repaired)
         self.assertNotIn("/match-logo.svg?", repaired)
         older = 'tvg-logo="https://iptv.example/match-logo.png?home=x"'
-        self.assertIn("&v=8", main._repair_match_logo_urls(older))
+        self.assertIn("&v=9", main._repair_match_logo_urls(older))
 
     def test_match_logo_svg_embeds_the_three_logos_in_order(self):
         response = main.app.test_client().get(

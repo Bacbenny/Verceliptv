@@ -12,7 +12,7 @@ from io import BytesIO
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
-from urllib.parse import quote, urlencode, urljoin, urlsplit
+from urllib.parse import quote, urlencode, urljoin, urlsplit, urlunsplit
 
 import cloudscraper
 import certifi
@@ -324,7 +324,7 @@ def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, s
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
-MATCH_LOGO_RENDER_VERSION = "8"
+MATCH_LOGO_RENDER_VERSION = "9"
 
 
 def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
@@ -2192,15 +2192,34 @@ _LOGO_IMAGE_ALLOWED_HOSTS = frozenset({
     "cdn-img.thethao247.vn",
     "cdn.keobongvip.digital",
     "cdn.jsdelivr.net",
+    "img0.aiscore.com",
     "imgts.sportpulseapiz.com",
     "images.keovip88.net",
     "static.wikia.nocookie.net",
     "static.flashscore.com",
+    "thumb.wikimedia.org",
     "upload.wikimedia.org",
     "encrypted-tbn0.gstatic.com",
 })
 _LOGO_IMAGE_MAX_BYTES = 512 * 1024
 _LOGO_IMAGE_MAX_PIXELS = 4_000_000
+
+
+def _logo_asset_download_url(url: str) -> str:
+    """Prefer larger variants from the logo CDNs used by PhaLang fixtures."""
+    safe_url = _safe_logo_source(url)
+    if not safe_url:
+        return ""
+    parsed = urlsplit(safe_url)
+    host = (parsed.hostname or "").lower().rstrip(".")
+    path = parsed.path
+    if host == "imgts.sportpulseapiz.com":
+        path = re.sub(r"/image/small/?$", "/image", path)
+    elif host == "img0.aiscore.com":
+        path = re.sub(r"\.png!w(?:30|60)$", ".png", path)
+    elif host == "thumb.wikimedia.org":
+        path = re.sub(r"/(?:250|330)px-", "/500px-", path)
+    return urlunsplit((parsed.scheme, parsed.netloc, path, parsed.query, parsed.fragment))
 
 
 @lru_cache(maxsize=96)
@@ -2209,6 +2228,7 @@ def _download_logo_asset(url: str) -> bytes:
     safe_url = _safe_logo_source(url)
     if not safe_url:
         return b""
+    download_url = _logo_asset_download_url(safe_url)
     try:
         parsed = urlsplit(safe_url)
         host = (parsed.hostname or "").lower().rstrip(".")
@@ -2220,8 +2240,8 @@ def _download_logo_asset(url: str) -> bytes:
             or parsed.password
         ):
             return b""
-        with requests.get(
-            safe_url,
+        with _http_session.get(
+            download_url,
             headers={"User-Agent": "Mozilla/5.0"},
             timeout=(2.5, 4),
             allow_redirects=False,
@@ -2273,7 +2293,7 @@ def _match_logo_font(size: int):
             index for index, name in enumerate(axis_names)
             if "weight" in name
         )
-        values[weight_index] = min(700, axes[weight_index]["maximum"])
+        values[weight_index] = min(900, axes[weight_index]["maximum"])
         font.set_variation_by_axes(values)
         return font
     except (OSError, AttributeError, ValueError, TypeError, StopIteration):
@@ -2301,7 +2321,6 @@ def _draw_match_logo_badge(
     asset_bytes: bytes | None = None,
 ) -> None:
     cx, cy = center
-    radius = diameter // 2
     draw = ImageDraw.Draw(canvas)
     asset = (
         asset_bytes
@@ -2331,20 +2350,16 @@ def _draw_match_logo_badge(
             return
         except Exception:
             pass
-    draw.ellipse(
-        (cx - radius, cy - radius, cx + radius, cy + radius),
-        fill=(241, 243, 245, 255),
-    )
     initials = _logo_initials(name)
     font = _match_logo_font(max(28, diameter // 3))
-    bounds = draw.textbbox((0, 0), initials, font=font)
-    text_width = bounds[2] - bounds[0]
-    text_height = bounds[3] - bounds[1]
     draw.text(
-        (cx - text_width / 2 - bounds[0], cy - text_height / 2 - bounds[1]),
+        (cx, cy),
         initials,
         font=font,
-        fill=(24, 32, 48, 255),
+        fill=(255, 255, 255, 255),
+        anchor="mm",
+        stroke_width=max(4, diameter // 64),
+        stroke_fill=(8, 12, 20, 240),
     )
 
 
@@ -2391,17 +2406,18 @@ def _match_team_color(asset: bytes, name: str, side: str) -> tuple[int, int, int
 
 
 def _match_logo_font_for_width(draw, text: str, max_width: int, start_size: int):
-    for size in range(start_size, 17, -2):
+    for size in range(start_size, 47, -2):
         font = _match_logo_font(size)
         bounds = draw.textbbox((0, 0), text, font=font)
         if bounds[2] - bounds[0] <= max_width:
             return font
-    return _match_logo_font(18)
+    return _match_logo_font(48)
 
 
 def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
                           home_name: str, league_name: str, away_name: str) -> bytes:
-    width, height = 960, 540
+    # Render at 2x resolution so IPTV clients can downscale crisp text and crests.
+    width, height = 1920, 1080
     canvas = Image.new("RGBA", (width, height), (9, 13, 22, 255))
     draw = ImageDraw.Draw(canvas)
 
@@ -2411,27 +2427,27 @@ def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
     home_color = _match_team_color(home_asset, home_name, "home")
     away_color = _match_team_color(away_asset, away_name, "away")
 
-    panel_width, panel_height = 896, 378
+    panel_width, panel_height = 1792, 756
     panel = Image.new("RGBA", (panel_width, panel_height), (0, 0, 0, 0))
     panel_draw = ImageDraw.Draw(panel)
     split = panel_width // 2
     panel_draw.polygon(
-        ((0, 0), (split + 30, 0), (split - 22, panel_height), (0, panel_height)),
+        ((0, 0), (split + 60, 0), (split - 44, panel_height), (0, panel_height)),
         fill=(*home_color, 255),
     )
     panel_draw.polygon(
-        ((split + 30, 0), (panel_width, 0), (panel_width, panel_height),
-         (split - 22, panel_height)),
+        ((split + 60, 0), (panel_width, 0), (panel_width, panel_height),
+         (split - 44, panel_height)),
         fill=(*away_color, 255),
     )
     panel_mask = Image.new("L", (panel_width, panel_height), 0)
     ImageDraw.Draw(panel_mask).rounded_rectangle(
         (0, 0, panel_width - 1, panel_height - 1),
-        radius=26,
+        radius=52,
         fill=255,
     )
     panel.putalpha(panel_mask)
-    canvas.alpha_composite(panel, (32, 36))
+    canvas.alpha_composite(panel, (64, 72))
 
     shade = Image.new("RGBA", (panel_width, panel_height), (0, 0, 0, 0))
     shade_draw = ImageDraw.Draw(shade)
@@ -2439,36 +2455,34 @@ def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
         alpha = round(8 + 38 * y / max(1, panel_height - 1))
         shade_draw.line((0, y, panel_width, y), fill=(0, 0, 0, alpha))
     shade.putalpha(Image.composite(shade.getchannel("A"), Image.new("L", (panel_width, panel_height), 0), panel_mask))
-    canvas.alpha_composite(shade, (32, 36))
+    canvas.alpha_composite(shade, (64, 72))
 
     draw = ImageDraw.Draw(canvas)
-    # Keep only neutral pads behind the crests; no outer card frame.
-    draw.ellipse((143, 105, 369, 331), fill=(249, 250, 252, 255))
-    draw.ellipse((591, 105, 817, 331), fill=(249, 250, 252, 255))
-    _draw_match_logo_badge(canvas, (256, 218), 204, home_url, home_name, home_asset)
-    _draw_match_logo_badge(canvas, (704, 218), 204, away_url, away_name, away_asset)
+    # Composite source crests directly over the team colors, without white disks.
+    _draw_match_logo_badge(canvas, (512, 436), 440, home_url, home_name, home_asset)
+    _draw_match_logo_badge(canvas, (1408, 436), 440, away_url, away_name, away_asset)
 
     home_label = str(home_name or "Home")[:80]
     away_label = str(away_name or "Away")[:80]
-    home_font = _match_logo_font_for_width(draw, home_label, 360, 38)
-    away_font = _match_logo_font_for_width(draw, away_label, 360, 38)
-    draw.text((256, 367), home_label, font=home_font, fill=(255, 255, 255, 255),
-              anchor="mm", stroke_width=2, stroke_fill=(12, 16, 25, 210))
-    draw.text((704, 367), away_label, font=away_font, fill=(255, 255, 255, 255),
-              anchor="mm", stroke_width=2, stroke_fill=(12, 16, 25, 210))
+    home_font = _match_logo_font_for_width(draw, home_label, 720, 88)
+    away_font = _match_logo_font_for_width(draw, away_label, 720, 88)
+    draw.text((512, 736), home_label, font=home_font, fill=(255, 255, 255, 255),
+              anchor="mm", stroke_width=5, stroke_fill=(8, 12, 20, 235))
+    draw.text((1408, 736), away_label, font=away_font, fill=(255, 255, 255, 255),
+              anchor="mm", stroke_width=5, stroke_fill=(8, 12, 20, 235))
 
-    draw.ellipse((426, 164, 534, 272), fill=(16, 21, 31, 255))
-    draw.ellipse((434, 172, 526, 264), fill=(246, 248, 251, 255))
-    vs_font = _match_logo_font(39)
-    draw.text((480, 218), "VS", font=vs_font, fill=(20, 28, 43, 255), anchor="mm")
+    vs_font = _match_logo_font(88)
+    draw.text((960, 436), "VS", font=vs_font, fill=(255, 255, 255, 255),
+              anchor="mm", stroke_width=6, stroke_fill=(8, 12, 20, 255))
 
-    draw.rounded_rectangle((32, 430, 928, 510), radius=20, fill=(25, 42, 126, 255))
-    draw.line((52, 435, 908, 435), fill=(108, 133, 225, 255), width=2)
-    _draw_match_logo_badge(canvas, (78, 470), 50, league_url, league_name, league_asset)
+    draw.rounded_rectangle((64, 860, 1856, 1020), radius=40, fill=(25, 42, 126, 255))
+    draw.line((104, 870, 1816, 870), fill=(108, 133, 225, 255), width=4)
+    _draw_match_logo_badge(canvas, (156, 940), 100, league_url, league_name, league_asset)
     competition = str(league_name or "SPORTS EVENT")[:80]
-    competition_font = _match_logo_font_for_width(draw, competition, 760, 32)
-    draw.text((514, 470), competition, font=competition_font,
-              fill=(255, 255, 255, 255), anchor="mm")
+    competition_font = _match_logo_font_for_width(draw, competition, 1520, 72)
+    draw.text((1028, 940), competition, font=competition_font,
+              fill=(255, 255, 255, 255), anchor="mm",
+              stroke_width=4, stroke_fill=(8, 12, 20, 220))
 
     output = BytesIO()
     canvas.convert("RGB").save(output, format="PNG", optimize=True)
