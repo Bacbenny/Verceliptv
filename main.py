@@ -6,6 +6,7 @@ import os
 import re
 import threading
 import time
+import colorsys
 from functools import lru_cache
 from io import BytesIO
 import unicodedata
@@ -323,7 +324,36 @@ def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, s
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
-MATCH_LOGO_RENDER_VERSION = "4"
+MATCH_LOGO_RENDER_VERSION = "5"
+
+
+def _match_logo_kickoff(match: dict, provider: str) -> str:
+    """Format fixture time in the same Vietnam timezone used by the playlist."""
+    try:
+        if provider == "giovang":
+            timestamp = match.get("time_start")
+            if timestamp is None:
+                return ""
+            kickoff = datetime.fromtimestamp(float(timestamp), tz=VN_TZ)
+        else:
+            raw = str(match.get("start_date") or "").strip()
+            if not raw:
+                return ""
+            kickoff = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+            if kickoff.tzinfo is None:
+                kickoff = kickoff.replace(tzinfo=timezone.utc)
+            kickoff = kickoff.astimezone(VN_TZ)
+        return kickoff.strftime("%a %d %b %H:%M ICT").upper()
+    except (TypeError, ValueError, OSError, OverflowError):
+        return ""
+
+
+def _match_logo_is_live(match: dict, provider: str) -> bool:
+    status = str(match.get("status_code") or match.get("status") or "").upper()
+    return bool(match.get("is_live")) or (
+        provider == "giovang"
+        and status in {"LIVE", "1H", "2H", "HT", "PEN", "ET"}
+    )
 
 
 def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
@@ -336,6 +366,8 @@ def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
     query = urlencode({
         "home": home_logo, "league": league_logo, "away": away_logo,
         "home_name": home_name, "league_name": league_name, "away_name": away_name,
+        "kickoff": _match_logo_kickoff(match, provider),
+        "live": "1" if _match_logo_is_live(match, provider) else "0",
         "v": MATCH_LOGO_RENDER_VERSION,
     })
     return f"{_get_server_base_url()}/match-logo.png?{query}"
@@ -1694,10 +1726,23 @@ def _repair_phalang_playlist_urls(text: str) -> str:
 
 # ══════════════════════════════════════════════════════════════════════════════
 def _repair_match_logo_urls(text: str) -> str:
-    """Migrate cached match-logo links from SVG to raster PNG for IPTV clients."""
+    """Migrate old match-logo links and bump the cached renderer version."""
     if not text:
         return text
-    return re.sub(r"/match-logo\.svg(?=\?)", "/match-logo.png", text)
+    text = re.sub(r"/match-logo\.svg(?=\?)", "/match-logo.png", text)
+
+    def bump_version(logo) -> str:
+        url = logo.group(1)
+        if re.search(r"[?&]v=\d+", url):
+            return re.sub(
+                r"([?&]v=)\d+",
+                lambda version: f"{version.group(1)}{MATCH_LOGO_RENDER_VERSION}",
+                url,
+            )
+        separator = "&" if "?" in url else "?"
+        return f"{url}{separator}v={MATCH_LOGO_RENDER_VERSION}"
+
+    return re.sub(r"(/match-logo\.png(?:\?[^\"\s]*)?)", bump_version, text)
 
 
 #  Cache helpers — build compressed + ETag
@@ -2247,11 +2292,22 @@ def _match_logo_font(size: int):
         return ImageFont.load_default(size=size)
 
 
-def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -> None:
+def _draw_match_logo_badge(
+    canvas,
+    center,
+    diameter: int,
+    url: str,
+    name: str,
+    asset_bytes: bytes | None = None,
+) -> None:
     cx, cy = center
     radius = diameter // 2
     draw = ImageDraw.Draw(canvas)
-    asset = _download_logo_asset(url) if url else b""
+    asset = (
+        asset_bytes
+        if asset_bytes is not None
+        else (_download_logo_asset(url) if url else b"")
+    )
     if asset:
         try:
             with Image.open(BytesIO(asset)) as source:
@@ -2292,30 +2348,158 @@ def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -
     )
 
 
+def _match_team_color(asset: bytes, name: str, side: str) -> tuple[int, int, int]:
+    """Use a saturated, readable shade of the team's crest color when available."""
+    if asset:
+        try:
+            with Image.open(BytesIO(asset)) as source:
+                source = source.convert("RGBA")
+                source.thumbnail((64, 64), Image.Resampling.LANCZOS)
+                buckets = {}
+                for red, green, blue, alpha in source.getdata():
+                    if alpha < 96:
+                        continue
+                    high = max(red, green, blue)
+                    low = min(red, green, blue)
+                    if high < 38 or high > 245 or high - low < 22:
+                        continue
+                    bucket = (red // 32, green // 32, blue // 32)
+                    buckets[bucket] = buckets.get(bucket, 0) + 1
+                if buckets:
+                    red, green, blue = (
+                        min(255, channel * 32 + 16)
+                        for channel in max(buckets, key=buckets.get)
+                    )
+                    hue, saturation, value = colorsys.rgb_to_hsv(
+                        red / 255, green / 255, blue / 255
+                    )
+                    saturation = max(0.58, saturation)
+                    value = min(0.58, max(0.38, value * 0.72))
+                    return tuple(
+                        round(channel * 255)
+                        for channel in colorsys.hsv_to_rgb(hue, saturation, value)
+                    )
+        except Exception:
+            pass
+
+    seed = sum((index + 1) * ord(char) for index, char in enumerate(f"{side}:{name}"))
+    hue = (seed % 360) / 360
+    return tuple(
+        round(channel * 255)
+        for channel in colorsys.hsv_to_rgb(hue, 0.68, 0.48)
+    )
+
+
+def _match_logo_font_for_width(draw, text: str, max_width: int, start_size: int):
+    for size in range(start_size, 17, -2):
+        font = _match_logo_font(size)
+        bounds = draw.textbbox((0, 0), text, font=font)
+        if bounds[2] - bounds[0] <= max_width:
+            return font
+    return _match_logo_font(18)
+
+
 def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
-                          home_name: str, league_name: str, away_name: str) -> bytes:
+                          home_name: str, league_name: str, away_name: str,
+                          kickoff: str = "", is_live: bool = False) -> bytes:
     width, height = 960, 540
-    canvas = Image.new("RGBA", (width, height), (11, 11, 17, 255))
+    canvas = Image.new("RGBA", (width, height), (9, 11, 18, 255))
     draw = ImageDraw.Draw(canvas)
     draw.rounded_rectangle(
         (18, 18, width - 18, height - 18),
-        radius=60,
-        fill=(255, 255, 255, 255),
+        radius=62,
+        fill=(218, 221, 228, 255),
     )
-    blue = (5, 128, 245, 255)
-    cyan = (5, 203, 193, 255)
-    frame_accents = (
-        (blue, ((60, 25), (370, 25), (352, 42), (43, 42))),
-        (cyan, ((550, 25), (780, 25), (763, 42), (533, 42))),
-        (blue, ((866, 25), (914, 25), (898, 42), (850, 42))),
-        (blue, ((43, 498), (300, 498), (284, 515), (60, 515))),
-        (cyan, ((570, 498), (914, 498), (898, 515), (553, 515))),
+    draw.rounded_rectangle(
+        (34, 34, width - 34, height - 34),
+        radius=48,
+        fill=(31, 34, 43, 255),
     )
-    for color, points in frame_accents:
-        draw.polygon(points, fill=color)
-    _draw_match_logo_badge(canvas, (232, 270), 246, home_url, home_name)
-    _draw_match_logo_badge(canvas, (480, 270), 196, league_url, league_name)
-    _draw_match_logo_badge(canvas, (728, 270), 246, away_url, away_name)
+
+    home_asset = _download_logo_asset(home_url) if home_url else b""
+    league_asset = _download_logo_asset(league_url) if league_url else b""
+    away_asset = _download_logo_asset(away_url) if away_url else b""
+    home_color = _match_team_color(home_asset, home_name, "home")
+    away_color = _match_team_color(away_asset, away_name, "away")
+
+    panel_width, panel_height = 856, 320
+    panel = Image.new("RGBA", (panel_width, panel_height), (0, 0, 0, 0))
+    panel_draw = ImageDraw.Draw(panel)
+    split = panel_width // 2
+    panel_draw.polygon(
+        ((0, 0), (split + 30, 0), (split - 22, panel_height), (0, panel_height)),
+        fill=(*home_color, 255),
+    )
+    panel_draw.polygon(
+        ((split + 30, 0), (panel_width, 0), (panel_width, panel_height),
+         (split - 22, panel_height)),
+        fill=(*away_color, 255),
+    )
+    panel_mask = Image.new("L", (panel_width, panel_height), 0)
+    ImageDraw.Draw(panel_mask).rounded_rectangle(
+        (0, 0, panel_width - 1, panel_height - 1),
+        radius=26,
+        fill=255,
+    )
+    panel.putalpha(panel_mask)
+    canvas.alpha_composite(panel, (52, 88))
+
+    shade = Image.new("RGBA", (panel_width, panel_height), (0, 0, 0, 0))
+    shade_draw = ImageDraw.Draw(shade)
+    for y in range(panel_height):
+        alpha = round(8 + 38 * y / max(1, panel_height - 1))
+        shade_draw.line((0, y, panel_width, y), fill=(0, 0, 0, alpha))
+    shade.putalpha(Image.composite(shade.getchannel("A"), Image.new("L", (panel_width, panel_height), 0), panel_mask))
+    canvas.alpha_composite(shade, (52, 88))
+
+    # A silver border and an inset ring echo the broadcast tile in the reference.
+    draw = ImageDraw.Draw(canvas)
+    draw.rounded_rectangle(
+        (43, 79, 917, 417),
+        radius=32,
+        outline=(239, 241, 245, 255),
+        width=3,
+    )
+    draw.ellipse((171, 152, 355, 336), fill=(245, 247, 250, 255),
+                 outline=(255, 255, 255, 255), width=5)
+    draw.ellipse((605, 152, 789, 336), fill=(245, 247, 250, 255),
+                 outline=(255, 255, 255, 255), width=5)
+    _draw_match_logo_badge(canvas, (263, 244), 142, home_url, home_name, home_asset)
+    _draw_match_logo_badge(canvas, (697, 244), 142, away_url, away_name, away_asset)
+
+    home_label = str(home_name or "Home")[:80]
+    away_label = str(away_name or "Away")[:80]
+    home_font = _match_logo_font_for_width(draw, home_label, 360, 32)
+    away_font = _match_logo_font_for_width(draw, away_label, 360, 32)
+    draw.text((263, 366), home_label, font=home_font, fill=(255, 255, 255, 255),
+              anchor="mm", stroke_width=2, stroke_fill=(12, 16, 25, 210))
+    draw.text((697, 366), away_label, font=away_font, fill=(255, 255, 255, 255),
+              anchor="mm", stroke_width=2, stroke_fill=(12, 16, 25, 210))
+
+    draw.ellipse((430, 195, 530, 295), fill=(16, 21, 31, 255))
+    draw.ellipse((437, 202, 523, 288), fill=(246, 248, 251, 255))
+    vs_font = _match_logo_font(37)
+    draw.text((480, 245), "VS", font=vs_font, fill=(20, 28, 43, 255), anchor="mm")
+
+    # The top time pill is intentionally high-contrast for small IPTV screens.
+    time_text = str(kickoff or "MATCH SCHEDULE")[:42].upper()
+    draw.rounded_rectangle((45, 31, 625, 91), radius=16, fill=(5, 7, 12, 255))
+    time_font = _match_logo_font_for_width(draw, time_text, 540, 32)
+    draw.text((65, 61), time_text, font=time_font, fill=(255, 255, 255, 255),
+              anchor="lm")
+    if is_live:
+        draw.rounded_rectangle((816, 43, 905, 82), radius=12, fill=(190, 37, 48, 255))
+        draw.text((860, 62), "LIVE", font=_match_logo_font(21),
+                  fill=(255, 255, 255, 255), anchor="mm")
+
+    draw.rounded_rectangle((52, 425, 908, 493), radius=18, fill=(25, 42, 126, 255))
+    draw.line((73, 429, 887, 429), fill=(108, 133, 225, 255), width=2)
+    _draw_match_logo_badge(canvas, (97, 459), 48, league_url, league_name, league_asset)
+    competition = str(league_name or "SPORTS EVENT")[:80]
+    competition_font = _match_logo_font_for_width(draw, competition, 720, 31)
+    draw.text((535, 460), competition, font=competition_font,
+              fill=(255, 255, 255, 255), anchor="mm")
+
     output = BytesIO()
     canvas.convert("RGB").save(output, format="PNG", optimize=True)
     return output.getvalue()
@@ -2332,6 +2516,8 @@ def match_logo_png():
         args.get("home_name", "Home")[:80],
         args.get("league_name", "League")[:80],
         args.get("away_name", "Away")[:80],
+        args.get("kickoff", "")[:42],
+        args.get("live", "").strip().lower() in {"1", "true", "yes"},
     )
     response = Response(png, mimetype="image/png")
     response.headers["Cache-Control"] = "public, max-age=3600"

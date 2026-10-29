@@ -282,6 +282,8 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(query["home"], ["https://assets.example/home.png"])
         self.assertEqual(query["league"], ["https://assets.example/league.png"])
         self.assertEqual(query["away"], ["https://assets.example/away.png"])
+        self.assertEqual(query["kickoff"], ["THU 01 JAN 19:00 ICT"])
+        self.assertEqual(query["live"], ["0"])
         self.assertEqual(query["v"], [main.MATCH_LOGO_RENDER_VERSION])
 
     def test_phalang_basketball_logo_composes_teams_and_sport_mark(self):
@@ -303,6 +305,7 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(query["home"], ["https://assets.example/cavaliers.png"])
         self.assertEqual(query["league"], [main.SPORT_LOGOS["basketball"]])
         self.assertEqual(query["away"], ["https://assets.example/timberwolves.png"])
+        self.assertEqual(query["live"], ["0"])
 
     def test_giovang_football_logo_reads_nested_provider_logos(self):
         match = {
@@ -326,6 +329,7 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(query["home"], ["https://assets.example/home.png"])
         self.assertEqual(query["league"], ["https://assets.example/league.png"])
         self.assertEqual(query["away"], ["https://assets.example/away.png"])
+        self.assertTrue(query["kickoff"][0].endswith("ICT"))
 
     def test_giovang_volleyball_logo_composes_nested_participant_logos(self):
         match = {
@@ -371,13 +375,13 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(result.size, (960, 540))
         self.assertEqual(fetch.call_count, 3)
 
-    def test_match_logo_png_uses_white_card_with_colored_frame(self):
+    def test_match_logo_png_uses_team_colors_and_silver_broadcast_frame(self):
         response = main.app.test_client().get("/match-logo.png")
         result = Image.open(BytesIO(response.data)).convert("RGB")
-        self.assertEqual(result.getpixel((10, 10)), (11, 11, 17))
-        self.assertEqual(result.getpixel((480, 80)), (255, 255, 255))
-        self.assertEqual(result.getpixel((100, 30)), (5, 128, 245))
-        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "4")
+        self.assertEqual(result.getpixel((10, 10)), (9, 11, 18))
+        self.assertEqual(result.getpixel((480, 25)), (218, 221, 228))
+        self.assertNotEqual(result.getpixel((100, 180)), result.getpixel((860, 180)))
+        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "5")
 
     def test_match_logo_png_uses_initials_when_source_logos_are_missing(self):
         with patch.object(main, "_download_logo_asset") as fetch:
@@ -395,10 +399,13 @@ class PhaLangRealtimeTests(unittest.TestCase):
         )
 
     def test_cached_match_logo_urls_migrate_to_png(self):
-        cached = '#EXTINF:-1 tvg-logo="https://iptv.example/match-logo.svg?home=x",Match\n'
+        cached = '#EXTINF:-1 tvg-logo="https://iptv.example/match-logo.svg?home=x&v=4",Match\n'
         repaired = main._repair_match_logo_urls(cached)
         self.assertIn("/match-logo.png?", repaired)
+        self.assertIn("&v=5", repaired)
         self.assertNotIn("/match-logo.svg?", repaired)
+        older = 'tvg-logo="https://iptv.example/match-logo.png?home=x"'
+        self.assertIn("&v=5", main._repair_match_logo_urls(older))
 
     def test_match_logo_svg_embeds_the_three_logos_in_order(self):
         response = main.app.test_client().get(
