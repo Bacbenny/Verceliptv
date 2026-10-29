@@ -324,28 +324,7 @@ def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, s
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
-MATCH_LOGO_RENDER_VERSION = "6"
-
-
-def _match_logo_kickoff(match: dict, provider: str) -> str:
-    """Format fixture time in the same Vietnam timezone used by the playlist."""
-    try:
-        if provider == "giovang":
-            timestamp = match.get("time_start")
-            if timestamp is None:
-                return ""
-            kickoff = datetime.fromtimestamp(float(timestamp), tz=VN_TZ)
-        else:
-            raw = str(match.get("start_date") or "").strip()
-            if not raw:
-                return ""
-            kickoff = datetime.fromisoformat(raw.replace("Z", "+00:00"))
-            if kickoff.tzinfo is None:
-                kickoff = kickoff.replace(tzinfo=timezone.utc)
-            kickoff = kickoff.astimezone(VN_TZ)
-        return kickoff.strftime("%a %d %b %H:%M ICT").upper()
-    except (TypeError, ValueError, OSError, OverflowError):
-        return ""
+MATCH_LOGO_RENDER_VERSION = "7"
 
 
 def _match_logo_is_live(match: dict, provider: str) -> bool:
@@ -366,7 +345,6 @@ def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
     query = urlencode({
         "home": home_logo, "league": league_logo, "away": away_logo,
         "home_name": home_name, "league_name": league_name, "away_name": away_name,
-        "kickoff": _match_logo_kickoff(match, provider),
         "live": "1" if _match_logo_is_live(match, provider) else "0",
         "v": MATCH_LOGO_RENDER_VERSION,
     })
@@ -1595,9 +1573,9 @@ def _build_phalang_lines(matches: list, use_prewarmed_live: bool = False) -> lis
             continue
         is_live = bool(match.get("is_live"))
 
-        home        = (match.get("team_1") or "Home").strip()
-        away        = (match.get("team_2") or "Away").strip()
-        league      = (match.get("league") or "").strip()
+        home        = _fixture_name(match.get("team_1"), "Home")
+        away        = _fixture_name(match.get("team_2"), "Away")
+        league      = _fixture_name(match.get("league"), "")
         commentator = (match.get("blv") or "").strip()
         logo        = _phalang_logo(match)
         start_str   = match.get("start_date", "")
@@ -2285,7 +2263,31 @@ def _logo_initials(name: str) -> str:
     return "".join(word[0] for word in words[:2]).upper() or "?"
 
 
+@lru_cache(maxsize=64)
 def _match_logo_font(size: int):
+    bundled_font = os.path.join(
+        os.path.dirname(__file__), "assets", "fonts", "RobotoCondensed[wght].ttf"
+    )
+    try:
+        font = ImageFont.truetype(bundled_font, size)
+        axes = font.get_variation_axes()
+        values = [axis["default"] for axis in axes]
+        axis_names = [
+            axis["name"].decode("ascii", errors="ignore").lower()
+            if isinstance(axis["name"], bytes)
+            else str(axis["name"]).lower()
+            for axis in axes
+        ]
+        weight_index = next(
+            index for index, name in enumerate(axis_names)
+            if "weight" in name
+        )
+        values[weight_index] = min(700, axes[weight_index]["maximum"])
+        font.set_variation_by_axes(values)
+        return font
+    except (OSError, AttributeError, ValueError, TypeError, StopIteration):
+        pass
+
     for path in (
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
@@ -2408,20 +2410,10 @@ def _match_logo_font_for_width(draw, text: str, max_width: int, start_size: int)
 
 def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
                           home_name: str, league_name: str, away_name: str,
-                          kickoff: str = "", is_live: bool = False) -> bytes:
+                          is_live: bool = False) -> bytes:
     width, height = 960, 540
-    canvas = Image.new("RGBA", (width, height), (9, 11, 18, 255))
+    canvas = Image.new("RGBA", (width, height), (9, 13, 22, 255))
     draw = ImageDraw.Draw(canvas)
-    draw.rounded_rectangle(
-        (18, 18, width - 18, height - 18),
-        radius=62,
-        fill=(218, 221, 228, 255),
-    )
-    draw.rounded_rectangle(
-        (34, 34, width - 34, height - 34),
-        radius=48,
-        fill=(31, 34, 43, 255),
-    )
 
     home_asset = _download_logo_asset(home_url) if home_url else b""
     league_asset = _download_logo_asset(league_url) if league_url else b""
@@ -2429,7 +2421,7 @@ def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
     home_color = _match_team_color(home_asset, home_name, "home")
     away_color = _match_team_color(away_asset, away_name, "away")
 
-    panel_width, panel_height = 856, 320
+    panel_width, panel_height = 896, 378
     panel = Image.new("RGBA", (panel_width, panel_height), (0, 0, 0, 0))
     panel_draw = ImageDraw.Draw(panel)
     split = panel_width // 2
@@ -2449,7 +2441,7 @@ def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
         fill=255,
     )
     panel.putalpha(panel_mask)
-    canvas.alpha_composite(panel, (52, 88))
+    canvas.alpha_composite(panel, (32, 36))
 
     shade = Image.new("RGBA", (panel_width, panel_height), (0, 0, 0, 0))
     shade_draw = ImageDraw.Draw(shade)
@@ -2457,54 +2449,40 @@ def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
         alpha = round(8 + 38 * y / max(1, panel_height - 1))
         shade_draw.line((0, y, panel_width, y), fill=(0, 0, 0, alpha))
     shade.putalpha(Image.composite(shade.getchannel("A"), Image.new("L", (panel_width, panel_height), 0), panel_mask))
-    canvas.alpha_composite(shade, (52, 88))
+    canvas.alpha_composite(shade, (32, 36))
 
-    # A silver border and an inset ring echo the broadcast tile in the reference.
     draw = ImageDraw.Draw(canvas)
-    draw.rounded_rectangle(
-        (43, 79, 917, 417),
-        radius=32,
-        outline=(239, 241, 245, 255),
-        width=3,
-    )
-    draw.ellipse((171, 152, 355, 336), fill=(245, 247, 250, 255),
-                 outline=(255, 255, 255, 255), width=5)
-    draw.ellipse((605, 152, 789, 336), fill=(245, 247, 250, 255),
-                 outline=(255, 255, 255, 255), width=5)
-    _draw_match_logo_badge(canvas, (263, 244), 142, home_url, home_name, home_asset)
-    _draw_match_logo_badge(canvas, (697, 244), 142, away_url, away_name, away_asset)
+    # Keep only neutral pads behind the crests; no outer card frame.
+    draw.ellipse((143, 105, 369, 331), fill=(249, 250, 252, 255))
+    draw.ellipse((591, 105, 817, 331), fill=(249, 250, 252, 255))
+    _draw_match_logo_badge(canvas, (256, 218), 204, home_url, home_name, home_asset)
+    _draw_match_logo_badge(canvas, (704, 218), 204, away_url, away_name, away_asset)
 
     home_label = str(home_name or "Home")[:80]
     away_label = str(away_name or "Away")[:80]
-    home_font = _match_logo_font_for_width(draw, home_label, 360, 32)
-    away_font = _match_logo_font_for_width(draw, away_label, 360, 32)
-    draw.text((263, 366), home_label, font=home_font, fill=(255, 255, 255, 255),
+    home_font = _match_logo_font_for_width(draw, home_label, 360, 38)
+    away_font = _match_logo_font_for_width(draw, away_label, 360, 38)
+    draw.text((256, 367), home_label, font=home_font, fill=(255, 255, 255, 255),
               anchor="mm", stroke_width=2, stroke_fill=(12, 16, 25, 210))
-    draw.text((697, 366), away_label, font=away_font, fill=(255, 255, 255, 255),
+    draw.text((704, 367), away_label, font=away_font, fill=(255, 255, 255, 255),
               anchor="mm", stroke_width=2, stroke_fill=(12, 16, 25, 210))
 
-    draw.ellipse((430, 195, 530, 295), fill=(16, 21, 31, 255))
-    draw.ellipse((437, 202, 523, 288), fill=(246, 248, 251, 255))
-    vs_font = _match_logo_font(37)
-    draw.text((480, 245), "VS", font=vs_font, fill=(20, 28, 43, 255), anchor="mm")
+    draw.ellipse((426, 164, 534, 272), fill=(16, 21, 31, 255))
+    draw.ellipse((434, 172, 526, 264), fill=(246, 248, 251, 255))
+    vs_font = _match_logo_font(39)
+    draw.text((480, 218), "VS", font=vs_font, fill=(20, 28, 43, 255), anchor="mm")
 
-    # The top time pill is intentionally high-contrast for small IPTV screens.
-    time_text = str(kickoff or "MATCH SCHEDULE")[:42].upper()
-    draw.rounded_rectangle((45, 31, 625, 91), radius=16, fill=(5, 7, 12, 255))
-    time_font = _match_logo_font_for_width(draw, time_text, 540, 32)
-    draw.text((65, 61), time_text, font=time_font, fill=(255, 255, 255, 255),
-              anchor="lm")
     if is_live:
-        draw.rounded_rectangle((816, 43, 905, 82), radius=12, fill=(190, 37, 48, 255))
-        draw.text((860, 62), "LIVE", font=_match_logo_font(21),
+        draw.rounded_rectangle((829, 49, 911, 85), radius=12, fill=(190, 37, 48, 255))
+        draw.text((870, 67), "LIVE", font=_match_logo_font(20),
                   fill=(255, 255, 255, 255), anchor="mm")
 
-    draw.rounded_rectangle((52, 425, 908, 493), radius=18, fill=(25, 42, 126, 255))
-    draw.line((73, 429, 887, 429), fill=(108, 133, 225, 255), width=2)
-    _draw_match_logo_badge(canvas, (97, 459), 48, league_url, league_name, league_asset)
+    draw.rounded_rectangle((32, 430, 928, 510), radius=20, fill=(25, 42, 126, 255))
+    draw.line((52, 435, 908, 435), fill=(108, 133, 225, 255), width=2)
+    _draw_match_logo_badge(canvas, (78, 470), 50, league_url, league_name, league_asset)
     competition = str(league_name or "SPORTS EVENT")[:80]
-    competition_font = _match_logo_font_for_width(draw, competition, 720, 31)
-    draw.text((535, 460), competition, font=competition_font,
+    competition_font = _match_logo_font_for_width(draw, competition, 760, 32)
+    draw.text((514, 470), competition, font=competition_font,
               fill=(255, 255, 255, 255), anchor="mm")
 
     output = BytesIO()
@@ -2523,7 +2501,6 @@ def match_logo_png():
         args.get("home_name", "Home")[:80],
         args.get("league_name", "League")[:80],
         args.get("away_name", "Away")[:80],
-        args.get("kickoff", "")[:42],
         args.get("live", "").strip().lower() in {"1", "true", "yes"},
     )
     response = Response(png, mimetype="image/png")
