@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 from urllib.parse import parse_qs, urlsplit
 
 import main
@@ -390,7 +390,7 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(result.getpixel((10, 10)), (11, 11, 17))
         self.assertEqual(result.getpixel((960, 160)), (255, 255, 255))
         self.assertEqual(result.getpixel((200, 60)), (5, 128, 245))
-        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "6")
+        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "7")
 
     def test_live_phalang_logo_hosts_use_larger_source_images(self):
         self.assertIn("thumb.wikimedia.org", main._LOGO_IMAGE_ALLOWED_HOSTS)
@@ -462,6 +462,33 @@ class PhaLangRealtimeTests(unittest.TestCase):
             with main._logo_asset_cache_lock:
                 main._logo_asset_cache.clear()
 
+    def test_logo_fetch_uses_shared_session_and_provider_referer(self):
+        response = MagicMock()
+        response.status_code = 200
+        response.headers = {
+            "Content-Type": "image/png",
+            "Content-Length": "4",
+        }
+        response.iter_content.return_value = [b"logo"]
+        response.__enter__.return_value = response
+        url = (
+            "https://imgts.sportpulseapiz.com/football/team/logo/image/small"
+        )
+
+        with patch.object(
+            main._http_session,
+            "get",
+            return_value=response,
+        ) as get:
+            self.assertEqual(main._fetch_logo_asset(url), b"logo")
+
+        headers = get.call_args.kwargs["headers"]
+        self.assertEqual(
+            headers["Referer"],
+            f"{main.PHALANG_FRONTEND_URL.rstrip('/')}/",
+        )
+        self.assertIn("Chrome", headers["User-Agent"])
+
     def test_match_logo_png_rejects_unapproved_asset_hosts(self):
         self.assertEqual(
             main._download_logo_asset("https://not-approved.example/logo.png"),
@@ -473,14 +500,14 @@ class PhaLangRealtimeTests(unittest.TestCase):
         repaired = main._repair_match_logo_urls(cached)
         self.assertIn("/match-logo.png?", repaired)
         self.assertNotIn("/match-logo.svg?", repaired)
-        self.assertIn("home=x&v=6", repaired)
+        self.assertIn("home=x&v=7", repaired)
 
         old_png = (
             '#EXTINF:-1 tvg-logo="https://iptv.example/match-logo.png'
             '?home=x&v=4",Match\n'
         )
         repaired_png = main._repair_match_logo_urls(old_png)
-        self.assertIn("home=x&v=6", repaired_png)
+        self.assertIn("home=x&v=7", repaired_png)
         self.assertNotIn("v=4", repaired_png)
 
     def test_match_logo_svg_embeds_the_three_logos_in_order(self):

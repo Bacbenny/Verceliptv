@@ -322,7 +322,7 @@ def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, s
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
-MATCH_LOGO_RENDER_VERSION = "6"
+MATCH_LOGO_RENDER_VERSION = "7"
 
 
 def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
@@ -2230,11 +2230,21 @@ def _fetch_logo_asset(url: str) -> bytes:
             or parsed.password
         ):
             return b""
+        headers = {
+            "User-Agent": _http_session.headers.get(
+                "User-Agent", "Mozilla/5.0"
+            ),
+            "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+        }
+        if host == "imgts.sportpulseapiz.com":
+            headers["Referer"] = f"{PHALANG_FRONTEND_URL.rstrip('/')}/"
+        elif host in {"cdn.keobongvip.digital", "images.keovip88.net"}:
+            headers["Referer"] = f"{GIOVANG_FRONTEND_URL.rstrip('/')}/"
         for asset_url in _logo_asset_candidates(safe_url):
             try:
-                with requests.get(
+                with _http_session.get(
                     asset_url,
-                    headers={"User-Agent": "Mozilla/5.0"},
+                    headers=headers,
                     timeout=(2.5, 4),
                     allow_redirects=False,
                     stream=True,
