@@ -2211,13 +2211,19 @@ _LOGO_IMAGE_CACHE_MAXSIZE = 96
 _LOGO_IMAGE_CACHE_TTL_SECONDS = 6 * 60 * 60
 _LOGO_IMAGE_NEGATIVE_CACHE_TTL_SECONDS = 30
 _logo_asset_cache: dict[str, tuple[float, bytes]] = {}
+_logo_asset_fetch_status: dict[str, str] = {}
 _logo_asset_cache_lock = threading.Lock()
 
 
-def _fetch_logo_asset(url: str) -> bytes:
+def _fetch_logo_asset(url: str, diagnostics: list[str] | None = None) -> bytes:
     """Fetch only known public logo CDNs; never proxy arbitrary URL parameters."""
+    def record(status: str) -> None:
+        if diagnostics is not None:
+            diagnostics.append(status)
+
     safe_url = _safe_logo_source(url)
     if not safe_url:
+        record("unsafe-url")
         return b""
     try:
         parsed = urlsplit(safe_url)
@@ -2229,6 +2235,7 @@ def _fetch_logo_asset(url: str) -> bytes:
             or parsed.username
             or parsed.password
         ):
+            record("blocked-host")
             return b""
         headers = {
             "User-Agent": _http_session.headers.get(
@@ -2250,15 +2257,18 @@ def _fetch_logo_asset(url: str) -> bytes:
                     stream=True,
                 ) as response:
                     if response.status_code != 200:
+                        record(f"http-{response.status_code}")
                         continue
                     content_type = response.headers.get("Content-Type", "")
                     content_type = content_type.split(";", 1)[0].strip().lower()
                     if content_type not in {
                         "image/png", "image/jpeg", "image/webp", "image/gif"
                     }:
+                        record("unsupported-content-type")
                         continue
                     length = response.headers.get("Content-Length")
                     if length and int(length) > _LOGO_IMAGE_MAX_BYTES:
+                        record("asset-too-large")
                         continue
                     content = bytearray()
                     for chunk in response.iter_content(chunk_size=32 * 1024):
@@ -2267,11 +2277,17 @@ def _fetch_logo_asset(url: str) -> bytes:
                             if len(content) > _LOGO_IMAGE_MAX_BYTES:
                                 break
                     if content and len(content) <= _LOGO_IMAGE_MAX_BYTES:
+                        record("ok")
                         return bytes(content)
-            except Exception:
+                    record("empty-or-too-large-body")
+            except Exception as exc:
+                record(f"request-{type(exc).__name__}")
                 continue
+        if diagnostics is not None and not diagnostics:
+            record("no-candidate")
         return b""
-    except Exception:
+    except Exception as exc:
+        record(f"fetch-{type(exc).__name__}")
         return b""
 
 
@@ -2292,7 +2308,8 @@ def _download_logo_asset(url: str) -> bytes:
                 return asset
             _logo_asset_cache.pop(safe_url, None)
 
-    asset = _fetch_logo_asset(safe_url)
+    diagnostics: list[str] = []
+    asset = _fetch_logo_asset(safe_url, diagnostics)
     ttl = (
         _LOGO_IMAGE_CACHE_TTL_SECONDS
         if asset
@@ -2301,9 +2318,19 @@ def _download_logo_asset(url: str) -> bytes:
     with _logo_asset_cache_lock:
         _logo_asset_cache.pop(safe_url, None)
         _logo_asset_cache[safe_url] = (time.monotonic() + ttl, asset)
+        _logo_asset_fetch_status[safe_url] = (
+            "ok" if asset else ",".join(diagnostics[-3:]) or "no-result"
+        )
+        while len(_logo_asset_fetch_status) > _LOGO_IMAGE_CACHE_MAXSIZE:
+            _logo_asset_fetch_status.pop(next(iter(_logo_asset_fetch_status)))
         while len(_logo_asset_cache) > _LOGO_IMAGE_CACHE_MAXSIZE:
             _logo_asset_cache.pop(next(iter(_logo_asset_cache)))
     return asset
+
+
+def _logo_asset_fetch_status_for(url: str) -> str:
+    with _logo_asset_cache_lock:
+        return _logo_asset_fetch_status.get(url, "unknown")
 
 
 def _logo_asset_candidates(url: str) -> tuple[str, ...]:
@@ -2354,7 +2381,11 @@ def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -
     radius = diameter // 2
     draw = ImageDraw.Draw(canvas)
     asset = _download_logo_asset(url) if url else b""
-    render_status = "no-source" if not url else "fetch-miss"
+    render_status = (
+        "no-source"
+        if not url
+        else f"fetch-{_logo_asset_fetch_status_for(url)}"
+    )
     if asset:
         try:
             with Image.open(BytesIO(asset)) as source:

@@ -450,7 +450,8 @@ class PhaLangRealtimeTests(unittest.TestCase):
             ):
                 self.assertEqual(main._download_logo_asset(url), b"")
                 self.assertEqual(main._download_logo_asset(url), b"")
-                fetch.assert_called_once_with(url)
+                fetch.assert_called_once()
+                self.assertEqual(fetch.call_args.args[0], url)
 
                 now[0] += main._LOGO_IMAGE_NEGATIVE_CACHE_TTL_SECONDS + 1
                 self.assertEqual(
