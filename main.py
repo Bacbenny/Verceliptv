@@ -2349,11 +2349,12 @@ def _match_logo_font(size: int):
         return ImageFont.load_default(size=size)
 
 
-def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -> bool:
+def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -> str:
     cx, cy = center
     radius = diameter // 2
     draw = ImageDraw.Draw(canvas)
     asset = _download_logo_asset(url) if url else b""
+    render_status = "no-source" if not url else "fetch-miss"
     if asset:
         try:
             with Image.open(BytesIO(asset)) as source:
@@ -2374,9 +2375,9 @@ def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -
                 logo,
                 (int(cx - logo.width / 2), int(cy - logo.height / 2)),
             )
-            return True
-        except Exception:
-            pass
+            return "ok"
+        except Exception as exc:
+            render_status = f"decode-{type(exc).__name__}"
     draw.ellipse(
         (cx - radius, cy - radius, cx + radius, cy + radius),
         fill=(241, 243, 245, 255),
@@ -2392,12 +2393,12 @@ def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -
         font=font,
         fill=(24, 32, 48, 255),
     )
-    return False
+    return render_status
 
 
 def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
                           home_name: str, league_name: str, away_name: str,
-                          logo_status: list[bool] | None = None) -> bytes:
+                          logo_status: list[str] | None = None) -> bytes:
     width, height = 1920, 1080
     canvas = Image.new("RGBA", (width, height), (11, 11, 17, 255))
     draw = ImageDraw.Draw(canvas)
@@ -2433,7 +2434,7 @@ def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
 def match_logo_png():
     """Return a raster match mark for IPTV clients that cannot render SVG."""
     args = request.args
-    logo_status: list[bool] = []
+    logo_status: list[str] = []
     png = _build_match_logo_png(
         _safe_logo_source(args.get("home")),
         _safe_logo_source(args.get("league")),
@@ -2449,8 +2450,8 @@ def match_logo_png():
     )
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Match-Logo-Assets"] = ",".join(
-        f"{label}={'ok' if loaded else 'fallback'}"
-        for label, loaded in zip(("home", "league", "away"), logo_status)
+        f"{label}={status}"
+        for label, status in zip(("home", "league", "away"), logo_status)
     )
     return response
 
