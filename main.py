@@ -6,7 +6,6 @@ import os
 import re
 import threading
 import time
-from functools import lru_cache
 from io import BytesIO
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -323,7 +322,7 @@ def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, s
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
-MATCH_LOGO_RENDER_VERSION = "5"
+MATCH_LOGO_RENDER_VERSION = "6"
 
 
 def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
@@ -2208,10 +2207,14 @@ _LOGO_IMAGE_ALLOWED_HOSTS = frozenset({
 })
 _LOGO_IMAGE_MAX_BYTES = 512 * 1024
 _LOGO_IMAGE_MAX_PIXELS = 4_000_000
+_LOGO_IMAGE_CACHE_MAXSIZE = 96
+_LOGO_IMAGE_CACHE_TTL_SECONDS = 6 * 60 * 60
+_LOGO_IMAGE_NEGATIVE_CACHE_TTL_SECONDS = 30
+_logo_asset_cache: dict[str, tuple[float, bytes]] = {}
+_logo_asset_cache_lock = threading.Lock()
 
 
-@lru_cache(maxsize=96)
-def _download_logo_asset(url: str) -> bytes:
+def _fetch_logo_asset(url: str) -> bytes:
     """Fetch only known public logo CDNs; never proxy arbitrary URL parameters."""
     safe_url = _safe_logo_source(url)
     if not safe_url:
@@ -2260,6 +2263,37 @@ def _download_logo_asset(url: str) -> bytes:
         return b""
     except Exception:
         return b""
+
+
+def _download_logo_asset(url: str) -> bytes:
+    """Cache valid logos briefly and retry transient failures instead of pinning them."""
+    safe_url = _safe_logo_source(url)
+    if not safe_url:
+        return b""
+
+    now = time.monotonic()
+    with _logo_asset_cache_lock:
+        cached = _logo_asset_cache.get(safe_url)
+        if cached is not None:
+            expires_at, asset = cached
+            if expires_at > now:
+                _logo_asset_cache.pop(safe_url)
+                _logo_asset_cache[safe_url] = cached
+                return asset
+            _logo_asset_cache.pop(safe_url, None)
+
+    asset = _fetch_logo_asset(safe_url)
+    ttl = (
+        _LOGO_IMAGE_CACHE_TTL_SECONDS
+        if asset
+        else _LOGO_IMAGE_NEGATIVE_CACHE_TTL_SECONDS
+    )
+    with _logo_asset_cache_lock:
+        _logo_asset_cache.pop(safe_url, None)
+        _logo_asset_cache[safe_url] = (time.monotonic() + ttl, asset)
+        while len(_logo_asset_cache) > _LOGO_IMAGE_CACHE_MAXSIZE:
+            _logo_asset_cache.pop(next(iter(_logo_asset_cache)))
+    return asset
 
 
 def _logo_asset_candidates(url: str) -> tuple[str, ...]:
@@ -2392,7 +2426,9 @@ def match_logo_png():
         args.get("away_name", "Away")[:80],
     )
     response = Response(png, mimetype="image/png")
-    response.headers["Cache-Control"] = "public, max-age=3600"
+    response.headers["Cache-Control"] = (
+        "public, max-age=60, s-maxage=60, stale-while-revalidate=120"
+    )
     response.headers["X-Content-Type-Options"] = "nosniff"
     return response
 

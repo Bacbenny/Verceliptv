@@ -367,6 +367,8 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, "image/png")
         self.assertTrue(response.data.startswith(b"\x89PNG\r\n\x1a\n"))
+        self.assertIn("max-age=60", response.headers["Cache-Control"])
+        self.assertIn("s-maxage=60", response.headers["Cache-Control"])
         result = Image.open(BytesIO(response.data))
         self.assertEqual(result.size, (1920, 1080))
         self.assertEqual(fetch.call_count, 3)
@@ -388,7 +390,7 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(result.getpixel((10, 10)), (11, 11, 17))
         self.assertEqual(result.getpixel((960, 160)), (255, 255, 255))
         self.assertEqual(result.getpixel((200, 60)), (5, 128, 245))
-        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "5")
+        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "6")
 
     def test_live_phalang_logo_hosts_use_larger_source_images(self):
         self.assertIn("thumb.wikimedia.org", main._LOGO_IMAGE_ALLOWED_HOSTS)
@@ -430,6 +432,36 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(response.mimetype, "image/png")
         fetch.assert_not_called()
 
+    def test_transient_logo_failure_is_retried_after_short_negative_cache(self):
+        url = (
+            "https://imgts.sportpulseapiz.com/football/team/transient/image/small"
+        )
+        now = [100.0]
+        with main._logo_asset_cache_lock:
+            main._logo_asset_cache.clear()
+        try:
+            with (
+                patch.object(
+                    main,
+                    "_fetch_logo_asset",
+                    side_effect=[b"", b"recovered-logo"],
+                ) as fetch,
+                patch.object(main.time, "monotonic", side_effect=lambda: now[0]),
+            ):
+                self.assertEqual(main._download_logo_asset(url), b"")
+                self.assertEqual(main._download_logo_asset(url), b"")
+                fetch.assert_called_once_with(url)
+
+                now[0] += main._LOGO_IMAGE_NEGATIVE_CACHE_TTL_SECONDS + 1
+                self.assertEqual(
+                    main._download_logo_asset(url),
+                    b"recovered-logo",
+                )
+                self.assertEqual(fetch.call_count, 2)
+        finally:
+            with main._logo_asset_cache_lock:
+                main._logo_asset_cache.clear()
+
     def test_match_logo_png_rejects_unapproved_asset_hosts(self):
         self.assertEqual(
             main._download_logo_asset("https://not-approved.example/logo.png"),
@@ -441,14 +473,14 @@ class PhaLangRealtimeTests(unittest.TestCase):
         repaired = main._repair_match_logo_urls(cached)
         self.assertIn("/match-logo.png?", repaired)
         self.assertNotIn("/match-logo.svg?", repaired)
-        self.assertIn("home=x&v=5", repaired)
+        self.assertIn("home=x&v=6", repaired)
 
         old_png = (
             '#EXTINF:-1 tvg-logo="https://iptv.example/match-logo.png'
             '?home=x&v=4",Match\n'
         )
         repaired_png = main._repair_match_logo_urls(old_png)
-        self.assertIn("home=x&v=5", repaired_png)
+        self.assertIn("home=x&v=6", repaired_png)
         self.assertNotIn("v=4", repaired_png)
 
     def test_match_logo_svg_embeds_the_three_logos_in_order(self):
