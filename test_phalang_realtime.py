@@ -368,16 +368,58 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(response.mimetype, "image/png")
         self.assertTrue(response.data.startswith(b"\x89PNG\r\n\x1a\n"))
         result = Image.open(BytesIO(response.data))
-        self.assertEqual(result.size, (960, 540))
+        self.assertEqual(result.size, (1920, 1080))
         self.assertEqual(fetch.call_count, 3)
 
-    def test_match_logo_png_uses_white_card_with_colored_frame(self):
-        response = main.app.test_client().get("/match-logo.png")
+    def test_match_logo_png_is_full_hd_with_larger_team_badges(self):
+        with patch.object(main, "_draw_match_logo_badge") as draw_badge:
+            response = main.app.test_client().get("/match-logo.png")
+
         result = Image.open(BytesIO(response.data)).convert("RGB")
+        self.assertEqual(result.size, (1920, 1080))
+        self.assertEqual(
+            [call.args[2] for call in draw_badge.call_args_list],
+            [560, 360, 560],
+        )
+        self.assertEqual(
+            [call.args[1] for call in draw_badge.call_args_list],
+            [(400, 540), (960, 540), (1520, 540)],
+        )
         self.assertEqual(result.getpixel((10, 10)), (11, 11, 17))
-        self.assertEqual(result.getpixel((480, 80)), (255, 255, 255))
-        self.assertEqual(result.getpixel((100, 30)), (5, 128, 245))
-        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "4")
+        self.assertEqual(result.getpixel((960, 160)), (255, 255, 255))
+        self.assertEqual(result.getpixel((200, 60)), (5, 128, 245))
+        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "5")
+
+    def test_live_phalang_logo_hosts_use_larger_source_images(self):
+        self.assertIn("thumb.wikimedia.org", main._LOGO_IMAGE_ALLOWED_HOSTS)
+        self.assertIn("img0.aiscore.com", main._LOGO_IMAGE_ALLOWED_HOSTS)
+        low_resolution = (
+            "https://img0.aiscore.com/volleyball/team/"
+            "b037a1bf40c26a9e0bad50963dbcb8c4.png!w60"
+        )
+        self.assertEqual(
+            main._logo_asset_candidates(low_resolution),
+            (
+                "https://img0.aiscore.com/volleyball/team/"
+                "b037a1bf40c26a9e0bad50963dbcb8c4.png!w300",
+                low_resolution,
+            ),
+        )
+        already_large = low_resolution.replace("!w60", "!w300")
+        self.assertEqual(main._logo_asset_candidates(already_large), (already_large,))
+
+        wikimedia_logo = (
+            "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/"
+            "Flag_of_Vietnam.svg/330px-Flag_of_Vietnam.svg.png"
+        )
+        self.assertEqual(
+            main._logo_asset_candidates(wikimedia_logo),
+            (
+                "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/"
+                "Flag_of_Vietnam.svg/960px-Flag_of_Vietnam.svg.png",
+                wikimedia_logo,
+            ),
+        )
 
     def test_match_logo_png_uses_initials_when_source_logos_are_missing(self):
         with patch.object(main, "_download_logo_asset") as fetch:
@@ -394,11 +436,20 @@ class PhaLangRealtimeTests(unittest.TestCase):
             b"",
         )
 
-    def test_cached_match_logo_urls_migrate_to_png(self):
+    def test_cached_match_logo_urls_migrate_and_invalidate_old_images(self):
         cached = '#EXTINF:-1 tvg-logo="https://iptv.example/match-logo.svg?home=x",Match\n'
         repaired = main._repair_match_logo_urls(cached)
         self.assertIn("/match-logo.png?", repaired)
         self.assertNotIn("/match-logo.svg?", repaired)
+        self.assertIn("home=x&v=5", repaired)
+
+        old_png = (
+            '#EXTINF:-1 tvg-logo="https://iptv.example/match-logo.png'
+            '?home=x&v=4",Match\n'
+        )
+        repaired_png = main._repair_match_logo_urls(old_png)
+        self.assertIn("home=x&v=5", repaired_png)
+        self.assertNotIn("v=4", repaired_png)
 
     def test_match_logo_svg_embeds_the_three_logos_in_order(self):
         response = main.app.test_client().get(

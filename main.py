@@ -323,7 +323,7 @@ def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, s
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
-MATCH_LOGO_RENDER_VERSION = "4"
+MATCH_LOGO_RENDER_VERSION = "5"
 
 
 def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
@@ -1694,10 +1694,29 @@ def _repair_phalang_playlist_urls(text: str) -> str:
 
 # ══════════════════════════════════════════════════════════════════════════════
 def _repair_match_logo_urls(text: str) -> str:
-    """Migrate cached match-logo links from SVG to raster PNG for IPTV clients."""
+    """Migrate cached logo links and invalidate rendered-image caches."""
     if not text:
         return text
-    return re.sub(r"/match-logo\.svg(?=\?)", "/match-logo.png", text)
+    migrated = re.sub(r"/match-logo\.svg(?=\?)", "/match-logo.png", text)
+
+    def bump_version(match: re.Match) -> str:
+        logo_url = match.group(1)
+        version = re.search(r"([?&]v=)[^&]*", logo_url)
+        if version:
+            return (
+                logo_url[:version.start()]
+                + version.group(1)
+                + MATCH_LOGO_RENDER_VERSION
+                + logo_url[version.end():]
+            )
+        separator = "&" if "?" in logo_url else "?"
+        return f"{logo_url}{separator}v={MATCH_LOGO_RENDER_VERSION}"
+
+    return re.sub(
+        r"(/match-logo\.png(?:\?[^\"\s]*)?)",
+        bump_version,
+        migrated,
+    )
 
 
 #  Cache helpers — build compressed + ETag
@@ -2178,10 +2197,12 @@ _LOGO_IMAGE_ALLOWED_HOSTS = frozenset({
     "cdn-img.thethao247.vn",
     "cdn.keobongvip.digital",
     "cdn.jsdelivr.net",
+    "img0.aiscore.com",
     "imgts.sportpulseapiz.com",
     "images.keovip88.net",
     "static.wikia.nocookie.net",
     "static.flashscore.com",
+    "thumb.wikimedia.org",
     "upload.wikimedia.org",
     "encrypted-tbn0.gstatic.com",
 })
@@ -2206,31 +2227,68 @@ def _download_logo_asset(url: str) -> bytes:
             or parsed.password
         ):
             return b""
-        with requests.get(
-            safe_url,
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=(2.5, 4),
-            allow_redirects=False,
-            stream=True,
-        ) as response:
-            if response.status_code != 200:
-                return b""
-            content_type = response.headers.get("Content-Type", "")
-            content_type = content_type.split(";", 1)[0].strip().lower()
-            if content_type not in {"image/png", "image/jpeg", "image/webp", "image/gif"}:
-                return b""
-            length = response.headers.get("Content-Length")
-            if length and int(length) > _LOGO_IMAGE_MAX_BYTES:
-                return b""
-            content = bytearray()
-            for chunk in response.iter_content(chunk_size=32 * 1024):
-                if chunk:
-                    content.extend(chunk)
-                    if len(content) > _LOGO_IMAGE_MAX_BYTES:
-                        return b""
-            return bytes(content)
+        for asset_url in _logo_asset_candidates(safe_url):
+            try:
+                with requests.get(
+                    asset_url,
+                    headers={"User-Agent": "Mozilla/5.0"},
+                    timeout=(2.5, 4),
+                    allow_redirects=False,
+                    stream=True,
+                ) as response:
+                    if response.status_code != 200:
+                        continue
+                    content_type = response.headers.get("Content-Type", "")
+                    content_type = content_type.split(";", 1)[0].strip().lower()
+                    if content_type not in {
+                        "image/png", "image/jpeg", "image/webp", "image/gif"
+                    }:
+                        continue
+                    length = response.headers.get("Content-Length")
+                    if length and int(length) > _LOGO_IMAGE_MAX_BYTES:
+                        continue
+                    content = bytearray()
+                    for chunk in response.iter_content(chunk_size=32 * 1024):
+                        if chunk:
+                            content.extend(chunk)
+                            if len(content) > _LOGO_IMAGE_MAX_BYTES:
+                                break
+                    if content and len(content) <= _LOGO_IMAGE_MAX_BYTES:
+                        return bytes(content)
+            except Exception:
+                continue
+        return b""
     except Exception:
         return b""
+
+
+def _logo_asset_candidates(url: str) -> tuple[str, ...]:
+    """Prefer larger known-provider logos, then fall back to the source URL."""
+    try:
+        parsed = urlsplit(url)
+        host = (parsed.hostname or "").lower().rstrip(".")
+    except Exception:
+        return (url,)
+
+    if host == "img0.aiscore.com":
+        match = re.search(r"(?i)(\.(?:png|jpe?g|webp))!w(\d+)$", parsed.path)
+        if not match or int(match.group(2)) >= 300:
+            return (url,)
+        high_resolution_path = (
+            parsed.path[:match.start()] + match.group(1) + "!w300"
+        )
+    elif host == "thumb.wikimedia.org":
+        match = re.search(r"/(\d+)px-[^/]+$", parsed.path)
+        if not match or int(match.group(1)) >= 960:
+            return (url,)
+        high_resolution_path = (
+            parsed.path[:match.start(1)] + "960" + parsed.path[match.end(1):]
+        )
+    else:
+        return (url,)
+
+    high_resolution_url = parsed._replace(path=high_resolution_path).geturl()
+    return (high_resolution_url, url)
 
 
 def _logo_initials(name: str) -> str:
@@ -2294,28 +2352,28 @@ def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -
 
 def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
                           home_name: str, league_name: str, away_name: str) -> bytes:
-    width, height = 960, 540
+    width, height = 1920, 1080
     canvas = Image.new("RGBA", (width, height), (11, 11, 17, 255))
     draw = ImageDraw.Draw(canvas)
     draw.rounded_rectangle(
-        (18, 18, width - 18, height - 18),
-        radius=60,
+        (36, 36, width - 36, height - 36),
+        radius=120,
         fill=(255, 255, 255, 255),
     )
     blue = (5, 128, 245, 255)
     cyan = (5, 203, 193, 255)
     frame_accents = (
-        (blue, ((60, 25), (370, 25), (352, 42), (43, 42))),
-        (cyan, ((550, 25), (780, 25), (763, 42), (533, 42))),
-        (blue, ((866, 25), (914, 25), (898, 42), (850, 42))),
-        (blue, ((43, 498), (300, 498), (284, 515), (60, 515))),
-        (cyan, ((570, 498), (914, 498), (898, 515), (553, 515))),
+        (blue, ((120, 50), (740, 50), (704, 84), (86, 84))),
+        (cyan, ((1100, 50), (1560, 50), (1526, 84), (1066, 84))),
+        (blue, ((1732, 50), (1828, 50), (1796, 84), (1700, 84))),
+        (blue, ((86, 996), (600, 996), (568, 1030), (120, 1030))),
+        (cyan, ((1140, 996), (1828, 996), (1796, 1030), (1106, 1030))),
     )
     for color, points in frame_accents:
         draw.polygon(points, fill=color)
-    _draw_match_logo_badge(canvas, (232, 270), 246, home_url, home_name)
-    _draw_match_logo_badge(canvas, (480, 270), 196, league_url, league_name)
-    _draw_match_logo_badge(canvas, (728, 270), 246, away_url, away_name)
+    _draw_match_logo_badge(canvas, (400, 540), 560, home_url, home_name)
+    _draw_match_logo_badge(canvas, (960, 540), 360, league_url, league_name)
+    _draw_match_logo_badge(canvas, (1520, 540), 560, away_url, away_name)
     output = BytesIO()
     canvas.convert("RGB").save(output, format="PNG", optimize=True)
     return output.getvalue()
