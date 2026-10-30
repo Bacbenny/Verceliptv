@@ -2349,7 +2349,7 @@ def _match_logo_font(size: int):
         return ImageFont.load_default(size=size)
 
 
-def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -> None:
+def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -> bool:
     cx, cy = center
     radius = diameter // 2
     draw = ImageDraw.Draw(canvas)
@@ -2374,7 +2374,7 @@ def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -
                 logo,
                 (int(cx - logo.width / 2), int(cy - logo.height / 2)),
             )
-            return
+            return True
         except Exception:
             pass
     draw.ellipse(
@@ -2392,10 +2392,12 @@ def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -
         font=font,
         fill=(24, 32, 48, 255),
     )
+    return False
 
 
 def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
-                          home_name: str, league_name: str, away_name: str) -> bytes:
+                          home_name: str, league_name: str, away_name: str,
+                          logo_status: list[bool] | None = None) -> bytes:
     width, height = 1920, 1080
     canvas = Image.new("RGBA", (width, height), (11, 11, 17, 255))
     draw = ImageDraw.Draw(canvas)
@@ -2415,9 +2417,13 @@ def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
     )
     for color, points in frame_accents:
         draw.polygon(points, fill=color)
-    _draw_match_logo_badge(canvas, (400, 540), 560, home_url, home_name)
-    _draw_match_logo_badge(canvas, (960, 540), 360, league_url, league_name)
-    _draw_match_logo_badge(canvas, (1520, 540), 560, away_url, away_name)
+    status = [
+        _draw_match_logo_badge(canvas, (400, 540), 560, home_url, home_name),
+        _draw_match_logo_badge(canvas, (960, 540), 360, league_url, league_name),
+        _draw_match_logo_badge(canvas, (1520, 540), 560, away_url, away_name),
+    ]
+    if logo_status is not None:
+        logo_status.extend(status)
     output = BytesIO()
     canvas.convert("RGB").save(output, format="PNG", optimize=True)
     return output.getvalue()
@@ -2427,6 +2433,7 @@ def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
 def match_logo_png():
     """Return a raster match mark for IPTV clients that cannot render SVG."""
     args = request.args
+    logo_status: list[bool] = []
     png = _build_match_logo_png(
         _safe_logo_source(args.get("home")),
         _safe_logo_source(args.get("league")),
@@ -2434,12 +2441,17 @@ def match_logo_png():
         args.get("home_name", "Home")[:80],
         args.get("league_name", "League")[:80],
         args.get("away_name", "Away")[:80],
+        logo_status,
     )
     response = Response(png, mimetype="image/png")
     response.headers["Cache-Control"] = (
         "public, max-age=60, s-maxage=60, stale-while-revalidate=120"
     )
     response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Match-Logo-Assets"] = ",".join(
+        f"{label}={'ok' if loaded else 'fallback'}"
+        for label, loaded in zip(("home", "league", "away"), logo_status)
+    )
     return response
 
 
