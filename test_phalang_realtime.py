@@ -384,7 +384,7 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertNotEqual(result.getpixel((300, 500)), result.getpixel((1600, 500)))
         self.assertLess(max(result.getpixel((512, 250))), 230)
         self.assertLess(max(result.getpixel((960, 350))), 230)
-        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "9")
+        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "10")
 
     def test_match_logo_png_displays_larger_team_logos(self):
         asset = BytesIO()
@@ -400,7 +400,31 @@ class PhaLangRealtimeTests(unittest.TestCase):
 
         result = Image.open(BytesIO(response.data)).convert("RGB")
         green_pixels = sum(1 for pixel in result.getdata() if pixel == (18, 230, 80))
-        self.assertGreater(green_pixels, 60_000)
+        self.assertGreater(green_pixels, 450_000)
+
+    def test_logo_download_accepts_and_downscales_large_phalang_assets(self):
+        asset = BytesIO()
+        Image.new("RGBA", (2049, 2049), (220, 30, 60, 255)).save(asset, format="PNG")
+        png_bytes = asset.getvalue()
+        response = MagicMock()
+        response.status_code = 200
+        response.headers = {
+            "Content-Type": "image/png",
+            "Content-Length": str(len(png_bytes)),
+        }
+        response.iter_content.return_value = [png_bytes]
+        response.__enter__.return_value = response
+
+        with patch.object(main._http_session, "get", return_value=response):
+            main._download_logo_asset.cache_clear()
+            normalized = main._download_logo_asset(
+                "https://imgts.sportpulseapiz.com/football/team/large/image"
+            )
+
+        result = Image.open(BytesIO(normalized)).convert("RGBA")
+        self.assertEqual(result.size, (720, 720))
+        self.assertEqual(result.getpixel((360, 360)), (220, 30, 60, 255))
+        main._download_logo_asset.cache_clear()
 
     def test_match_logo_uses_bundled_roboto_condensed_font(self):
         self.assertIn("Roboto Condensed", main._match_logo_font(32).getname()[0])
@@ -413,6 +437,22 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, "image/png")
         fetch.assert_not_called()
+
+    def test_unavailable_team_image_keeps_a_visible_initials_badge(self):
+        with patch.object(main, "_download_logo_asset", return_value=b""):
+            response = main.app.test_client().get(
+                "/match-logo.png?home=https%3A%2F%2Fassets.example%2Fhome.png"
+                "&away=https%3A%2F%2Fassets.example%2Faway.png"
+                "&home_name=TP+Ho+Chi+Minh&away_name=Home+FC"
+            )
+
+        result = Image.open(BytesIO(response.data)).convert("RGB")
+        home_badge = result.crop((242, 140, 782, 680))
+        white_pixels = sum(
+            1 for pixel in home_badge.getdata() if min(pixel) > 245
+        )
+        self.assertEqual(result.size, (1920, 1080))
+        self.assertGreater(white_pixels, 1_000)
 
     def test_match_logo_png_ignores_legacy_overlay_query_parameters(self):
         client = main.app.test_client()
@@ -477,7 +517,10 @@ class PhaLangRealtimeTests(unittest.TestCase):
         with patch.object(main._http_session, "get", return_value=response) as fetch:
             for url, _ in urls:
                 main._download_logo_asset.cache_clear()
-                self.assertEqual(main._download_logo_asset(url), png_bytes)
+                normalized = main._download_logo_asset(url)
+                self.assertTrue(normalized.startswith(b"\x89PNG\r\n\x1a\n"))
+                result = Image.open(BytesIO(normalized))
+                self.assertEqual(result.size, (8, 8))
 
         self.assertEqual(
             [call.args[0] for call in fetch.call_args_list],
@@ -489,10 +532,10 @@ class PhaLangRealtimeTests(unittest.TestCase):
         cached = '#EXTINF:-1 tvg-logo="https://iptv.example/match-logo.svg?home=x&v=4",Match\n'
         repaired = main._repair_match_logo_urls(cached)
         self.assertIn("/match-logo.png?", repaired)
-        self.assertIn("&v=9", repaired)
+        self.assertIn("&v=10", repaired)
         self.assertNotIn("/match-logo.svg?", repaired)
         older = 'tvg-logo="https://iptv.example/match-logo.png?home=x"'
-        self.assertIn("&v=9", main._repair_match_logo_urls(older))
+        self.assertIn("&v=10", main._repair_match_logo_urls(older))
 
     def test_match_logo_svg_embeds_the_three_logos_in_order(self):
         response = main.app.test_client().get(

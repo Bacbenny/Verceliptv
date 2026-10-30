@@ -324,7 +324,7 @@ def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, s
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
-MATCH_LOGO_RENDER_VERSION = "9"
+MATCH_LOGO_RENDER_VERSION = "10"
 
 
 def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
@@ -2201,8 +2201,8 @@ _LOGO_IMAGE_ALLOWED_HOSTS = frozenset({
     "upload.wikimedia.org",
     "encrypted-tbn0.gstatic.com",
 })
-_LOGO_IMAGE_MAX_BYTES = 512 * 1024
-_LOGO_IMAGE_MAX_PIXELS = 4_000_000
+_LOGO_IMAGE_MAX_BYTES = 4 * 1024 * 1024
+_LOGO_IMAGE_MAX_PIXELS = 16_000_000
 
 
 def _logo_asset_download_url(url: str) -> str:
@@ -2222,7 +2222,7 @@ def _logo_asset_download_url(url: str) -> str:
     return urlunsplit((parsed.scheme, parsed.netloc, path, parsed.query, parsed.fragment))
 
 
-@lru_cache(maxsize=96)
+@lru_cache(maxsize=64)
 def _download_logo_asset(url: str) -> bytes:
     """Fetch only known public logo CDNs; never proxy arbitrary URL parameters."""
     safe_url = _safe_logo_source(url)
@@ -2262,7 +2262,27 @@ def _download_logo_asset(url: str) -> bytes:
                     content.extend(chunk)
                     if len(content) > _LOGO_IMAGE_MAX_BYTES:
                         return b""
-            return bytes(content)
+            return _normalize_logo_asset(bytes(content))
+    except Exception:
+        return b""
+
+
+def _normalize_logo_asset(content: bytes) -> bytes:
+    """Keep large source crests sharp enough while caching a bounded preview."""
+    try:
+        with Image.open(BytesIO(content)) as source:
+            if (
+                source.format not in {"PNG", "JPEG", "WEBP", "GIF"}
+                or source.width <= 0
+                or source.height <= 0
+                or source.width * source.height > _LOGO_IMAGE_MAX_PIXELS
+            ):
+                return b""
+            source.thumbnail((720, 720), Image.Resampling.LANCZOS)
+            logo = source.convert("RGBA")
+            output = BytesIO()
+            logo.save(output, format="PNG", optimize=True)
+            return output.getvalue()
     except Exception:
         return b""
 
@@ -2459,8 +2479,8 @@ def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
 
     draw = ImageDraw.Draw(canvas)
     # Composite source crests directly over the team colors, without white disks.
-    _draw_match_logo_badge(canvas, (512, 436), 440, home_url, home_name, home_asset)
-    _draw_match_logo_badge(canvas, (1408, 436), 440, away_url, away_name, away_asset)
+    _draw_match_logo_badge(canvas, (512, 410), 540, home_url, home_name, home_asset)
+    _draw_match_logo_badge(canvas, (1408, 410), 540, away_url, away_name, away_asset)
 
     home_label = str(home_name or "Home")[:80]
     away_label = str(away_name or "Away")[:80]
