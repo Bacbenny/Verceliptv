@@ -322,7 +322,7 @@ def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, s
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
-MATCH_LOGO_RENDER_VERSION = "7"
+MATCH_LOGO_RENDER_VERSION = "8"
 
 
 def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
@@ -2248,41 +2248,54 @@ def _fetch_logo_asset(url: str, diagnostics: list[str] | None = None) -> bytes:
         elif host in {"cdn.keobongvip.digital", "images.keovip88.net"}:
             headers["Referer"] = f"{GIOVANG_FRONTEND_URL.rstrip('/')}/"
         for asset_url in _logo_asset_candidates(safe_url):
-            try:
-                with _http_session.get(
-                    asset_url,
-                    headers=headers,
-                    timeout=(2.5, 4),
-                    allow_redirects=False,
-                    stream=True,
-                ) as response:
-                    if response.status_code != 200:
-                        record(f"http-{response.status_code}")
-                        continue
-                    content_type = response.headers.get("Content-Type", "")
-                    content_type = content_type.split(";", 1)[0].strip().lower()
-                    if content_type not in {
-                        "image/png", "image/jpeg", "image/webp", "image/gif"
-                    }:
-                        record("unsupported-content-type")
-                        continue
-                    length = response.headers.get("Content-Length")
-                    if length and int(length) > _LOGO_IMAGE_MAX_BYTES:
-                        record("asset-too-large")
-                        continue
-                    content = bytearray()
-                    for chunk in response.iter_content(chunk_size=32 * 1024):
-                        if chunk:
-                            content.extend(chunk)
-                            if len(content) > _LOGO_IMAGE_MAX_BYTES:
-                                break
-                    if content and len(content) <= _LOGO_IMAGE_MAX_BYTES:
-                        record("ok")
-                        return bytes(content)
-                    record("empty-or-too-large-body")
-            except Exception as exc:
-                record(f"request-{type(exc).__name__}")
-                continue
+            for attempt in range(2):
+                client = _http_session
+                close_client = False
+                if attempt:
+                    client = requests.Session()
+                    client.verify = _http_session.verify
+                    client.trust_env = _http_session.trust_env
+                    client.headers.update(headers)
+                    client.headers["Connection"] = "close"
+                    close_client = True
+                try:
+                    with client.get(
+                        asset_url,
+                        headers=headers,
+                        timeout=(2.5, 4),
+                        allow_redirects=False,
+                        stream=True,
+                    ) as response:
+                        if response.status_code != 200:
+                            record(f"http-{response.status_code}")
+                            continue
+                        content_type = response.headers.get("Content-Type", "")
+                        content_type = content_type.split(";", 1)[0].strip().lower()
+                        if content_type not in {
+                            "image/png", "image/jpeg", "image/webp", "image/gif"
+                        }:
+                            record("unsupported-content-type")
+                            continue
+                        length = response.headers.get("Content-Length")
+                        if length and int(length) > _LOGO_IMAGE_MAX_BYTES:
+                            record("asset-too-large")
+                            continue
+                        content = bytearray()
+                        for chunk in response.iter_content(chunk_size=32 * 1024):
+                            if chunk:
+                                content.extend(chunk)
+                                if len(content) > _LOGO_IMAGE_MAX_BYTES:
+                                    break
+                        if content and len(content) <= _LOGO_IMAGE_MAX_BYTES:
+                            record("ok")
+                            return bytes(content)
+                        record("empty-or-too-large-body")
+                except Exception as exc:
+                    status = type(exc).__name__
+                    record(f"retry-{status}" if not attempt else f"request-{status}")
+                finally:
+                    if close_client:
+                        client.close()
         if diagnostics is not None and not diagnostics:
             record("no-candidate")
         return b""
