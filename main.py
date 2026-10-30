@@ -6,13 +6,12 @@ import os
 import re
 import threading
 import time
-import colorsys
 from functools import lru_cache
 from io import BytesIO
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
-from urllib.parse import quote, urlencode, urljoin, urlsplit, urlunsplit
+from urllib.parse import quote, urlencode, urljoin, urlsplit
 
 import cloudscraper
 import certifi
@@ -83,7 +82,7 @@ GIOVANG_API_HOST     = os.environ.get(
     "GIOVANG_API_HOST", "https://live-api.keonhacaitp.one"
 )
 # Bound slow upstream responses so one source cannot hold a cold playlist open.
-GIOVANG_API_TIMEOUT = float(os.environ.get("GIOVANG_API_TIMEOUT", "15"))
+GIOVANG_API_TIMEOUT = float(os.environ.get("GIOVANG_API_TIMEOUT", "10"))
 GIOVANG_DETAIL_WINDOW_SECONDS = max(
     0, int(os.environ.get("GIOVANG_DETAIL_WINDOW_SECONDS", "21600"))
 )  # fetch upcoming/live fixture details only inside this window
@@ -324,7 +323,7 @@ def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, s
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
-MATCH_LOGO_RENDER_VERSION = "10"
+MATCH_LOGO_RENDER_VERSION = "4"
 
 
 def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
@@ -1224,7 +1223,7 @@ def _fetch_phalang_stream(match_id: str) -> str:
     api = _get_phalang_api_url()
     try:
         resp = _http_session.get(f"{api}/match/{match_id}/live",
-                                 headers=_PHALANG_HEADERS, timeout=15)
+                                 headers=_PHALANG_HEADERS, timeout=10)
         if resp.status_code != 200:
             return ""
         data = resp.json()
@@ -1564,9 +1563,9 @@ def _build_phalang_lines(matches: list, use_prewarmed_live: bool = False) -> lis
             continue
         is_live = bool(match.get("is_live"))
 
-        home        = _fixture_name(match.get("team_1"), "Home")
-        away        = _fixture_name(match.get("team_2"), "Away")
-        league      = _fixture_name(match.get("league"), "")
+        home        = (match.get("team_1") or "Home").strip()
+        away        = (match.get("team_2") or "Away").strip()
+        league      = (match.get("league") or "").strip()
         commentator = (match.get("blv") or "").strip()
         logo        = _phalang_logo(match)
         start_str   = match.get("start_date", "")
@@ -1695,23 +1694,10 @@ def _repair_phalang_playlist_urls(text: str) -> str:
 
 # ══════════════════════════════════════════════════════════════════════════════
 def _repair_match_logo_urls(text: str) -> str:
-    """Migrate old match-logo links and bump the cached renderer version."""
+    """Migrate cached match-logo links from SVG to raster PNG for IPTV clients."""
     if not text:
         return text
-    text = re.sub(r"/match-logo\.svg(?=\?)", "/match-logo.png", text)
-
-    def bump_version(logo) -> str:
-        url = logo.group(1)
-        if re.search(r"[?&]v=\d+", url):
-            return re.sub(
-                r"([?&]v=)\d+",
-                lambda version: f"{version.group(1)}{MATCH_LOGO_RENDER_VERSION}",
-                url,
-            )
-        separator = "&" if "?" in url else "?"
-        return f"{url}{separator}v={MATCH_LOGO_RENDER_VERSION}"
-
-    return re.sub(r"(/match-logo\.png(?:\?[^\"\s]*)?)", bump_version, text)
+    return re.sub(r"/match-logo\.svg(?=\?)", "/match-logo.png", text)
 
 
 #  Cache helpers — build compressed + ETag
@@ -2192,43 +2178,23 @@ _LOGO_IMAGE_ALLOWED_HOSTS = frozenset({
     "cdn-img.thethao247.vn",
     "cdn.keobongvip.digital",
     "cdn.jsdelivr.net",
-    "img0.aiscore.com",
     "imgts.sportpulseapiz.com",
     "images.keovip88.net",
     "static.wikia.nocookie.net",
     "static.flashscore.com",
-    "thumb.wikimedia.org",
     "upload.wikimedia.org",
     "encrypted-tbn0.gstatic.com",
 })
-_LOGO_IMAGE_MAX_BYTES = 4 * 1024 * 1024
-_LOGO_IMAGE_MAX_PIXELS = 16_000_000
+_LOGO_IMAGE_MAX_BYTES = 512 * 1024
+_LOGO_IMAGE_MAX_PIXELS = 4_000_000
 
 
-def _logo_asset_download_url(url: str) -> str:
-    """Prefer larger variants from the logo CDNs used by PhaLang fixtures."""
-    safe_url = _safe_logo_source(url)
-    if not safe_url:
-        return ""
-    parsed = urlsplit(safe_url)
-    host = (parsed.hostname or "").lower().rstrip(".")
-    path = parsed.path
-    if host == "imgts.sportpulseapiz.com":
-        path = re.sub(r"/image/small/?$", "/image", path)
-    elif host == "img0.aiscore.com":
-        path = re.sub(r"\.png!w(?:30|60)$", ".png", path)
-    elif host == "thumb.wikimedia.org":
-        path = re.sub(r"/(?:250|330)px-", "/500px-", path)
-    return urlunsplit((parsed.scheme, parsed.netloc, path, parsed.query, parsed.fragment))
-
-
-@lru_cache(maxsize=64)
+@lru_cache(maxsize=96)
 def _download_logo_asset(url: str) -> bytes:
     """Fetch only known public logo CDNs; never proxy arbitrary URL parameters."""
     safe_url = _safe_logo_source(url)
     if not safe_url:
         return b""
-    download_url = _logo_asset_download_url(safe_url)
     try:
         parsed = urlsplit(safe_url)
         host = (parsed.hostname or "").lower().rstrip(".")
@@ -2240,8 +2206,8 @@ def _download_logo_asset(url: str) -> bytes:
             or parsed.password
         ):
             return b""
-        with _http_session.get(
-            download_url,
+        with requests.get(
+            safe_url,
             headers={"User-Agent": "Mozilla/5.0"},
             timeout=(2.5, 4),
             allow_redirects=False,
@@ -2262,27 +2228,7 @@ def _download_logo_asset(url: str) -> bytes:
                     content.extend(chunk)
                     if len(content) > _LOGO_IMAGE_MAX_BYTES:
                         return b""
-            return _normalize_logo_asset(bytes(content))
-    except Exception:
-        return b""
-
-
-def _normalize_logo_asset(content: bytes) -> bytes:
-    """Keep large source crests sharp enough while caching a bounded preview."""
-    try:
-        with Image.open(BytesIO(content)) as source:
-            if (
-                source.format not in {"PNG", "JPEG", "WEBP", "GIF"}
-                or source.width <= 0
-                or source.height <= 0
-                or source.width * source.height > _LOGO_IMAGE_MAX_PIXELS
-            ):
-                return b""
-            source.thumbnail((720, 720), Image.Resampling.LANCZOS)
-            logo = source.convert("RGBA")
-            output = BytesIO()
-            logo.save(output, format="PNG", optimize=True)
-            return output.getvalue()
+            return bytes(content)
     except Exception:
         return b""
 
@@ -2294,59 +2240,18 @@ def _logo_initials(name: str) -> str:
     return "".join(word[0] for word in words[:2]).upper() or "?"
 
 
-@lru_cache(maxsize=64)
 def _match_logo_font(size: int):
-    bundled_font = os.path.join(
-        os.path.dirname(__file__), "assets", "fonts", "RobotoCondensed[wght].ttf"
-    )
     try:
-        font = ImageFont.truetype(bundled_font, size)
-        axes = font.get_variation_axes()
-        values = [axis["default"] for axis in axes]
-        axis_names = [
-            axis["name"].decode("ascii", errors="ignore").lower()
-            if isinstance(axis["name"], bytes)
-            else str(axis["name"]).lower()
-            for axis in axes
-        ]
-        weight_index = next(
-            index for index, name in enumerate(axis_names)
-            if "weight" in name
-        )
-        values[weight_index] = min(900, axes[weight_index]["maximum"])
-        font.set_variation_by_axes(values)
-        return font
-    except (OSError, AttributeError, ValueError, TypeError, StopIteration):
-        pass
-
-    for path in (
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf",
-        "DejaVuSans-Bold.ttf",
-    ):
-        try:
-            return ImageFont.truetype(path, size)
-        except OSError:
-            continue
-    return ImageFont.load_default(size=size)
+        return ImageFont.truetype("DejaVuSans-Bold.ttf", size)
+    except OSError:
+        return ImageFont.load_default(size=size)
 
 
-def _draw_match_logo_badge(
-    canvas,
-    center,
-    diameter: int,
-    url: str,
-    name: str,
-    asset_bytes: bytes | None = None,
-) -> None:
+def _draw_match_logo_badge(canvas, center, diameter: int, url: str, name: str) -> None:
     cx, cy = center
+    radius = diameter // 2
     draw = ImageDraw.Draw(canvas)
-    asset = (
-        asset_bytes
-        if asset_bytes is not None
-        else (_download_logo_asset(url) if url else b"")
-    )
+    asset = _download_logo_asset(url) if url else b""
     if asset:
         try:
             with Image.open(BytesIO(asset)) as source:
@@ -2370,140 +2275,47 @@ def _draw_match_logo_badge(
             return
         except Exception:
             pass
+    draw.ellipse(
+        (cx - radius, cy - radius, cx + radius, cy + radius),
+        fill=(241, 243, 245, 255),
+    )
     initials = _logo_initials(name)
     font = _match_logo_font(max(28, diameter // 3))
+    bounds = draw.textbbox((0, 0), initials, font=font)
+    text_width = bounds[2] - bounds[0]
+    text_height = bounds[3] - bounds[1]
     draw.text(
-        (cx, cy),
+        (cx - text_width / 2 - bounds[0], cy - text_height / 2 - bounds[1]),
         initials,
         font=font,
-        fill=(255, 255, 255, 255),
-        anchor="mm",
-        stroke_width=max(4, diameter // 64),
-        stroke_fill=(8, 12, 20, 240),
+        fill=(24, 32, 48, 255),
     )
-
-
-def _match_team_color(asset: bytes, name: str, side: str) -> tuple[int, int, int]:
-    """Use a saturated, readable shade of the team's crest color when available."""
-    if asset:
-        try:
-            with Image.open(BytesIO(asset)) as source:
-                source = source.convert("RGBA")
-                source.thumbnail((64, 64), Image.Resampling.LANCZOS)
-                buckets = {}
-                for red, green, blue, alpha in source.getdata():
-                    if alpha < 96:
-                        continue
-                    high = max(red, green, blue)
-                    low = min(red, green, blue)
-                    if high < 38 or high > 245 or high - low < 22:
-                        continue
-                    bucket = (red // 32, green // 32, blue // 32)
-                    buckets[bucket] = buckets.get(bucket, 0) + 1
-                if buckets:
-                    red, green, blue = (
-                        min(255, channel * 32 + 16)
-                        for channel in max(buckets, key=buckets.get)
-                    )
-                    hue, saturation, value = colorsys.rgb_to_hsv(
-                        red / 255, green / 255, blue / 255
-                    )
-                    saturation = max(0.58, saturation)
-                    value = min(0.58, max(0.38, value * 0.72))
-                    return tuple(
-                        round(channel * 255)
-                        for channel in colorsys.hsv_to_rgb(hue, saturation, value)
-                    )
-        except Exception:
-            pass
-
-    seed = sum((index + 1) * ord(char) for index, char in enumerate(f"{side}:{name}"))
-    hue = (seed % 360) / 360
-    return tuple(
-        round(channel * 255)
-        for channel in colorsys.hsv_to_rgb(hue, 0.68, 0.48)
-    )
-
-
-def _match_logo_font_for_width(draw, text: str, max_width: int, start_size: int):
-    for size in range(start_size, 47, -2):
-        font = _match_logo_font(size)
-        bounds = draw.textbbox((0, 0), text, font=font)
-        if bounds[2] - bounds[0] <= max_width:
-            return font
-    return _match_logo_font(48)
 
 
 def _build_match_logo_png(home_url: str, league_url: str, away_url: str,
                           home_name: str, league_name: str, away_name: str) -> bytes:
-    # Render at 2x resolution so IPTV clients can downscale crisp text and crests.
-    width, height = 1920, 1080
-    canvas = Image.new("RGBA", (width, height), (9, 13, 22, 255))
+    width, height = 960, 540
+    canvas = Image.new("RGBA", (width, height), (11, 11, 17, 255))
     draw = ImageDraw.Draw(canvas)
-
-    home_asset = _download_logo_asset(home_url) if home_url else b""
-    league_asset = _download_logo_asset(league_url) if league_url else b""
-    away_asset = _download_logo_asset(away_url) if away_url else b""
-    home_color = _match_team_color(home_asset, home_name, "home")
-    away_color = _match_team_color(away_asset, away_name, "away")
-
-    panel_width, panel_height = 1792, 756
-    panel = Image.new("RGBA", (panel_width, panel_height), (0, 0, 0, 0))
-    panel_draw = ImageDraw.Draw(panel)
-    split = panel_width // 2
-    panel_draw.polygon(
-        ((0, 0), (split + 60, 0), (split - 44, panel_height), (0, panel_height)),
-        fill=(*home_color, 255),
+    draw.rounded_rectangle(
+        (18, 18, width - 18, height - 18),
+        radius=60,
+        fill=(255, 255, 255, 255),
     )
-    panel_draw.polygon(
-        ((split + 60, 0), (panel_width, 0), (panel_width, panel_height),
-         (split - 44, panel_height)),
-        fill=(*away_color, 255),
+    blue = (5, 128, 245, 255)
+    cyan = (5, 203, 193, 255)
+    frame_accents = (
+        (blue, ((60, 25), (370, 25), (352, 42), (43, 42))),
+        (cyan, ((550, 25), (780, 25), (763, 42), (533, 42))),
+        (blue, ((866, 25), (914, 25), (898, 42), (850, 42))),
+        (blue, ((43, 498), (300, 498), (284, 515), (60, 515))),
+        (cyan, ((570, 498), (914, 498), (898, 515), (553, 515))),
     )
-    panel_mask = Image.new("L", (panel_width, panel_height), 0)
-    ImageDraw.Draw(panel_mask).rounded_rectangle(
-        (0, 0, panel_width - 1, panel_height - 1),
-        radius=52,
-        fill=255,
-    )
-    panel.putalpha(panel_mask)
-    canvas.alpha_composite(panel, (64, 72))
-
-    shade = Image.new("RGBA", (panel_width, panel_height), (0, 0, 0, 0))
-    shade_draw = ImageDraw.Draw(shade)
-    for y in range(panel_height):
-        alpha = round(8 + 38 * y / max(1, panel_height - 1))
-        shade_draw.line((0, y, panel_width, y), fill=(0, 0, 0, alpha))
-    shade.putalpha(Image.composite(shade.getchannel("A"), Image.new("L", (panel_width, panel_height), 0), panel_mask))
-    canvas.alpha_composite(shade, (64, 72))
-
-    draw = ImageDraw.Draw(canvas)
-    # Composite source crests directly over the team colors, without white disks.
-    _draw_match_logo_badge(canvas, (512, 410), 540, home_url, home_name, home_asset)
-    _draw_match_logo_badge(canvas, (1408, 410), 540, away_url, away_name, away_asset)
-
-    home_label = str(home_name or "Home")[:80]
-    away_label = str(away_name or "Away")[:80]
-    home_font = _match_logo_font_for_width(draw, home_label, 720, 88)
-    away_font = _match_logo_font_for_width(draw, away_label, 720, 88)
-    draw.text((512, 736), home_label, font=home_font, fill=(255, 255, 255, 255),
-              anchor="mm", stroke_width=5, stroke_fill=(8, 12, 20, 235))
-    draw.text((1408, 736), away_label, font=away_font, fill=(255, 255, 255, 255),
-              anchor="mm", stroke_width=5, stroke_fill=(8, 12, 20, 235))
-
-    vs_font = _match_logo_font(88)
-    draw.text((960, 436), "VS", font=vs_font, fill=(255, 255, 255, 255),
-              anchor="mm", stroke_width=6, stroke_fill=(8, 12, 20, 255))
-
-    draw.rounded_rectangle((64, 860, 1856, 1020), radius=40, fill=(25, 42, 126, 255))
-    draw.line((104, 870, 1816, 870), fill=(108, 133, 225, 255), width=4)
-    _draw_match_logo_badge(canvas, (156, 940), 100, league_url, league_name, league_asset)
-    competition = str(league_name or "SPORTS EVENT")[:80]
-    competition_font = _match_logo_font_for_width(draw, competition, 1520, 72)
-    draw.text((1028, 940), competition, font=competition_font,
-              fill=(255, 255, 255, 255), anchor="mm",
-              stroke_width=4, stroke_fill=(8, 12, 20, 220))
-
+    for color, points in frame_accents:
+        draw.polygon(points, fill=color)
+    _draw_match_logo_badge(canvas, (232, 270), 246, home_url, home_name)
+    _draw_match_logo_badge(canvas, (480, 270), 196, league_url, league_name)
+    _draw_match_logo_badge(canvas, (728, 270), 246, away_url, away_name)
     output = BytesIO()
     canvas.convert("RGB").save(output, format="PNG", optimize=True)
     return output.getvalue()
