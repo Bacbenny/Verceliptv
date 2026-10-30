@@ -367,8 +367,8 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, "image/png")
         self.assertTrue(response.data.startswith(b"\x89PNG\r\n\x1a\n"))
-        self.assertIn("max-age=60", response.headers["Cache-Control"])
-        self.assertIn("s-maxage=60", response.headers["Cache-Control"])
+        self.assertIn("max-age=15", response.headers["Cache-Control"])
+        self.assertIn("s-maxage=15", response.headers["Cache-Control"])
         result = Image.open(BytesIO(response.data))
         self.assertEqual(result.size, (1920, 1080))
         self.assertEqual(fetch.call_count, 3)
@@ -390,11 +390,25 @@ class PhaLangRealtimeTests(unittest.TestCase):
         self.assertEqual(result.getpixel((10, 10)), (11, 11, 17))
         self.assertEqual(result.getpixel((960, 160)), (255, 255, 255))
         self.assertEqual(result.getpixel((200, 60)), (5, 128, 245))
-        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "8")
+        self.assertEqual(main.MATCH_LOGO_RENDER_VERSION, "9")
 
     def test_live_phalang_logo_hosts_use_larger_source_images(self):
         self.assertIn("thumb.wikimedia.org", main._LOGO_IMAGE_ALLOWED_HOSTS)
         self.assertIn("img0.aiscore.com", main._LOGO_IMAGE_ALLOWED_HOSTS)
+        self.assertIn("ssl.gstatic.com", main._LOGO_IMAGE_ALLOWED_HOSTS)
+        imgts_logo = (
+            "https://imgts.sportpulseapiz.com/football/team/"
+            "logo/image/small"
+        )
+        self.assertEqual(
+            main._logo_asset_candidates(imgts_logo),
+            (f"{imgts_logo}?v=1", imgts_logo),
+        )
+        versioned_imgts_logo = f"{imgts_logo}?v=2"
+        self.assertEqual(
+            main._logo_asset_candidates(versioned_imgts_logo),
+            (versioned_imgts_logo,),
+        )
         low_resolution = (
             "https://img0.aiscore.com/volleyball/team/"
             "b037a1bf40c26a9e0bad50963dbcb8c4.png!w60"
@@ -538,14 +552,14 @@ class PhaLangRealtimeTests(unittest.TestCase):
         repaired = main._repair_match_logo_urls(cached)
         self.assertIn("/match-logo.png?", repaired)
         self.assertNotIn("/match-logo.svg?", repaired)
-        self.assertIn("home=x&v=8", repaired)
+        self.assertIn("home=x&v=9", repaired)
 
         old_png = (
             '#EXTINF:-1 tvg-logo="https://iptv.example/match-logo.png'
             '?home=x&v=4",Match\n'
         )
         repaired_png = main._repair_match_logo_urls(old_png)
-        self.assertIn("home=x&v=8", repaired_png)
+        self.assertIn("home=x&v=9", repaired_png)
         self.assertNotIn("v=4", repaired_png)
 
     def test_match_logo_svg_embeds_the_three_logos_in_order(self):

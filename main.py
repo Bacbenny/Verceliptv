@@ -322,7 +322,7 @@ def _match_logo_parts(match: dict, provider: str) -> tuple[str, str, str, str, s
     return home_logo, league_logo, away_logo, home_name, league_name, away_name
 
 
-MATCH_LOGO_RENDER_VERSION = "8"
+MATCH_LOGO_RENDER_VERSION = "9"
 
 
 def _composite_match_logo_url(match: dict, provider: str, parts: str) -> str:
@@ -2199,6 +2199,7 @@ _LOGO_IMAGE_ALLOWED_HOSTS = frozenset({
     "img0.aiscore.com",
     "imgts.sportpulseapiz.com",
     "images.keovip88.net",
+    "ssl.gstatic.com",
     "static.wikia.nocookie.net",
     "static.flashscore.com",
     "thumb.wikimedia.org",
@@ -2354,6 +2355,16 @@ def _logo_asset_candidates(url: str) -> tuple[str, ...]:
     except Exception:
         return (url,)
 
+    if host == "imgts.sportpulseapiz.com":
+        query = parsed.query
+        if not re.search(r"(?:^|&)v=", query):
+            query = f"{query}&v=1" if query else "v=1"
+        cache_busted_url = parsed._replace(query=query).geturl()
+        return (
+            (cache_busted_url, url)
+            if cache_busted_url != url
+            else (url,)
+        )
     if host == "img0.aiscore.com":
         match = re.search(r"(?i)(\.(?:png|jpe?g|webp))!w(\d+)$", parsed.path)
         if not match or int(match.group(2)) >= 300:
@@ -2489,9 +2500,14 @@ def match_logo_png():
         logo_status,
     )
     response = Response(png, mimetype="image/png")
-    response.headers["Cache-Control"] = (
-        "public, max-age=60, s-maxage=60, stale-while-revalidate=120"
-    )
+    if all(status == "ok" for status in logo_status):
+        response.headers["Cache-Control"] = (
+            "public, max-age=3600, s-maxage=3600, stale-while-revalidate=3600"
+        )
+    else:
+        response.headers["Cache-Control"] = (
+            "public, max-age=15, s-maxage=15, stale-while-revalidate=15"
+        )
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Match-Logo-Assets"] = ",".join(
         f"{label}={status}"
