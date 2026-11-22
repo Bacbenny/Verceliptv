@@ -1,6 +1,6 @@
 #EXTM3U url-tvg="https://epg.io.vn/epg.xml.gz"
 
-##EXTINF:-1 tvg-id="vtv1hd" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/1789027955396/02dce36fc3ff_480_270.png",VTV1
+#EXTINF:-1 tvg-id="vtv1hd" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/1789027955396/02dce36fc3ff_480_270.png",VTV1
 https://freem3u.xyz/api/live/play.m3u8?vid=2
 #EXTINF:-1 tvg-id="vtv2hd" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/1789027996819/72d1db4aee30_480_270.png",VTV2
 https://vmttv.dpdns.org/tv360/?id=vtv2
