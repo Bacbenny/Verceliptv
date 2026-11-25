@@ -1,31 +1,31 @@
 #EXTM3U url-tvg="https://epg.io.vn/epg.xml.gz"
 
 #EXTINF:-1 tvg-id="vtv1hd" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/1789027955396/02dce36fc3ff_480_270.png",VTV1
-https://freem3u.xyz/api/live/play.m3u8?vid=2
+https://vtvgolive-sctvdrm.vtvdigital.vn/manifest/vtv1/master.m3u8
 #EXTINF:-1 tvg-id="vtv2hd" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/1789027996819/72d1db4aee30_480_270.png",VTV2
-https://vmttv.dpdns.org/tv360/?id=vtv2
+https://vtvgolive-sctvdrm.vtvdigital.vn/manifest/vtv2/master.m3u8
 #EXTINF:-1 tvg-id="vtv3hd" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/1789028028518/5e31c4d0e6df_480_270.png",VTV3
-https://vmttv.dpdns.org/tv360/?id=vtv3
+https://vtvgolive-sctvdrm.vtvdigital.vn/manifest/vtv3/master.m3u8
 #EXTINF:-1 tvg-id="vtv4hd" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/1789028176727/7330e5a3b2d9_480_270.png",VTV4
-https://vmttv.dpdns.org/tv360/?id=vtv4
+https://vtvgolive-sctvdrm.vtvdigital.vn/manifest/vtv4/master.m3u8
 #EXTINF:-1 tvg-id="vtv5hd" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/1789028197435/9250c116a95a_480_270.png",VTV5
-https://freem3u.xyz/api/live/play.m3u8?vid=110
+https://vtvgolive-sctvdrm.vtvdigital.vn/manifest/vtv5/master.m3u8
 #EXTINF:-1 tvg-id="vtv5hdtnb" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/1789028453349/679543a01193_480_270.png",VTV5 Tây Nam Bộ
-https://vmttv.dpdns.org/tv360/?id=vtv5-tay-nam-bo
+https://vtvgolive-sctvdrm.vtvdigital.vn/manifest/vtv5tnb/master.m3u8
 #EXTINF:-1 tvg-id="vtv5hdtn" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/1789028476364/6cc9a1e13281_480_270.png",VTV5 Tây Nguyên
-https://vmttv.dpdns.org/tv360/?id=vtv5-tay-nguyen
+https://vtvgolive-sctvdrm.vtvdigital.vn/manifest/vtv5tnb/master.m3u8
 #EXTINF:-1 tvg-id="vtv6" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/1789028251332/3b8d99f01cf8_480_270.png",VTV6
-https://vmttv.dpdns.org/tv360/?id=vtv6
+https://vtvgolivepre-vtv02.vtvdigital.vn/hls/vtv/live/vtv6__vtv720p-h264/index.m3u8
 #EXTINF:-1 tvg-id="vtv7hd" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/1789028340304/12d1ff56339c_480_270.png",VTV7
-https://vmttv.dpdns.org/tv360/?id=vtv7
+https://vtvgolive-sctvdrm.vtvdigital.vn/manifest/vtv7/master.m3u8
 #EXTINF:-1 tvg-id="vtv8hd" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/1789028374733/17d3b1dcfa56_480_270.png",VTV8
-https://vmttv.dpdns.org/tv360/?id=vtv8
+https://vtvgolive-sctvdrm.vtvdigital.vn/manifest/vtv8/master.m3u8
 #EXTINF:-1 tvg-id="vtv9hd" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/1789028403548/13cc721d59b3_480_270.png",VTV9
-https://vmttv.dpdns.org/tv360/?id=vtv9
+https://vtvgolive-sctvdrm.vtvdigital.vn/manifest/vtv9/master.m3u8
 #EXTINF:-1 tvg-id="vtvcantho" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2026/09/10/15/178902829313/9caa3cdd2362_480_270.png",VTV10
-https://vmttv.dpdns.org/tv360/?id=vtv10
+https://vtvgolive-sctvdrm.vtvdigital.vn/manifest/vtv6/master.m3u8
 #EXTINF:-1 tvg-id="vietnamtoday" group-title="VTV" tvg-logo="https://img-evg1.tv360.vn/image1/2025/12/05/09/1764903286193/46f72417f718_480_270.png",VietNam Today
-https://freem3u.xyz/api/live/play.m3u8?vid=9951
+https://vips-livecdn.fptplay.net/live/media/vietnamtoday/live-hls-avc/index.m3u8
 
 #EXTINF:-1 tvg-id="antvhd" group-title="Thiết Yếu" tvg-logo="https://raw.githubusercontent.com/vietng228/m3u/main/logos/antv-hd.png",An Ninh TV
 https://freem3u.xyz/api/live/play.m3u8?vid=20
